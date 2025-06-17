@@ -10,9 +10,9 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SolanaSwap - Modern Solana Trading Platform',
+  title: 'Trading Computer - A Modern Solana Trading Platform by Bonk Computer',
   description:
-    'Trade Solana tokens with the most modern and efficient swap platform',
+    'Trade Solana tokens with the most modern and efficient swap computer',
 }
 
 export default function RootLayout({

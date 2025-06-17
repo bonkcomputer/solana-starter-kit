@@ -57,3 +57,16 @@ export function formatRawAmount(rawAmount: bigint, decimals: bigint) {
     return '0'
   }
 }
+
+export const formatNumber = (num: number) => {
+  if (Math.abs(num) < 1) {
+    return num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 6,
+    })
+  }
+  return num.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}

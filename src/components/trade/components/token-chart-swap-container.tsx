@@ -2,7 +2,7 @@
 
 import SwapClient from '@/app/swap-client'
 import { useEffect, useState } from 'react'
-import { SOL_MINT, SSE_MINT } from '../constants'
+import { SOL_MINT, BCT_MINT } from '../constants'
 import TokenChartWidget from './token-chart-widget'
 
 interface TokenChartSwapContainerProps {
@@ -15,8 +15,8 @@ interface TokenChartSwapContainerProps {
 export default function TokenChartSwapContainer({
   defaultTokenAddress = SOL_MINT, // SOL token address
   defaultTokenSymbol = 'SOL',
-  defaultOutputAddress = SSE_MINT, // SSE token address
-  defaultOutputSymbol = 'SSE',
+  defaultOutputAddress = BCT_MINT, // BCT token address
+  defaultOutputSymbol = 'BCT',
 }: TokenChartSwapContainerProps) {
   const [inputToken, setInputToken] = useState({
     address: defaultTokenAddress,
@@ -69,7 +69,7 @@ export default function TokenChartSwapContainer({
           outputTokenSymbol={outputToken.symbol}
         />
       </div>
-      <div className="h-full">
+      <div className="py-2">
         <SwapClient
           onTokenChange={handleTokenChange}
           onOutputTokenChange={handleOutputTokenChange}

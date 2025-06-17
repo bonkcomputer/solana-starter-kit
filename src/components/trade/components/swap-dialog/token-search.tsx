@@ -1,6 +1,12 @@
 'use client'
 
-import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { TokenSearchHeader } from "./token-search-header"
 import { TokenList } from "./token-list"
 import { useTokenSearch } from "../../hooks/use-token-search"
@@ -40,6 +46,10 @@ export function TokenSearch({
     <Dialog open={openModal} onOpenChange={onClose}>
       <DialogContent className="max-w-lg flex flex-col">
         <DialogHeader>
+          <DialogTitle>Select a token</DialogTitle>
+          <DialogDescription>
+            Search for a token to swap or select one from the list below.
+          </DialogDescription>
           <TokenSearchHeader
             searchQuery={searchQuery}
             verifiedOnly={verifiedOnly}

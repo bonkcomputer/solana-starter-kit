@@ -4,6 +4,7 @@ import { TokenInfos } from '@/components/token/token-infos'
 
 export function TokenContainer() {
   const tokenList = [
+    'D3CVUkqyXZKgVBdRD7XfuRxQXFKJ86474XyFZrqAbonk',
     'H4phNbsqjV5rqk8u6FUACTLB6rNZRTAPGnBb8KXJpump',
     '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh',
     '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs',

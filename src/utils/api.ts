@@ -1,3 +1,5 @@
+import axios, { AxiosResponse } from 'axios'
+
 export enum FetchMethod {
   GET = 'GET',
   POST = 'POST',
@@ -87,3 +89,6 @@ export const fetchTapestry = async <ResponseType = any, InputType = any>({
     }
   }
 }
+
+export const fetcher = (url: string) =>
+  axios.get(url).then((res: AxiosResponse<any>) => res.data)

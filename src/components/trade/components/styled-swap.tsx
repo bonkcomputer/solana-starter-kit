@@ -36,26 +36,6 @@ export function StyledSwap({
           background-color: hsl(var(--card)) !important;
         }
 
-        /* Style the swap button using semantic colors */
-        button[class*='rounded-full'] {
-          background: linear-gradient(
-            to right,
-            rgb(147 51 234),
-            rgb(219 39 119)
-          ) !important;
-          border: none !important;
-          color: white !important;
-          margin-top: 0.5rem;
-        }
-
-        button[class*='rounded-full']:hover {
-          background: linear-gradient(
-            to right,
-            rgb(126 34 206),
-            rgb(190 24 93)
-          ) !important;
-        }
-
         /* Add height to match chart height */
         .card-content-container {
           min-height: 485px;

@@ -16,6 +16,7 @@ export default function Dialog({ isOpen, setIsOpen, children }: Props) {
         <button
           className="absolute top-2 right-2 text-foreground hover:text-gray-200"
           onClick={() => setIsOpen(false)}
+          aria-label="Close dialog"
         >
           <X className="w-6 h-6" />
         </button>

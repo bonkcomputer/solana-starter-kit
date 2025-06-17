@@ -18,7 +18,7 @@ import {
 import { useSolanaWallets } from '@privy-io/react-auth'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { SOL_MINT, SSE_MINT } from '../constants'
+import { SOL_MINT, BCT_MINT } from '../constants'
 import { useJupiterSwap } from '../hooks/jupiter/use-jupiter-swap'
 import { ESwapMode } from '../models/jupiter/jup-api-models'
 import { useSwapStore } from '../stores/use-swap-store'
@@ -65,7 +65,7 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const [inputTokenMint, setInputTokenMint] = useState<string>(SOL_MINT)
-  const [outputTokenMint, setOutputTokenMint] = useState<string>(SSE_MINT)
+  const [outputTokenMint, setOutputTokenMint] = useState<string>(BCT_MINT)
   const [inAmount, setInAmount] = useState('1')
   const [outAmount, setOutAmount] = useState('')
   const [swapMode, setSwapMode] = useState(ESwapMode.EXACT_IN)

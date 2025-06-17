@@ -18,7 +18,8 @@ const buttonBase = cn(
 const buttonVariants = cva(cn(buttonBase, 'rounded-button font-medium'), {
   variants: {
     variant: {
-      default: 'bg-primary text-primary-foreground hover:bg-primary/80',
+      default:
+        'bg-gradient-to-r from-yellow-600 to-yellow-700 text-white transition-all duration-200 hover:shadow-xl hover:shadow-[#10b981]/40 active:scale-95',
       secondary:
         'bg-primary/10 text-foreground/90 border border-primary hover:bg-primary/20',
       outline:
@@ -54,14 +55,24 @@ const buttonVariants = cva(cn(buttonBase, 'rounded-button font-medium'), {
       icon_sm: 'h-6 w-6',
       icon_lg: 'h-11 w-11',
     },
+    icon: {
+      true: 'rounded-full',
+      false: '',
+    },
+    loading: {
+      true: 'opacity-50 pointer-events-none',
+      false: '',
+    },
   },
   defaultVariants: {
     variant: 'default',
     size: 'default',
+    icon: false,
+    loading: false,
   },
 })
 
-interface ButtonProps
+export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
@@ -71,6 +82,7 @@ interface ButtonProps
   disableActiveFeedback?: boolean
   newTab?: boolean
   href?: string
+  centered?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -79,8 +91,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       className: _className,
       variant,
       size,
-      asChild = false,
+      icon,
       loading = false,
+      asChild = false,
       isInvisible = false,
       disableHoverFeedback = false,
       disableActiveFeedback = false,
@@ -131,6 +144,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             : buttonVariants({
                 variant,
                 size,
+                icon,
+                loading,
                 className: cn(hoverEffect, className),
               }),
         )}
@@ -147,4 +162,3 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button'
 
 export { Button, buttonVariants }
-export type { ButtonProps }

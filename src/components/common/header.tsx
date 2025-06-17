@@ -22,6 +22,7 @@ import { useCurrentWallet } from '../auth/hooks/use-current-wallet'
 import { useGetProfiles } from '../auth/hooks/use-get-profiles'
 import { CreateProfileContainer } from '../create-profile/create-profile-container'
 import { DialectNotificationComponent } from '../notifications/dialect-notifications-component'
+import bctLogo from '@/app/bctlogo.png'
 
 export function Header() {
   const { walletAddress } = useCurrentWallet()
@@ -38,11 +39,22 @@ export function Header() {
   const [copied, setCopied] = useState(false)
   const dropdownRef = useRef(null)
   const router = useRouter()
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+
+  useEffect(() => {
+    setAudio(new Audio('/bonksfx.aac'))
+  }, [])
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleLogoClick = () => {
+    if (audio) {
+      audio.play().catch(console.error)
+    }
   }
 
   useEffect(() => {
@@ -78,11 +90,19 @@ export function Header() {
     <>
       <div className="border-b-1 border-muted flex items-center justify-center w-full p-3">
         <div className="max-w-6xl w-full flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="hover:opacity-80"
+          <Link
+            href="/"
+            className="hover:opacity-80 flex items-center gap-3"
           >
-            <h1 className="text-2xl font-bold">Solana Starter Kit Template</h1>
+            <Image
+              alt="logo"
+              src={bctLogo}
+              width={32}
+              height={32}
+              className="transition-transform hover:scale-110"
+              onClick={handleLogoClick}
+            />
+            <h1 className="text-2xl font-nabla">Trading Computer</h1>
           </Link>
 
           <nav className="flex items-center space-x-8">

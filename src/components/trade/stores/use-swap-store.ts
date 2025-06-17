@@ -1,6 +1,6 @@
-// import { SOL_MINT, SSE_MINT } from '@/utils/constants'
+// import { SOL_MINT, BCT_MINT } from '@/utils/constants'
 import { create } from 'zustand'
-import { SOL_MINT, SSE_MINT } from '../constants'
+import { SOL_MINT, BCT_MINT } from '../constants'
 
 export interface ISwapInputs {
   inputMint: string
@@ -19,7 +19,7 @@ export const useSwapStore = create<State>()((set) => ({
   open: false,
   inputs: {
     inputMint: SOL_MINT,
-    outputMint: SSE_MINT,
+    outputMint: BCT_MINT,
     inputAmount: 0,
   },
   setOpen: (open) =>
@@ -31,7 +31,7 @@ export const useSwapStore = create<State>()((set) => ({
       inputs: {
         ...inputs,
         inputMint: inputs.inputMint || SOL_MINT,
-        outputMint: inputs.outputMint || SSE_MINT,
+        outputMint: inputs.outputMint || BCT_MINT,
         inputAmount: inputs.inputAmount || 0,
       },
     })),

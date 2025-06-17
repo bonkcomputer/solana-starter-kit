@@ -106,7 +106,7 @@
   --card-foreground: #fafafa; /* zinc-50 */
   --popover: #18181b; /* zinc-900 */
   --popover-foreground: #fafafa; /* zinc-50 */
-  --primary: #9333ea; /* purple-600 */
+  --primary: #ffc400; /* purple-600 */
   --primary-foreground: #fafafa; /* zinc-50 */
   --secondary: #27272a; /* zinc-800 */
   --secondary-foreground: #fafafa; /* zinc-50 */
@@ -118,20 +118,20 @@
   --destructive-foreground: #fafafa; /* zinc-50 */
   --border: #27272a; /* zinc-800 */
   --input: #3f3f46; /* zinc-700 */
-  --ring: #9333ea; /* purple-600 */
-  --chart-1: #9333ea; /* purple-600 */
-  --chart-2: #db2777; /* pink-600 */
+  --ring: #ffc400; /* yellow-600 */
+  --chart-1: #ffc400; /* yellow-600 */
+  --chart-2: #ffc400; /* yellow-600 */
   --chart-3: #06b6d4; /* cyan-500 */
   --chart-4: #10b981; /* emerald-500 */
-  --chart-5: #f59e0b; /* amber-500 */
+  --chart-5: #fffb00; /* amber-500 */
   --sidebar: #18181b; /* zinc-900 */
   --sidebar-foreground: #fafafa; /* zinc-50 */
-  --sidebar-primary: #9333ea; /* purple-600 */
+  --sidebar-primary: #ffc400; /* yellow-600 */
   --sidebar-primary-foreground: #fafafa; /* zinc-50 */
   --sidebar-accent: #27272a; /* zinc-800 */
   --sidebar-accent-foreground: #fafafa; /* zinc-50 */
   --sidebar-border: #27272a; /* zinc-800 */
-  --sidebar-ring: #9333ea; /* purple-600 */
+  --sidebar-ring: #ffc400; /* yellow-600 */
 }
 
 @layer base {
@@ -154,7 +154,7 @@
   }
 
   .button-primary {
-    @apply bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 transition-all duration-200;
+    @apply bg-gradient-to-r from-yellow-600 to-yellow-700 text-white hover:from-yellow-700 hover:to-yellow-800 transition-all duration-200;
   }
 
   .button-secondary {

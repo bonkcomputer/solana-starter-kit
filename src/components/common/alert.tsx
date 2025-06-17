@@ -43,7 +43,7 @@ export const Alert = ({
           {type === 'info' && 'Info!'}
         </strong>
         <span className="block sm:inline ml-2">{message}</span>
-        <button onClick={() => setVisible(false)} className="ml-4">
+        <button onClick={() => setVisible(false)} className="ml-4" aria-label="Close alert">
           <X size={20} />
         </button>
       </div>
