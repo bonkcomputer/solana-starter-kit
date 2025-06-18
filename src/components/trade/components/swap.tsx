@@ -66,7 +66,7 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
   const pathname = usePathname()
   const [inputTokenMint, setInputTokenMint] = useState<string>(SOL_MINT)
   const [outputTokenMint, setOutputTokenMint] = useState<string>(BCT_MINT)
-  const [inAmount, setInAmount] = useState('1')
+  const [inAmount, setInAmount] = useState('')
   const [outAmount, setOutAmount] = useState('')
   const [swapMode, setSwapMode] = useState(ESwapMode.EXACT_IN)
   const [showInputTokenSearch, setShowInputTokenSearch] = useState(false)

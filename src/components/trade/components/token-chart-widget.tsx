@@ -135,6 +135,7 @@ export default function TokenChartWidget({
                 height="100%"
                 src={`https://birdeye.so/tv-widget/${outputTokenAddress || ''}?chain=solana&vs=${USDC_MINT}&viewMode=pair&chartInterval=1D&chartType=AREA&chartTimezone=UTC&chartLeftToolbar=show&theme=dark`}
                 frameBorder="0"
+                style={{ border: 'none' }}
                 allowFullScreen
               />
             </div>

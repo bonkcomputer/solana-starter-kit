@@ -323,6 +323,7 @@ export function PortfolioView({
                   {selectedNft.content?.metadata?.name || 'Unnamed NFT'}
                 </h3>
                 <button
+                  title="Close"
                   type="button"
                   onClick={closeNftModal}
                   className="text-gray-400 hover:text-white"
