@@ -23,7 +23,7 @@ const nextConfig = {
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               "connect-src 'self' https: wss:",
-              "frame-src 'self' https://auth.privy.io https://privy.bonk.computer",
+              "frame-src 'self' https://auth.privy.io https://privy.bonk.computer https://birdeye.so",
               "frame-ancestors 'self' https://bcttrading.vercel.app https://auth.privy.io https://privy.bonk.computer",
             ].join('; '),
           },

@@ -111,23 +111,28 @@ export function useJupiterSwap({
       const inputAmountInDecimals = Math.floor(
         Number(inputAmount) * Math.pow(10, inputDecimals),
       )
-      const QUOTE_URL = `
-        https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${inputAmountInDecimals}&slippageBps=${DEFAULT_SLIPPAGE_VALUE}&platformFeeBps=${PLATFORM_FEE_BPS}&feeAccount=${PLATFORM_FEE_ACCOUNT}&swapMode=${swapMode}
-      `
-      const response = await fetch(QUOTE_URL).then((res) => res.json())
+      const QUOTE_URL = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${inputAmountInDecimals}&slippageBps=${DEFAULT_SLIPPAGE_VALUE}&platformFeeBps=${PLATFORM_FEE_BPS}&feeAccount=${PLATFORM_FEE_ACCOUNT}&swapMode=${swapMode}`
+      
+      const response = await fetch(QUOTE_URL)
+      
+      if (!response.ok) {
+        throw new Error(`Jupiter API error: ${response.status} - ${response.statusText}`)
+      }
+      
+      const data = await response.json()
       if (swapMode == 'ExactIn') {
         setExpectedOutput(
           (
-            Number(response.outAmount) / Math.pow(10, outputDecimals)
+            Number(data.outAmount) / Math.pow(10, outputDecimals)
           ).toString(),
         )
       } else {
         setExpectedOutput(
-          (Number(response.inAmount) / Math.pow(10, outputDecimals)).toString(),
+          (Number(data.inAmount) / Math.pow(10, outputDecimals)).toString(),
         )
       }
-      setPriceImpact(response.priceImpactPct)
-      setQuoteResponse(response)
+      setPriceImpact(data.priceImpactPct)
+      setQuoteResponse(data)
       setError('')
     } catch (err) {
       console.error(err)

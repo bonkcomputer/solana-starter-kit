@@ -12,10 +12,21 @@ export function useTokenInfo(id: string) {
     let isMounted = true
 
     async function fetchTokenInfo() {
+      if (!id || id.trim() === '') {
+        if (isMounted) {
+          setLoading(false)
+          setError('No token ID provided')
+        }
+        return
+      }
+
       try {
         const response = await fetch(`/api/token?id=${id}`)
 
         if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error(`Token not found: ${id}`)
+          }
           throw new Error(`HTTP error! status: ${response.status}`)
         }
 
@@ -23,10 +34,12 @@ export function useTokenInfo(id: string) {
 
         if (isMounted) {
           setTokenInfo(data)
+          setError(null)
         }
       } catch (err) {
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Unknown error')
+          console.warn('Token info fetch failed:', err)
         }
       } finally {
         if (isMounted) {
@@ -35,7 +48,12 @@ export function useTokenInfo(id: string) {
       }
     }
 
-    fetchTokenInfo()
+    if (id) {
+      fetchTokenInfo()
+    } else {
+      setLoading(false)
+      setError('No token ID provided')
+    }
 
     return () => {
       isMounted = false

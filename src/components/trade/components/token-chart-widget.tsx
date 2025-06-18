@@ -48,10 +48,12 @@ export default function TokenChartWidget({
       outputTokenSymbol,
     })
 
-    console.log(
-      'Chart URL:',
-      `https://birdeye.so/tv-widget/${outputTokenAddress || ''}?chain=solana&vs=${USDC_MINT}&viewMode=pair&chartInterval=1D&chartType=CANDLE&chartTimezone=UTC&chartLeftToolbar=show&theme=dark`,
-    )
+    if (outputTokenAddress) {
+      console.log(
+        'Chart URL:',
+        `https://birdeye.so/tv-widget/${outputTokenAddress}?chain=solana&vs=${USDC_MINT}&viewMode=pair&chartInterval=1D&chartType=CANDLE&chartTimezone=UTC&chartLeftToolbar=show&theme=dark`,
+      )
+    }
   }, [tokenAddress, tokenSymbol, outputTokenAddress, outputTokenSymbol])
 
   return (

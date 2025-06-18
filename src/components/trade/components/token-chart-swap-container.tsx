@@ -39,8 +39,10 @@ export default function TokenChartSwapContainer({
       defaultOutputSymbol,
     })
   }, [
-    inputToken,
-    outputToken,
+    inputToken.address,
+    inputToken.symbol,
+    outputToken.address,
+    outputToken.symbol,
     defaultTokenAddress,
     defaultTokenSymbol,
     defaultOutputAddress,
