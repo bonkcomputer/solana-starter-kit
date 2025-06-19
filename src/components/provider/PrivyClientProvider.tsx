@@ -19,7 +19,11 @@ export function PrivyClientProvider({
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
+          requireUserPasswordOnCreate: true,
         },
+        // sessions: {
+        //   noPromptOnSignature: true,
+        // },
       }}
     >
       {children}

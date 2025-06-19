@@ -82,7 +82,6 @@ export interface ButtonProps
   disableActiveFeedback?: boolean
   newTab?: boolean
   href?: string
-  centered?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -100,7 +99,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       newTab = false,
       href,
       type = 'button',
-      centered,
       ...props
     },
     ref
