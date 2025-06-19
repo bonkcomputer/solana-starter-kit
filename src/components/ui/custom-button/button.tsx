@@ -100,6 +100,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       newTab = false,
       href,
       type = 'button',
+      centered,
       ...props
     },
     ref

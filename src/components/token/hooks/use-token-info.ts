@@ -22,15 +22,14 @@ export function useTokenInfo(id: string) {
 
       try {
         const response = await fetch(`/api/token?id=${id}`)
+        const data = await response.json()
 
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error(`Token not found: ${id}`)
+            throw new Error(data.error || `Token not found: ${id}`)
           }
-          throw new Error(`HTTP error! status: ${response.status}`)
+          throw new Error(data.error || `HTTP error! status: ${response.status}`)
         }
-
-        const data: TokenResponse = await response.json()
 
         if (isMounted) {
           setTokenInfo(data)

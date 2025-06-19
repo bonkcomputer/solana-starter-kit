@@ -194,13 +194,7 @@ export function Header() {
                 variant="ghost"
                 className='!text-green-500'
                 disabled={disableLogin}
-                onClick={() =>
-                  login({
-                    loginMethods: ['wallet'],
-                    walletChainType: 'ethereum-and-solana',
-                    disableSignup: false,
-                  })
-                }
+                onClick={login}
               >
                 <LogIn className="h-4 w-4 mr-2" /> Log in
               </Button>

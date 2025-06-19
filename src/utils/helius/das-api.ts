@@ -1,5 +1,24 @@
 import { RPCResponse, TokenResponse } from "@/models/token.models"
 
+const getHeliusRpcUrl = (): string => {
+  const rpcUrl = process.env.RPC_URL
+  const apiKey = process.env.HELIUS_API_KEY
+  console.log('getHeliusRpcUrl in das-api: RPC_URL set?', !!rpcUrl)
+  console.log('getHeliusRpcUrl in das-api: HELIUS_API_KEY set?', !!apiKey)
+
+  if (!rpcUrl) {
+    throw new Error('RPC_URL environment variable is not set.')
+  }
+
+  if (!apiKey || rpcUrl.includes('api-key')) {
+    return rpcUrl
+  }
+
+  const url = new URL(rpcUrl)
+  url.searchParams.append('api-key', apiKey)
+  return url.toString()
+}
+
 interface SearchAssetsResponse {
   jsonrpc: string
   id: string
@@ -19,12 +38,9 @@ export async function fetchTokenInfo(
   id: string
 ): Promise<TokenResponse | null> {
   try {
-    if (!process.env.RPC_URL) {
-      console.error('RPC_URL is not configured')
-      return null
-    }
-
-    const response = await fetch(process.env.RPC_URL, {
+    const rpcUrl = getHeliusRpcUrl()
+    console.log('Constructed RPC URL in das-api/fetchTokenInfo:', rpcUrl)
+    const response = await fetch(rpcUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -80,15 +96,17 @@ export async function checkSolanaBusinessFrogHolder({
   walletAddress: string
 }): Promise<boolean> {
   try {
-    if (!process.env.RPC_URL) {
-      throw new Error('RPC_URL is not configured')
-    }
+    const rpcUrl = getHeliusRpcUrl()
+    console.log(
+      'Constructed RPC URL in das-api/checkSolanaBusinessFrogHolder:',
+      rpcUrl,
+    )
 
     if (whiteListedHolders.includes(walletAddress)) {
       return true
     }
 
-    const response = await fetch(process.env.RPC_URL, {
+    const response = await fetch(rpcUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -20,22 +20,23 @@ export function useGetProfiles({
     const fetchProfiles = async () => {
       setLoading(true)
       try {
-        const url = new URL(`/api/profiles`, window.location.origin)
+        const url = new URL('/api/profiles', 'http://localhost') // Base is ignored for relative URLs
         url.searchParams.append('walletAddress', walletAddress)
 
         if (shouldIncludeExternalProfiles) {
           url.searchParams.append('includeExternal', 'true')
         }
 
-        const res = await fetch(url.toString())
-        if (!res.ok) {
-          const errorData = await res.json()
-          throw new Error(errorData.error || 'Failed to fetch profiles')
-        }
+        const res = await fetch(url.pathname + url.search)
         const data = await res.json()
+
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to fetch profiles')
+        }
+
         setProfiles(data.profiles)
       } catch (err: any) {
-        setError(err)
+        setError(err.message || 'An unknown error occurred')
       } finally {
         setLoading(false)
       }

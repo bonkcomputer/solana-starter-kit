@@ -28,6 +28,16 @@ export async function GET(request: Request) {
     if (tokenAccount) {
       tokenAccountToQuery = new PublicKey(tokenAccount)
     } else {
+      if (!/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(walletAddress || '')) {
+        return NextResponse.json({
+          balance: {
+            amount: '0',
+            decimals: 0,
+            uiAmount: 0,
+            uiAmountString: '0',
+          },
+        })
+      }
       // Find the associated token account for the wallet and mint
       tokenAccountToQuery = await getAssociatedTokenAddress(
         new PublicKey(mintAddress!),

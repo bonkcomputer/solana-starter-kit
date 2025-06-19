@@ -33,21 +33,8 @@ export default function TokenChartSwapContainer({
     console.log('TokenChartSwapContainer state:', {
       inputToken,
       outputToken,
-      defaultTokenAddress,
-      defaultTokenSymbol,
-      defaultOutputAddress,
-      defaultOutputSymbol,
     })
-  }, [
-    inputToken.address,
-    inputToken.symbol,
-    outputToken.address,
-    outputToken.symbol,
-    defaultTokenAddress,
-    defaultTokenSymbol,
-    defaultOutputAddress,
-    defaultOutputSymbol,
-  ])
+  }, [inputToken, outputToken])
 
   // Function to handle token change from swap component
   const handleTokenChange = (address: string, symbol: string) => {
