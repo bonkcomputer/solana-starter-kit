@@ -1,28 +1,27 @@
-import { socialfi } from '@/utils/socialfi'
+import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const formData = await req.formData()
-  const query = formData.get('query')?.toString()
-
-  if (!query) {
-    return NextResponse.json({ error: 'A query is required' }, { status: 400 })
-  }
-
-  if (!process.env.TAPESTRY_API_KEY) {
-    return NextResponse.json({ error: 'Missing API key' }, { status: 500 })
-  }
-
   try {
-    const response = await socialfi.search.profilesList({
-      apiKey: process.env.TAPESTRY_API_KEY,
-      query,
-      includeExternalProfiles: 'false',
-      page: '1',
-      pageSize: '50',
+    const { query } = await req.json()
+
+    if (!query) {
+      return NextResponse.json({ error: 'A query is required' }, { status: 400 })
+    }
+
+    // Search the local Prisma database for users where the username contains the query string.
+    // This is a case-insensitive search.
+    const users = await prisma.user.findMany({
+      where: {
+        username: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+      take: 50, // Limit the number of results
     })
 
-    return NextResponse.json(response)
+    return NextResponse.json(users)
   } catch (error: any) {
     console.error('Error searching profiles:', error)
     return NextResponse.json(

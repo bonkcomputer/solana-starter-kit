@@ -3,19 +3,19 @@
 import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { Button } from '@/components/common/button'
 import { useUpdateProfileInfo } from '@/components/profile/hooks/use-update-profile'
-import { IProfileResponse } from '@/models/profile.models'
+import { IUser } from '@/models/profile.models'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 
 interface Props {
   username: string
-  data?: IProfileResponse
+  data?: IUser | null
   refetch: () => void
 }
 
 export function Bio({ username, data, refetch }: Props) {
-  const { updateProfile, loading } = useUpdateProfileInfo({ username })
-  const [bio, setBio] = useState(data?.profile?.bio || '')
+  const { updateProfile, loading } = useUpdateProfileInfo(username)
+  const [bio, setBio] = useState(data?.bio || '')
   const [isEditing, setIsEditing] = useState(false)
 
   const { mainUsername } = useCurrentWallet()
@@ -65,7 +65,7 @@ export function Bio({ username, data, refetch }: Props) {
               </Button>
             </span>
             <p className="text-gray">
-              {data?.profile?.bio ? data?.profile?.bio : 'no bio'}
+              {data?.bio ? data?.bio : 'no bio'}
             </p>
           </div>
         )
@@ -73,7 +73,7 @@ export function Bio({ username, data, refetch }: Props) {
         <div>
           <p>Bio</p>
           <p className="text-gray">
-            {data?.profile?.bio ? data?.profile?.bio : 'no bio'}
+            {data?.bio ? data?.bio : 'no bio'}
           </p>
         </div>
       )}

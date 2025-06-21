@@ -1,10 +1,13 @@
 'use client'
 
-import type { IProfileResponse } from '@/models/profile.models'
+import { IUser } from '@/models/profile.models'; // We will need to create/update this model
 import { useCallback, useEffect, useState } from 'react'
 
-export const useGetProfileInfo = ({ username }: { username: string }) => {
-  const [data, setData] = useState<IProfileResponse>()
+// We should define this in a model file, but for now this will do.
+// Assuming IUser will have privyDid, username, bio, image, etc.
+
+export const useGetProfileInfo = (username: string) => {
+  const [profile, setProfile] = useState<IUser | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,23 +18,15 @@ export const useGetProfileInfo = ({ username }: { username: string }) => {
     setError(null)
 
     try {
-      const response = await fetch(`/api/profiles/info?username=${username}`, {
-        method: 'GET',
-      })
-
-      const result = await response.json()
-
+      const response = await fetch(`/api/profiles/info?username=${username}`)
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch profile')
+        const err = await response.json()
+        throw new Error(err.error || 'Failed to fetch profile')
       }
-
-      setData(result)
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message || 'Something went wrong')
-      } else {
-        setError('An unknown error occurred')
-      }
+      const data = await response.json()
+      setProfile(data)
+    } catch (err: any) {
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -41,5 +36,5 @@ export const useGetProfileInfo = ({ username }: { username: string }) => {
     fetchProfile()
   }, [fetchProfile])
 
-  return { data, loading, error, refetch: fetchProfile }
+  return { profile, loading, error, refetch: fetchProfile }
 }

@@ -3,23 +3,25 @@
 import { useState } from 'react'
 
 interface FollowUserProps {
-  followerUsername: string
-  followeeUsername: string
+  followerPrivyDid: string;
+  followeePrivyDid: string;
+  followerUsername: string;
+  followeeUsername: string;
 }
 
 export const useFollowUser = () => {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [data, setData] = useState<any>(null)
   const [success, setSuccess] = useState<boolean>(false)
 
   const followUser = async ({
+    followerPrivyDid,
+    followeePrivyDid,
     followerUsername,
     followeeUsername,
   }: FollowUserProps) => {
     setLoading(true)
     setError(null)
-    setData(null)
     setSuccess(false)
 
     try {
@@ -29,18 +31,18 @@ export const useFollowUser = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          followerUser: { username: followerUsername },
-          followeeUser: { username: followeeUsername },
+          followerPrivyDid,
+          followeePrivyDid,
+          followerUsername,
+          followeeUsername,
         }),
       })
 
-      const result = await response.json()
-
       if (!response.ok) {
+        const result = await response.json()
         throw new Error(result.error || 'Failed to follow user')
       }
 
-      setData(result)
       setSuccess(true)
     } catch (err: any) {
       setError(err.message || 'Something went wrong')
@@ -49,5 +51,5 @@ export const useFollowUser = () => {
     }
   }
 
-  return { followUser, loading, error, success, data }
+  return { followUser, loading, error, success }
 }

@@ -125,11 +125,25 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       {
         'active:opacity-80 active:scale-95': !disableActiveFeedback,
         'pointer-events-none opacity-50': !disableActiveFeedback && disabled,
+        'justify-center': centered,
       },
       _className,
     )
 
     const hoverEffect = disableHoverFeedback ? '' : 'hover:scale-100'
+
+    // Filter out custom props that shouldn't be passed to DOM
+    const {
+      asChild: _asChild,
+      loading: _loading,
+      isInvisible: _isInvisible,
+      disableHoverFeedback: _disableHoverFeedback,
+      disableActiveFeedback: _disableActiveFeedback,
+      newTab: _newTab,
+      href: _href,
+      centered: _centered,
+      ...domProps
+    } = props
 
     return (
       <Comp
@@ -153,7 +167,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={disabled}
         type={type}
-        {...props}
+        {...domProps}
       >
         {children}
       </Comp>

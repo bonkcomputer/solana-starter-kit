@@ -1,29 +1,37 @@
 'use client'
 
-import { IProfile } from '@/models/profile.models'
+import { IUser } from '@/models/profile.models'
+import { usePrivy } from '@privy-io/react-auth'
 import { useCallback, useState } from 'react'
 
-interface Props {
-  username: string
-}
-
-export const useUpdateProfileInfo = ({ username }: Props) => {
+export const useUpdateProfileInfo = (username: string) => {
+  const { user } = usePrivy()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
 
-  const updateProfile = useCallback(async (profileData: Partial<IProfile>) => {
+  const updateProfile = useCallback(async (profileData: Partial<IUser>) => {
+    if (!user?.id) {
+        setError('User not authenticated');
+        return;
+    }
+
     setLoading(true)
     setError(null)
     setSuccess(false)
 
     try {
+      const payload = {
+        ...profileData,
+        privyDid: user.id
+      };
+
       const response = await fetch(`/api/profiles/info?username=${username}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
       })
 
       const result = await response.json()
@@ -39,7 +47,7 @@ export const useUpdateProfileInfo = ({ username }: Props) => {
     } finally {
       setLoading(false)
     }
-  }, [username])
+  }, [username, user])
 
   return { updateProfile, loading, error, success }
 }

@@ -8,6 +8,7 @@ interface LikeButtonProps {
   initiallyLiked: boolean
   onLike: () => void
   onUnlike: () => void
+  disabled?: boolean
 }
 
 export function LikeButton({
@@ -15,6 +16,7 @@ export function LikeButton({
   initiallyLiked,
   onLike,
   onUnlike,
+  disabled,
 }: LikeButtonProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount)
   const [hasLiked, setHasLiked] = useState(initiallyLiked)
@@ -35,7 +37,7 @@ export function LikeButton({
     <div className="flex items-end justify-end">
       <div className="flex items-center space-x-1">
         <p className="text-gray">{likeCount}</p>
-        <Button variant="ghost" onClick={handleToggleLike}>
+        <Button variant="ghost" onClick={handleToggleLike} disabled={disabled}>
           <Heart
             className={cn('text-muted-light', {
               'fill-accent text-muted': hasLiked,

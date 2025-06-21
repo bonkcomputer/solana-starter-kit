@@ -10,9 +10,10 @@ export const randomIntInRange = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
-export const formatRelativeTime = (timestamp: number): string => {
-  const now = new Date().getTime()
-  const diff = now - (timestamp > 9999999999 ? timestamp : timestamp * 1000) // Adjust for milliseconds if needed
+export const formatRelativeTime = (date: string | number): string => {
+  const dateObj = typeof date === 'string' ? new Date(date) : new Date(date > 9999999999 ? date : date * 1000);
+  const now = new Date();
+  const diff = now.getTime() - dateObj.getTime();
 
   const seconds = Math.floor(diff / 1000)
   const minutes = Math.floor(seconds / 60)

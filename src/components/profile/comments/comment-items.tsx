@@ -1,27 +1,32 @@
 import { Card } from '@/components/common/card'
 import { LikeButton } from '@/components/profile/comments/like-button'
-import { IComments } from '@/models/comment.models'
 import { formatRelativeTime } from '@/utils/utils'
 import { User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { PopulatedComment } from '../hooks/use-get-comments'
 
-interface CommentItemProps {
-  comment: IComments
-  handleLike: (id: string) => void
-  handleUnlike: (id: string) => void
+interface CommentItemsProps {
+  comment: PopulatedComment
+  handleLike: (commentId: string, tapestryCommentId: string) => void
+  handleUnlike: (commentId: string, tapestryCommentId: string) => void
+  currentUserId?: string
 }
 
-export function CommentItem({
+export function CommentItems({
   comment,
   handleLike,
   handleUnlike,
-}: CommentItemProps) {
+  currentUserId,
+}: CommentItemsProps) {
+  const isLikedByCurrentUser = comment.likes.some(like => like.userId === currentUserId)
+  const hasTapestryId = !!comment.tapestryCommentId;
+
   return (
     <Card className="w-full space-y-4">
       <div className="flex space-x-1 items-center justify-end text-gray text-sm">
         <p className="pr-2">
-          {formatRelativeTime(comment.comment.created_at)} by
+          {formatRelativeTime(comment.createdAt)} by
         </p>
         {comment.author.image ? (
           <Image
@@ -43,17 +48,24 @@ export function CommentItem({
       </div>
 
       <div>
-        <p>{comment.comment.text}</p>
+        <p>{comment.text}</p>
       </div>
 
-      {comment.requestingProfileSocialInfo && comment.socialCounts && (
-        <LikeButton
-          initialLikeCount={comment.socialCounts.likeCount}
-          initiallyLiked={comment?.requestingProfileSocialInfo?.hasLiked}
-          onLike={() => handleLike(comment.comment.id)}
-          onUnlike={() => handleUnlike(comment.comment.id)}
-        />
-      )}
+      <LikeButton
+        initialLikeCount={comment.likes.length}
+        initiallyLiked={isLikedByCurrentUser}
+        onLike={() => {
+            if (comment.tapestryCommentId) {
+                handleLike(comment.id, comment.tapestryCommentId)
+            }
+        }}
+        onUnlike={() => {
+            if (comment.tapestryCommentId) {
+                handleUnlike(comment.id, comment.tapestryCommentId)
+            }
+        }}
+        disabled={!hasTapestryId}
+      />
     </Card>
   )
 }

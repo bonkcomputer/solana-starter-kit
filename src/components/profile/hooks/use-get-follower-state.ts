@@ -1,52 +1,52 @@
 'use client'
 
-import { IGetFollowersStateResponse } from '@/models/profile.models'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Props {
-  followeeUsername: string
-  followerUsername: string
+  followerId: string; // This is the privyDid
+  followingId: string; // This is the privyDid
 }
 
-export const useGetFollowersState = ({
-  followeeUsername,
-  followerUsername,
+export const useGetFollowerState = ({
+  followerId,
+  followingId,
 }: Props) => {
-  const [data, setData] = useState<IGetFollowersStateResponse | null>(null)
+  const [isFollowing, setIsFollowing] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchFollowersState = useCallback(async () => {
+  const fetchFollowerState = useCallback(async () => {
+    if (!followerId || !followingId) return;
+
     setLoading(true)
     setError(null)
 
     try {
       const response = await fetch(
-        `/api/followers/state?startId=${followerUsername}&endId=${followeeUsername}`,
+        `/api/followers/state?followerId=${followerId}&followingId=${followingId}`,
         {
           method: 'GET',
         },
       )
 
-      const result = await response.json()
-
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch followers state')
+        const result = await response.json();
+        throw new Error(result.error || 'Failed to fetch follower state')
       }
 
-      setData(result)
+      const result = await response.json();
+      setIsFollowing(result.isFollowing);
+
     } catch (err: any) {
       setError(err.message || 'Something went wrong')
     } finally {
       setLoading(false)
     }
-  }, [followeeUsername, followerUsername])
+  }, [followerId, followingId])
 
   useEffect(() => {
-    if (followeeUsername && followerUsername) {
-      fetchFollowersState()
-    }
-  }, [fetchFollowersState, followeeUsername, followerUsername])
+    fetchFollowerState()
+  }, [fetchFollowerState])
 
-  return { data, loading, error, refetch: fetchFollowersState }
+  return { isFollowing, loading, error, refetch: fetchFollowerState }
 }

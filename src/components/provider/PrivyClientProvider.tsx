@@ -13,17 +13,20 @@ export function PrivyClientProvider({
       appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
       config={{
         loginMethods: ['email', 'wallet'],
-        appearance: { walletChainType: 'solana-only' },
+        appearance: { 
+          walletChainType: 'solana-only',
+          theme: 'dark',
+        },
         externalWallets: {
           solana: { connectors: toSolanaWalletConnectors() },
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
-          requireUserPasswordOnCreate: true,
+          requireUserPasswordOnCreate: false,
         },
-        // sessions: {
-        //   noPromptOnSignature: true,
-        // },
+        mfa: {
+          noPromptOnMfaRequired: false,
+        },
       }}
     >
       {children}

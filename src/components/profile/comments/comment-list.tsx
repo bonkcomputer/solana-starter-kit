@@ -1,12 +1,13 @@
 import { LoadCircle } from '@/components/common/load-circle'
-import { CommentItem } from '@/components/profile/comments/comment-items'
-import { IComments } from '@/models/comment.models'
+import { CommentItems } from './comment-items'
+import { PopulatedComment } from '../hooks/use-get-comments';
 
 interface CommentListProps {
-  comments: IComments[]
+  comments: PopulatedComment[];
   loading: boolean
-  handleLike: (id: string) => void
-  handleUnlike: (id: string) => void
+  handleLike: (commentId: string, tapestryCommentId: string) => void;
+  handleUnlike: (commentId: string, tapestryCommentId: string) => void;
+  currentUserId?: string;
 }
 
 export function CommentList({
@@ -14,16 +15,24 @@ export function CommentList({
   loading,
   handleLike,
   handleUnlike,
+  currentUserId,
 }: CommentListProps) {
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center p-8">
+        <LoadCircle />
+      </div>
+    )
+  }
   return (
-    <div className="space-y-4 flex items-center justify-center flex-col w-full">
-      {loading && <LoadCircle />}
-      {comments.map((comment) => (
-        <CommentItem
-          key={comment.comment.id}
+    <div className="flex flex-col space-y-4">
+      {comments?.map((comment, index) => (
+        <CommentItems
+          key={index}
           comment={comment}
           handleLike={handleLike}
           handleUnlike={handleUnlike}
+          currentUserId={currentUserId}
         />
       ))}
     </div>

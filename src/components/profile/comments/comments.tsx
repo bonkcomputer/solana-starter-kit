@@ -5,120 +5,111 @@ import { Alert } from '@/components/common/alert'
 import { CommentInput } from '@/components/profile/comments/comment-input'
 import { CommentList } from '@/components/profile/comments/comment-list'
 import { useCreateComment } from '@/components/profile/hooks/use-create-comment'
-import {
-  useCreateLike,
-  useCreateUnlike,
-} from '@/components/profile/hooks/use-create-like'
+import { useCreateLike, useDeleteLike } from '@/components/profile/hooks/use-create-like'
 import { useGetComments } from '@/components/profile/hooks/use-get-comments'
+import { useGetProfileInfo } from '../hooks/use-get-profile-info'
+import { usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 
 interface Props {
-  username: string
+  username: string; // The username of the profile being viewed
 }
 
 export function Comments({ username }: Props) {
-  const { mainUsername } = useCurrentWallet()
+  const { user: currentUser } = usePrivy();
+  const { mainUsername: currentUserUsername } = useCurrentWallet();
+  const { profile: viewedProfile } = useGetProfileInfo(username);
 
-  const { data, loading, refetch } = useGetComments({
-    targetProfileId: username,
-    requestingProfileId: mainUsername,
-  })
+  const { comments, loading, refetch } = useGetComments({
+    profileId: viewedProfile?.privyDid || '',
+  });
 
-  const {
-    createComment,
-    loading: commentLoading,
-    error: commentError,
-    success: commentSuccess,
-  } = useCreateComment()
+  const { createComment, loading: commentLoading, error: commentError, success: commentSuccess } = useCreateComment();
+  const { createLike, error: likeError, success: likeSuccess } = useCreateLike();
+  const { deleteLike, error: unlikeError, success: unlikeSuccess } = useDeleteLike();
 
-  const { createLike, error: likeError, success: likeSuccess } = useCreateLike()
+  const [commentText, setCommentText] = useState('');
 
-  const {
-    createUnlike,
-    error: unlikeError,
-    success: unlikeSuccess,
-  } = useCreateUnlike()
-
-  const [commentText, setCommentText] = useState('')
-
+  // Refetch comments after a new comment, like, or unlike
   useEffect(() => {
-    if (commentSuccess) {
-      refetch()
-      setCommentText('')
+    if (commentSuccess || likeSuccess || unlikeSuccess) {
+      refetch();
+      if (commentSuccess) {
+        setCommentText('');
+      }
     }
-  }, [commentSuccess, refetch])
+  }, [commentSuccess, likeSuccess, unlikeSuccess, refetch]);
 
-  useEffect(() => {
-    if (likeSuccess) {
-      refetch()
+  const handleSubmitComment = () => {
+    if (currentUser?.id && viewedProfile?.privyDid && currentUserUsername && viewedProfile?.username) {
+        createComment({
+            authorId: currentUser.id,
+            profileId: viewedProfile.privyDid,
+            text: commentText,
+            authorUsername: currentUserUsername,
+            profileUsername: viewedProfile.username,
+        });
+    } else {
+        console.error("Cannot post comment, user or profile information is missing.");
     }
-  }, [likeSuccess, refetch])
+  }
 
-  useEffect(() => {
-    if (unlikeSuccess) {
-      refetch()
+  const handleLike = (commentId: string, tapestryCommentId: string) => {
+    if (currentUser?.id && currentUserUsername) {
+        createLike({
+            userId: currentUser.id,
+            commentId,
+            username: currentUserUsername,
+            tapestryCommentId,
+        })
     }
-  }, [unlikeSuccess, refetch])
+  }
+
+  const handleUnlike = (commentId: string, tapestryCommentId: string) => {
+    if (currentUser?.id && currentUserUsername) {
+        deleteLike({
+            userId: currentUser.id,
+            commentId,
+            username: currentUserUsername,
+            tapestryCommentId,
+        })
+    }
+  }
 
   return (
     <>
       <CommentInput
         commentText={commentText}
         setCommentText={setCommentText}
-        handleSubmit={() =>
-          createComment({
-            profileId: mainUsername || '',
-            targetProfileId: username,
-            text: commentText,
-          })
-        }
+        handleSubmit={handleSubmitComment}
         loading={commentLoading}
       />
 
       <CommentList
-        comments={data?.comments || []}
+        comments={comments}
         loading={loading}
-        handleLike={(id) =>
-          createLike({ nodeId: id, startId: mainUsername || '' })
-        }
-        handleUnlike={(id) =>
-          createUnlike({ nodeId: id, startId: mainUsername || '' })
-        }
+        handleLike={handleLike}
+        handleUnlike={handleUnlike}
+        currentUserId={currentUser?.id}
       />
 
       {commentSuccess && (
-        <Alert
-          type="success"
-          message="Comment sent successfully!"
-          duration={5000}
-        />
+        <Alert type="success" message="Comment sent successfully!" duration={5000} />
       )}
       {commentError && (
-        <Alert
-          type="error"
-          message={`Error sending comment: ${commentError}`}
-          duration={5000}
-        />
+        <Alert type="error" message={`Error sending comment: ${commentError}`} duration={5000} />
       )}
       {likeSuccess && (
         <Alert type="success" message="Like success!" duration={5000} />
       )}
       {likeError && (
-        <Alert
-          type="error"
-          message={`Error like: ${likeError}`}
-          duration={5000}
-        />
+        <Alert type="error" message={`Error like: ${likeError}`} duration={5000} />
       )}
       {unlikeSuccess && (
         <Alert type="success" message="Unlike success!" duration={5000} />
       )}
       {unlikeError && (
-        <Alert
-          type="error"
-          message={`Error unlike: ${unlikeError}`}
-          duration={5000}
-        />
+        <Alert type="error" message={`Error unlike: ${unlikeError}`} duration={5000} />
       )}
     </>
   )

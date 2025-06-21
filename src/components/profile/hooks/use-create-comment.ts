@@ -3,10 +3,11 @@
 import { useCallback, useState } from 'react'
 
 interface Props {
-  profileId: string
-  targetProfileId: string
-  text: string
-  commentId?: string
+  authorId: string;        // privyDid of the comment author
+  profileId: string;       // privyDid of the profile being commented on
+  text: string;
+  authorUsername: string;  // For Tapestry
+  profileUsername: string; // For Tapestry
 }
 
 export const useCreateComment = () => {
@@ -15,7 +16,7 @@ export const useCreateComment = () => {
   const [success, setSuccess] = useState<boolean>(false)
 
   const createComment = useCallback(
-    async ({ profileId, targetProfileId, text, commentId }: Props) => {
+    async ({ authorId, profileId, text, authorUsername, profileUsername }: Props) => {
       setLoading(true)
       setError(null)
       setSuccess(false)
@@ -26,17 +27,17 @@ export const useCreateComment = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ profileId, targetProfileId, text, commentId }),
+          body: JSON.stringify({ authorId, profileId, text, authorUsername, profileUsername }),
         })
 
-        const result = await response.json()
-
         if (!response.ok) {
+          const result = await response.json();
           throw new Error(result.error || 'Failed to create comment')
         }
 
         setSuccess(true)
-        return result
+        return await response.json();
+        
       } catch (err: any) {
         setError(err.message || 'Something went wrong')
       } finally {

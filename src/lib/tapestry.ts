@@ -8,7 +8,9 @@ export const getFollowers = async ({ username }: { username: string }) => {
     })
     return response
   } catch (error: any) {
-    throw new Error(error.message || 'Failed get followers list')
+    console.warn('Tapestry API error for followers:', error.message || error)
+    // Return empty result instead of throwing
+    return { profiles: [], page: 0, pageSize: 0 }
   }
 }
 
@@ -20,6 +22,8 @@ export const getFollowing = async ({ username }: { username: string }) => {
     })
     return response
   } catch (error: any) {
-    throw new Error(error.message || 'Failed get following list')
+    console.warn('Tapestry API error for following:', error.message || error)
+    // Return empty result instead of throwing
+    return { profiles: [], page: 0, pageSize: 0 }
   }
 }

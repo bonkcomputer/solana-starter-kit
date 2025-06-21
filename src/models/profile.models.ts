@@ -101,3 +101,13 @@ export interface IProfileWithWallets extends IProfile {
 export interface IProfileTokenDetails {
   profiles: IProfileWithWallets[]
 }
+
+export interface IUser {
+    privyDid: string;
+    createdAt: string; // ISO date string
+    username: string;
+    bio: string | null;
+    image: string | null;
+    solanaWalletAddress: string | null;
+    embeddedWalletAddress: string | null;
+}

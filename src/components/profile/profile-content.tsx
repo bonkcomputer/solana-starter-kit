@@ -50,19 +50,31 @@ export function ProfileContent({ username }: Props) {
           actualUsername = username
         }
 
-        // Fetch followers and following
-        const followersData = await getFollowers({
-          username: actualUsername,
-        })
+        // Fetch followers and following with better error handling
+        try {
+          const followersData = await getFollowers({
+            username: actualUsername,
+          })
+          setFollowers(followersData)
+        } catch (error) {
+          console.warn('Failed to fetch followers:', error)
+          setFollowers({ profiles: [], page: 0, pageSize: 0 })
+        }
 
-        const followingData = await getFollowing({
-          username: actualUsername,
-        })
-
-        setFollowers(followersData)
-        setFollowing(followingData)
+        try {
+          const followingData = await getFollowing({
+            username: actualUsername,
+          })
+          setFollowing(followingData)
+        } catch (error) {
+          console.warn('Failed to fetch following:', error)
+          setFollowing({ profiles: [], page: 0, pageSize: 0 })
+        }
       } catch (error) {
         console.error('Error initializing profile:', error)
+        // Set default values on error
+        setFollowers({ profiles: [], page: 0, pageSize: 0 })
+        setFollowing({ profiles: [], page: 0, pageSize: 0 })
       } finally {
         setIsLoading(false)
       }

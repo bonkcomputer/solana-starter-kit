@@ -3,57 +3,65 @@
 import { Alert } from '@/components/common/alert'
 import { Button } from '@/components/common/button'
 import { LoadCircle } from '@/components/common/load-circle'
-import { useFollowUser } from '@/components/profile/hooks/use-follow-user'
-import { useGetFollowersState } from '@/components/profile/hooks/use-get-follower-state'
 import { useCurrentWallet } from '../auth/hooks/use-current-wallet'
+import { useFollowUser } from './hooks/use-follow-user'
+import { useGetFollowerState } from './hooks/use-get-follower-state'
+import { useGetProfileInfo } from './hooks/use-get-profile-info'
 import { useUnfollowUser } from './hooks/use-unfollow-user'
+import { usePrivy } from '@privy-io/react-auth'
 
 interface Props {
-  username: string
+  username: string // The username of the profile being viewed
 }
 
 export function FollowButton({ username }: Props) {
-  const { walletAddress, mainUsername, loadingMainUsername } =
-    useCurrentWallet()
-  const { followUser, loading, error, success } = useFollowUser()
-  const { unfollowUser } = useUnfollowUser()
+  const { user: currentUser } = usePrivy();
+  const { mainUsername: currentUserUsername, loadingMainUsername } = useCurrentWallet();
+  
+  // Get the profile info for the user being viewed
+  const { profile: viewedProfile, loading: loadingViewedProfile } = useGetProfileInfo(username);
+  
+  const { followUser, loading: followLoading, error: followError, success: followSuccess } = useFollowUser();
+  const { unfollowUser, loading: unfollowLoading, error: unfollowError, success: unfollowSuccess } = useUnfollowUser();
 
-  const { data } = useGetFollowersState({
-    followeeUsername: username,
-    followerUsername: mainUsername || '',
-  })
-
-  const isFollowing = data?.isFollowing
+  const { isFollowing, loading: followStateLoading, error: followStateError } = useGetFollowerState({
+    followerId: currentUser?.id || '',
+    followingId: viewedProfile?.privyDid || '',
+  });
 
   const handleFollowToggleClicked = async () => {
-    if (mainUsername && username) {
+    if (currentUser?.id && viewedProfile?.privyDid && currentUserUsername && viewedProfile?.username) {
       if (isFollowing) {
         await unfollowUser({
-          followerUsername: mainUsername,
-          followeeUsername: username,
-        })
+            followerPrivyDid: currentUser.id,
+            followeePrivyDid: viewedProfile.privyDid,
+            followerUsername: currentUserUsername,
+            followeeUsername: viewedProfile.username,
+        });
       } else {
         await followUser({
-          followerUsername: mainUsername,
-          followeeUsername: username,
-        })
+            followerPrivyDid: currentUser.id,
+            followeePrivyDid: viewedProfile.privyDid,
+            followerUsername: currentUserUsername,
+            followeeUsername: viewedProfile.username,
+        });
       }
     } else {
-      console.error('No main username or followee username')
+      console.error('Missing user information for follow action');
     }
-  }
+  };
 
-  if (!walletAddress) {
-    return null
-  }
+  const loading = loadingMainUsername || loadingViewedProfile || followLoading || unfollowLoading || followStateLoading;
+  const error = followError || unfollowError || followStateError;
+  const success = followSuccess || unfollowSuccess;
 
-  if (mainUsername === username) {
-    return null
+  if (!currentUser?.id || currentUserUsername === username) {
+    return null;
   }
 
   return (
     <>
-      {loadingMainUsername ? (
+      {loading ? (
         <span>
           <LoadCircle />
         </span>
@@ -66,7 +74,7 @@ export function FollowButton({ username }: Props) {
       {success && (
         <Alert
           type="success"
-          message="Followed user successfully!"
+          message="Action successful!"
           duration={5000}
         />
       )}
@@ -74,7 +82,7 @@ export function FollowButton({ username }: Props) {
       {error && (
         <Alert
           type="error"
-          message="There was an error following the user."
+          message={error}
           duration={5000}
         />
       )}

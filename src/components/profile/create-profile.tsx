@@ -100,6 +100,15 @@ export function CreateProfile({
     <>
       <div className="w-full">
         <h2 className="text-xl mb-3">Create Profile</h2>
+        
+        {/* Display wallet address */}
+        {walletAddress && (
+          <div className="mb-4 p-3 bg-muted rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Connected Wallet:</p>
+            <p className="text-sm font-mono break-all">{walletAddress}</p>
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <div className="flex items-center">
             <Input

@@ -1,66 +1,73 @@
+import { prisma } from '@/lib/prisma'
 import { socialfi } from '@/utils/socialfi'
 import { NextRequest, NextResponse } from 'next/server'
 
+// POST handler for "liking" a comment
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { nodeId, startId } = body
+    const { userId, commentId, username, tapestryCommentId } = await request.json()
 
-    if (!nodeId) {
-      return NextResponse.json(
-        { error: 'Missing required nodeId' },
-        { status: 400 },
-      )
+    if (!userId || !commentId || !username || !tapestryCommentId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const response = await socialfi.likes.likesCreate(
+    // 1. Write to Tapestry first
+    await socialfi.likes.likesCreate(
       {
         apiKey: process.env.TAPESTRY_API_KEY || '',
-        nodeId: nodeId,
+        nodeId: tapestryCommentId, // Tapestry needs its own internal ID for the comment
       },
-      { startId },
+      { startId: username },
     )
 
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('[Create like Error]:', error)
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to create like',
+    // 2. Write to our local Prisma database
+    const newLike = await prisma.like.create({
+      data: {
+        userId,   // The user's privyDid
+        commentId, // The comment's CUID from our DB
       },
-      { status: 500 },
-    )
+    })
+
+    return NextResponse.json(newLike)
+  } catch (error) {
+    console.error('[POST Like Error]:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create like'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
 
+// DELETE handler for "unliking" a comment
 export async function DELETE(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { nodeId, startId } = body
+    const { userId, commentId, username, tapestryCommentId } = await request.json()
 
-    if (!nodeId) {
-      return NextResponse.json(
-        { error: 'Missing required nodeId' },
-        { status: 400 },
-      )
+    if (!userId || !commentId || !username || !tapestryCommentId) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
-
-    const response = await socialfi.likes.likesDelete(
+    
+    // 1. Delete from Tapestry first
+    await socialfi.likes.likesDelete(
       {
         apiKey: process.env.TAPESTRY_API_KEY || '',
-        nodeId: nodeId,
+        nodeId: tapestryCommentId,
       },
-      { startId },
+      { startId: username },
     )
 
-    return NextResponse.json(response)
-  } catch (error) {
-    console.error('[Unlike Error]:', error)
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : 'Failed to unlike',
+    // 2. Delete from our local Prisma database
+    await prisma.like.delete({
+      where: {
+        userId_commentId: {
+          userId,
+          commentId,
+        },
       },
-      { status: 500 },
-    )
+    })
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('[DELETE Like Error]:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to unlike'
+    return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
