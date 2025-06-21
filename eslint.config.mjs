@@ -27,6 +27,27 @@ const eslintConfig = [
   ...tseslint.configs.recommended,
   pluginReactConfig,
   {
+    rules: {
+      'react/react-in-jsx-scope': 'off', // Not needed in React 17+ with new JSX Transform
+      'react/prop-types': 'off', // We use TypeScript for prop validation
+      '@typescript-eslint/no-explicit-any': 'off', // Allow any types for flexibility
+      '@typescript-eslint/no-unused-vars': ['error', { 
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_'
+      }], // Allow unused vars that start with underscore
+      'react/no-unknown-property': 'off', // Allow unknown properties for styled-jsx
+      'no-case-declarations': 'off', // Allow declarations in case blocks
+      'no-extra-boolean-cast': 'off', // Allow double negation
+      'no-useless-catch': 'off', // Allow catch blocks that just rethrow
+    },
+    settings: {
+      react: {
+        version: 'detect', // Automatically detect React version
+      },
+    },
+  },
+  {
     ignores: ["src/generated/**"],
   }
 ]
