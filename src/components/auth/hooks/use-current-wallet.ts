@@ -17,7 +17,12 @@ export function useCurrentWallet() {
   })
 
   useEffect(() => {
-    if (!ready || !authenticated) {
+    if (!ready) {
+      setLoadingMainUsername(true)
+      return
+    }
+
+    if (!authenticated) {
       setWalletAddress('')
       setMainUsername(null)
       setLoadingMainUsername(false)
@@ -48,21 +53,30 @@ export function useCurrentWallet() {
       console.log('Found Solana wallet:', solanaWallet.address)
       setWalletAddress(solanaWallet.address)
     } else {
-      // Only use Solana addresses - don't fall back to non-Solana wallets
-      console.log('No Solana wallet found, available wallets:', wallets.map(w => ({ 
-        address: w.address,
-        wallet: w
-      })))
-      setWalletAddress('')
+      // Check if we have any wallets at all - if yes, try the first one
+      if (wallets.length > 0) {
+        console.log('No clear Solana wallet found, using first available wallet:', wallets[0].address)
+        setWalletAddress(wallets[0].address)
+      } else {
+        console.log('No wallets found')
+        setWalletAddress('')
+        setLoadingMainUsername(false)
+      }
     }
   }, [wallets, ready, authenticated])
 
   useEffect(() => {
+    // Only manage loading state if we're authenticated and ready
+    if (!ready || !authenticated) {
+      return
+    }
+
     if (profilesLoading) {
       setLoadingMainUsername(true)
       return
     }
 
+    // Profiles have finished loading
     if (profiles && profiles.length > 0) {
       setMainUsername(profiles[0].profile.username)
     } else {
@@ -70,7 +84,7 @@ export function useCurrentWallet() {
     }
     
     setLoadingMainUsername(false)
-  }, [profiles, profilesLoading])
+  }, [profiles, profilesLoading, ready, authenticated])
 
   return { 
     walletAddress, 

@@ -46,10 +46,21 @@ export function CreateProfile({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (walletAddress && username) {
-      await createProfile({ username, walletAddress })
-      setIsProfileCreated(true)
-      setProfileUsername(username)
-      setCreateProfileDialog(false)
+      try {
+        const result = await createProfile({ username, walletAddress })
+        if (result) {
+          setIsProfileCreated(true)
+          setProfileUsername(username)
+          setCreateProfileDialog(false)
+          // Force refresh to ensure all components get updated state
+          setTimeout(() => {
+            window.location.reload()
+          }, 500)
+        }
+      } catch (err) {
+        console.error('Failed to create profile:', err)
+        // Error will be displayed through the error state in the UI
+      }
     }
   }
 

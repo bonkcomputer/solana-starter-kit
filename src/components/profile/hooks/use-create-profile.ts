@@ -20,6 +20,8 @@ export const useCreateProfile = () => {
     bio,
     image,
   }: Props) => {
+    console.log('Creating profile with:', { username, walletAddress, bio, image, userId: user?.id });
+
     if (!user?.id) {
         setError("User is not authenticated");
         return;
@@ -48,6 +50,8 @@ export const useCreateProfile = () => {
         image,
       };
 
+      console.log('Sending profile creation payload:', payload);
+
       const res = await fetch('/api/profiles/create', {
         method: 'POST',
         headers: {
@@ -56,15 +60,17 @@ export const useCreateProfile = () => {
         body: JSON.stringify(payload),
       });
 
+      const data = await res.json();
+      console.log('Profile creation response:', { status: res.status, data });
+
       if (!res.ok) {
-        const errorResponse = await res.json();
-        throw new Error(errorResponse.error || 'Failed to create profile');
+        throw new Error(data.error || 'Failed to create profile');
       }
 
-      const data = await res.json();
       setResponse(data);
       return data;
     } catch (err: any) {
+      console.error('Profile creation error:', err);
       setError(err.message);
       throw err;
     } finally {

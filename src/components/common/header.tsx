@@ -30,6 +30,7 @@ export function Header() {
   const [mainUsername, setMainUsername] = useState<string | null>(null)
   const [isProfileCreated, setIsProfileCreated] = useState<boolean>(false)
   const [profileUsername, setProfileUsername] = useState<string | null>(null)
+  const [loadingTimeout, setLoadingTimeout] = useState<boolean>(false)
   const { profiles, loading: profilesLoading } = useGetProfiles({
     walletAddress: walletAddress || '',
   })
@@ -53,9 +54,11 @@ export function Header() {
       profilesLength: profiles?.length || 0,
       loadingMainUsername,
       profilesLoading,
-      userId: user?.id
+      userId: user?.id,
+      loadingTimeout,
+      showCreateProfile
     })
-  }, [ready, authenticated, walletAddress, mainUsername, currentMainUsername, profiles, loadingMainUsername, profilesLoading, user])
+  }, [ready, authenticated, walletAddress, mainUsername, currentMainUsername, profiles, loadingMainUsername, profilesLoading, user, loadingTimeout, showCreateProfile])
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
@@ -92,6 +95,12 @@ export function Header() {
 
   // Updated logic to handle profile states better
   useEffect(() => {
+    // Don't do anything if Privy isn't ready or user isn't authenticated
+    if (!ready || !authenticated) {
+      setMainUsername(null)
+      return
+    }
+
     // Priority 1: Use currentMainUsername from useCurrentWallet if available
     if (currentMainUsername) {
       setMainUsername(currentMainUsername)
@@ -112,9 +121,11 @@ export function Header() {
       return
     }
 
-    // No profile found
-    setMainUsername(null)
-  }, [currentMainUsername, profiles, isProfileCreated, profileUsername])
+    // If we're not loading and no profile is found, clear mainUsername
+    if (!loadingMainUsername && !profilesLoading) {
+      setMainUsername(null)
+    }
+  }, [currentMainUsername, profiles, isProfileCreated, profileUsername, ready, authenticated, loadingMainUsername, profilesLoading])
 
   const handleProfileCreated = (username: string) => {
     setIsProfileCreated(true)
@@ -126,7 +137,31 @@ export function Header() {
     }, 1000)
   }
 
-  const showCreateProfile = ready && authenticated && !loadingMainUsername && !profilesLoading && !mainUsername
+  // Determine if we should show create profile based on authentication and loading states
+  const showCreateProfile = ready && authenticated && walletAddress && (!loadingMainUsername || loadingTimeout) && (!profilesLoading || loadingTimeout) && !mainUsername
+
+  // Determine loading message
+  const getLoadingMessage = () => {
+    if (!ready) return 'Loading...'
+    if (!authenticated) return null
+    if ((loadingMainUsername || profilesLoading) && !loadingTimeout) return 'Loading profile...'
+    if (!walletAddress) return 'No wallet connected'
+    return 'No profile found'
+  }
+
+  // Add timeout mechanism to prevent infinite loading
+  useEffect(() => {
+    if (ready && authenticated && (loadingMainUsername || profilesLoading)) {
+      const timeout = setTimeout(() => {
+        console.warn('Profile loading timed out, forcing stop')
+        setLoadingTimeout(true)
+      }, 15000) // 15 second timeout
+
+      return () => clearTimeout(timeout)
+    } else {
+      setLoadingTimeout(false)
+    }
+  }, [ready, authenticated, loadingMainUsername, profilesLoading])
 
   return (
     <>
@@ -256,8 +291,16 @@ export function Header() {
                   setProfileUsername={setProfileUsername}
                 />
               ) : (
-                <div className="text-sm text-muted-foreground">
-                  {loadingMainUsername || profilesLoading ? 'Loading profile...' : 'No profile found'}
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
+                  {getLoadingMessage()}
+                  {loadingTimeout && (
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="text-xs underline hover:opacity-80"
+                    >
+                      Refresh
+                    </button>
+                  )}
                 </div>
               )
             ) : (

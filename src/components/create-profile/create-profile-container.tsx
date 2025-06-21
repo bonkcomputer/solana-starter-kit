@@ -3,6 +3,7 @@
 import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import Dialog from '@/components/common/dialog'
 import { CreateProfile } from '@/components/profile/create-profile'
+import { usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 
 interface CreateProfileContainerProps {
@@ -15,14 +16,15 @@ export function CreateProfileContainer({
   setProfileUsername,
 }: CreateProfileContainerProps) {
   const { walletAddress, loadingMainUsername } = useCurrentWallet()
+  const { ready, authenticated } = usePrivy()
   const [isOpen, setIsOpen] = useState(false)
 
   // Auto-open dialog when user is authenticated but has no profile
   useEffect(() => {
-    if (walletAddress && !loadingMainUsername) {
+    if (ready && authenticated && walletAddress && !loadingMainUsername) {
       setIsOpen(true)
     }
-  }, [walletAddress, loadingMainUsername])
+  }, [ready, authenticated, walletAddress, loadingMainUsername])
 
   const handleProfileCreated = (isCreated: boolean) => {
     if (isCreated) {
@@ -35,10 +37,11 @@ export function CreateProfileContainer({
     setIsProfileCreated(username)
   }
 
-  if (!walletAddress || loadingMainUsername) {
+  // Show loading state while determining authentication status
+  if (!ready || !authenticated || !walletAddress || loadingMainUsername) {
     return (
       <button className="px-4 py-2 text-sm text-muted-foreground">
-        Loading...
+        {!ready ? 'Loading...' : 'Loading profile...'}
       </button>
     )
   }
