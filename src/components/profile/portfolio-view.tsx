@@ -1,16 +1,25 @@
 'use client'
 
-import { useGetProfilePortfolio } from '@/components/trade/hooks/birdeye/use-get-profile-portfolio'
-import type { ITokenPortfolioItem } from '@/components/trade/models/birdeye/birdeye-api-models'
 import type { HeliusAsset } from '@/types/helius'
-import { fetchAssets } from '@/utils/helius/fetch-assets'
 import { PublicKey } from '@solana/web3.js'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface PortfolioViewProps {
   username: string
   initialTokenType?: 'fungible' | 'nft'
+}
+
+interface TokenHolding {
+  address: string
+  name: string
+  symbol: string
+  decimals: number
+  balance: string
+  uiAmount: number
+  logoURI: string
+  priceUsd: number
+  valueUsd: number
 }
 
 export function PortfolioView({
@@ -19,11 +28,11 @@ export function PortfolioView({
 }: PortfolioViewProps) {
   const [walletAddress, setWalletAddress] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
-  const [tokenType, setTokenType] = useState<'fungible' | 'nft'>(
-    initialTokenType,
-  )
+  const [tokenType, setTokenType] = useState<'fungible' | 'nft'>(initialTokenType)
+  const [tokens, setTokens] = useState<TokenHolding[]>([])
   const [nfts, setNfts] = useState<HeliusAsset[]>([])
-  const [nftsLoading, setNftsLoading] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [selectedNft, setSelectedNft] = useState<HeliusAsset | null>(null)
   const [isNftModalOpen, setIsNftModalOpen] = useState(false)
 
@@ -43,8 +52,8 @@ export function PortfolioView({
         const response = await fetch(`/api/profiles/info?username=${username}`)
         const data = await response.json()
 
-        if (data?.profile?.wallet_address) {
-          setWalletAddress(data.profile.wallet_address)
+        if (data?.solanaWalletAddress) {
+          setWalletAddress(data.solanaWalletAddress)
         }
       } catch (error) {
         console.error('Error getting wallet address:', error)
@@ -64,44 +73,43 @@ export function PortfolioView({
     setTokenType(initialTokenType)
   }, [initialTokenType])
 
-  useEffect(() => {
-    async function fetchNfts() {
-      if (!walletAddress || tokenType !== 'nft') return
+  const fetchPortfolioData = useCallback(async () => {
+    if (!walletAddress) return
 
-      try {
-        setNftsLoading(true)
-        const response = await fetchAssets(walletAddress)
-        const nftAssets =
-          response.items?.filter(
-            (asset: HeliusAsset) =>
-              asset.interface === 'ProgrammableNFT' ||
-              asset.interface === 'NFT',
-          ) ?? []
-        setNfts(nftAssets)
-      } catch (error) {
-        console.error('Error fetching NFTs:', error)
-        setNfts([])
-      } finally {
-        setNftsLoading(false)
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Fetch portfolio data from our API endpoint
+      const response = await fetch(`/api/portfolio?walletAddress=${walletAddress}`)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`)
       }
+
+      const data = await response.json()
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to fetch portfolio data')
+      }
+
+      setTokens(data.tokens || [])
+      setNfts(data.nfts || [])
+      
+    } catch (error) {
+      console.error('Error fetching portfolio:', error)
+      setError(error instanceof Error ? error.message : 'Failed to load portfolio')
+    } finally {
+      setLoading(false)
     }
+  }, [walletAddress])
 
-    fetchNfts()
-  }, [walletAddress, tokenType])
+  useEffect(() => {
+    fetchPortfolioData()
+  }, [walletAddress])
 
-  const {
-    data: portfolioItems,
-    loading: portfolioLoading,
-    error,
-  } = useGetProfilePortfolio({
-    walletAddress,
-  })
-
-  if (
-    isLoading ||
-    (portfolioLoading && tokenType === 'fungible') ||
-    (nftsLoading && tokenType === 'nft')
-  ) {
+  if (isLoading || loading) {
     return (
       <div className="p-6 bg-background rounded-lg border border-border flex justify-center items-center min-h-[300px]">
         <div className="animate-pulse flex flex-col items-center">
@@ -115,8 +123,17 @@ export function PortfolioView({
 
   if (error) {
     return (
-      <div className="p-6 bg-background rounded-lg border border-border text-destructive">
-        Error loading portfolio: {error}
+      <div className="p-6 bg-background rounded-lg border border-border">
+        <div className="text-center py-8">
+          <h3 className="text-xl font-medium mb-2 text-destructive">Error loading portfolio</h3>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <button 
+            onClick={fetchPortfolioData} 
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }
@@ -126,7 +143,7 @@ export function PortfolioView({
       <div className="p-6 bg-background rounded-lg border border-border">
         <div className="text-center py-8">
           <h3 className="text-xl font-medium mb-2">No wallet address found</h3>
-          <p className="text-gray-400">
+          <p className="text-muted-foreground">
             We couldn&apos;t find a wallet address for this profile.
           </p>
         </div>
@@ -134,10 +151,7 @@ export function PortfolioView({
     )
   }
 
-  const totalValue = portfolioItems.reduce(
-    (sum, item) => sum + (item.valueUsd || 0),
-    0,
-  )
+  const totalValue = tokens.reduce((sum, token) => sum + (token.valueUsd || 0), 0)
 
   const handleViewNftDetails = (nft: HeliusAsset) => {
     setSelectedNft(nft)
@@ -153,10 +167,19 @@ export function PortfolioView({
     <div className="bg-background rounded-lg border border-border p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">Portfolio</h2>
-        <p className="text-gray-400">
-          Total Value: $
-          {totalValue.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-        </p>
+        <div className="space-y-1">
+          <p className="text-muted-foreground">
+            {tokenType === 'fungible' 
+              ? `${tokens.length} tokens found`
+              : `${nfts.length} NFTs found`
+            }
+          </p>
+          {tokenType === 'fungible' && totalValue > 0 && (
+            <p className="text-lg font-medium text-green-600">
+              Total Value: ${totalValue.toFixed(2)} USD
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="mb-6">
@@ -165,35 +188,37 @@ export function PortfolioView({
             type="button"
             className={`px-5 py-2.5 rounded-md transition-all duration-200 ${
               tokenType === 'fungible'
-                ? 'button-primary shadow-lg'
+                ? 'bg-primary text-primary-foreground shadow-lg'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
             }`}
             onClick={() => setTokenType('fungible')}
           >
-            Tokens
+            Tokens ({tokens.length})
           </button>
           <button
             type="button"
             className={`px-5 py-2.5 rounded-md transition-all duration-200 ${
               tokenType === 'nft'
-                ? 'button-primary shadow-lg'
+                ? 'bg-primary text-primary-foreground shadow-lg'
                 : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
             }`}
             onClick={() => setTokenType('nft')}
           >
-            NFTs
+            NFTs ({nfts.length})
           </button>
         </div>
       </div>
 
       {tokenType === 'fungible' ? (
         <div className="space-y-4">
-          {portfolioItems.length > 0 ? (
-            portfolioItems.map((token) => (
+          {tokens.length > 0 ? (
+            tokens.map((token) => (
               <TokenCard key={token.address} token={token} />
             ))
           ) : (
-            <p>No tokens found.</p>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No tokens found in this wallet.</p>
+            </div>
           )}
         </div>
       ) : (
@@ -207,7 +232,9 @@ export function PortfolioView({
               />
             ))
           ) : (
-            <p>No NFTs found.</p>
+            <div className="text-center py-8 col-span-full">
+              <p className="text-muted-foreground">No NFTs found in this wallet.</p>
+            </div>
           )}
         </div>
       )}
@@ -219,33 +246,50 @@ export function PortfolioView({
   )
 }
 
-function TokenCard({ token }: { token: ITokenPortfolioItem }) {
-  const value = token.valueUsd?.toLocaleString() ?? '0'
+function TokenCard({ token }: { token: TokenHolding }) {
+  const formatBalance = (balance: string, symbol: string) => {
+    const num = parseFloat(balance)
+    if (num >= 1_000_000) {
+      return `${(num / 1_000_000).toFixed(2)}M ${symbol}`
+    }
+    if (num >= 1_000) {
+      return `${(num / 1_000).toFixed(2)}K ${symbol}`
+    }
+    return `${num.toFixed(6)} ${symbol}`
+  }
 
   return (
     <div className="bg-muted p-4 rounded-lg flex items-center space-x-4">
-      <div className="w-12 h-12 rounded-full bg-muted-light flex-shrink-0 relative">
-        {token.logoURI && (
+      <div className="w-12 h-12 rounded-full bg-muted-foreground flex-shrink-0 relative overflow-hidden">
+        {token.logoURI ? (
           <Image
             src={token.logoURI}
             alt={`${token.symbol} logo`}
-            layout="fill"
-            objectFit="cover"
-            className="rounded-full"
+            fill
+            className="object-cover"
             onError={(e) => {
-              e.currentTarget.src = '/placeholder.svg'
+              e.currentTarget.style.display = 'none'
             }}
           />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-xs font-bold">
+            {token.symbol.slice(0, 2)}
+          </div>
         )}
       </div>
-      <div className="flex-1">
-        <h4 className="font-semibold">{token.symbol}</h4>
-        <p className="text-sm text-gray-400">{token.name}</p>
+      <div className="flex-1 min-w-0">
+        <h4 className="font-semibold truncate">{token.symbol}</h4>
+        <p className="text-sm text-muted-foreground truncate">{token.name}</p>
       </div>
       <div className="text-right">
-        <p className="font-semibold">${value}</p>
-        <p className="text-sm text-gray-400">
-          {token.balance.toLocaleString()} {token.symbol}
+        <p className="font-semibold">{formatBalance(token.balance, token.symbol)}</p>
+        {token.valueUsd > 0 && (
+          <p className="text-sm font-medium text-green-600">
+            ${token.valueUsd.toFixed(2)}
+          </p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          {token.address.slice(0, 4)}...{token.address.slice(-4)}
         </p>
       </div>
     </div>
@@ -269,33 +313,35 @@ function NFTCard({ nft, onViewDetails }: NFTCardProps) {
   const imageUrl = getNftImageUrl(nft)
 
   return (
-    <div
-      className="bg-muted rounded-lg overflow-hidden cursor-pointer group"
+    <div 
+      className="bg-muted rounded-lg overflow-hidden cursor-pointer hover:bg-muted/80 transition-colors"
       onClick={onViewDetails}
     >
-      <div className="w-full h-48 bg-muted-light relative">
+      <div className="aspect-square bg-muted-foreground relative">
         <Image
           src={imageUrl}
-          alt={nft.content?.metadata?.name ?? 'NFT Image'}
-          layout="fill"
-          objectFit="cover"
-          className="group-hover:scale-105 transition-transform"
+          alt={nft.content?.metadata?.name ?? 'NFT'}
+          fill
+          className="object-cover"
           onError={(e) => {
             e.currentTarget.src = '/placeholder.svg'
           }}
         />
       </div>
-      <div className="p-4">
-        <h4 className="font-semibold truncate">
+      <div className="p-3">
+        <h4 className="font-semibold text-sm truncate">
           {nft.content?.metadata?.name ?? 'Unnamed NFT'}
         </h4>
+        <p className="text-xs text-muted-foreground truncate">
+          {nft.content?.metadata?.description ?? 'No description'}
+        </p>
       </div>
     </div>
   )
 }
 
 interface NftDetailModalProps {
-  nft: HeliusAsset | null
+  nft: HeliusAsset
   onClose: () => void
 }
 
@@ -306,38 +352,63 @@ function NftDetailModal({ nft, onClose }: NftDetailModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="bg-background rounded-lg max-w-lg w-full p-6 relative">
+      <div className="bg-background rounded-lg max-w-lg w-full p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-400 hover:text-white h-8 w-8 flex items-center justify-center"
+          className="absolute top-2 right-2 text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center text-xl"
           aria-label="Close"
         >
-          &times;
+          ×
         </button>
-        <div className="w-full h-64 bg-muted-light rounded-lg mb-4 relative">
+        <div className="w-full h-64 bg-muted rounded-lg mb-4 relative">
           <Image
             src={imageUrl}
             alt={nft.content?.metadata?.name ?? 'NFT Image'}
-            layout="fill"
-            objectFit="contain"
-            className="rounded-lg"
+            fill
+            className="object-contain rounded-lg"
           />
         </div>
         <h2 className="text-xl font-bold mb-2 break-words">
           {nft.content?.metadata?.name ?? 'Unnamed NFT'}
         </h2>
-        <p className="text-gray-400 mb-4 break-words">
+        <p className="text-muted-foreground mb-4 break-words">
           {nft.content?.metadata?.description ?? 'No description available.'}
         </p>
-        <a
-          href={`https://solscan.io/token/${nft.id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-primary hover:underline break-all"
-        >
-          View on Solscan
-        </a>
+        
+        {/* Attributes */}
+        {nft.content?.metadata?.attributes && nft.content.metadata.attributes.length > 0 && (
+          <div className="mb-4">
+            <h3 className="font-semibold mb-2">Attributes</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {nft.content.metadata.attributes.map((attr, index) => (
+                <div key={index} className="bg-muted p-2 rounded text-sm">
+                  <div className="font-medium">{attr.trait_type}</div>
+                  <div className="text-muted-foreground">{attr.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <div className="flex gap-2">
+          <a
+            href={`https://solscan.io/token/${nft.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 text-center px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+          >
+            View on Solscan
+          </a>
+          <a
+            href={`https://magiceden.io/item-details/${nft.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 text-center px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 transition-colors"
+          >
+            View on Magic Eden
+          </a>
+        </div>
       </div>
     </div>
   )
