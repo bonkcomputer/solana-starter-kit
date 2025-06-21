@@ -139,6 +139,7 @@ export async function GET(request: NextRequest) {
     const priorityTokens: { [key: string]: string } = {
       'So11111111111111111111111111111111111111112': 'SOL', // Wrapped SOL
       'D3CVUkqyXZKgVBdRD7XfuRxQXFKJ86474XyFZrqAbonk': 'BCT', // BCT token
+      'H4phNbsqjV5rqk8u6FUACTLB6rNZRTAPGnBb8KXJpump': 'SSE', // SSE token
     }
     
     // Track which priority tokens we've found
@@ -293,12 +294,14 @@ export async function GET(request: NextRequest) {
         return bPriority - aPriority // Priority tokens first
       }
       
-      // Among priority tokens, SOL first, then BCT
+      // Among priority tokens, SOL first, then BCT, then SSE
       if (aPriority && bPriority) {
         if (a.symbol === 'SOL') return -1
         if (b.symbol === 'SOL') return 1
         if (a.symbol === 'BCT') return -1
         if (b.symbol === 'BCT') return 1
+        if (a.symbol === 'SSE') return -1
+        if (b.symbol === 'SSE') return 1
       }
       
       // Sort by value for non-priority tokens

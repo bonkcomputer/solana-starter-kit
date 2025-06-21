@@ -4,6 +4,7 @@ import type { HeliusAsset } from '@/types/helius'
 import { PublicKey } from '@solana/web3.js'
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
+import { CopyPaste } from '@/components/common/copy-paste'
 
 interface PortfolioViewProps {
   username: string
@@ -258,8 +259,8 @@ function TokenCard({ token }: { token: TokenHolding }) {
     return `${num.toFixed(6)} ${symbol}`
   }
 
-  // Check if this is a priority token (SOL or BCT)
-  const isPriorityToken = token.symbol === 'SOL' || token.symbol === 'BCT'
+  // Check if this is a priority token (SOL, BCT, or SSE)
+  const isPriorityToken = token.symbol === 'SOL' || token.symbol === 'BCT' || token.symbol === 'SSE'
   const isZeroBalance = parseFloat(token.balance) === 0
 
   return (
@@ -324,9 +325,12 @@ function TokenCard({ token }: { token: TokenHolding }) {
             ${token.priceUsd.toFixed(4)} each
           </p>
         )}
-        <p className="text-xs text-muted-foreground">
-          {token.address.slice(0, 4)}...{token.address.slice(-4)}
-        </p>
+        <div className="flex items-center gap-1">
+          <p className="text-xs text-muted-foreground">
+            Contract: {token.address.slice(0, 4)}...{token.address.slice(-4)}
+          </p>
+          <CopyPaste content={token.address} />
+        </div>
       </div>
     </div>
   )
