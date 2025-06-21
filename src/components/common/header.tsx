@@ -36,7 +36,7 @@ export function Header() {
   })
   const { ready, authenticated, logout, user } = usePrivy()
   const { login } = useLogin()
-  const disableLogin = !ready || (ready && authenticated)
+  const disableLogin = !ready
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const dropdownRef = useRef(null)

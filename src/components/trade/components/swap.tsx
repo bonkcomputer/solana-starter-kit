@@ -15,7 +15,7 @@ import {
   formatRawAmount,
   formatUsdValue,
 } from '@/utils/format'
-import { useSolanaWallets } from '@privy-io/react-auth'
+import { useSolanaWallets, useLogin } from '@privy-io/react-auth'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SOL_MINT, BCT_MINT } from '../constants'
@@ -61,6 +61,7 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
   const { replace } = useRouter()
   const { walletAddress } = useCurrentWallet()
   const { ready, wallets } = useSolanaWallets()
+  const { login } = useLogin()
   const wallet = wallets[0]
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -358,6 +359,7 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
             variant={ButtonVariant.OUTLINE}
             size={ButtonSize.LG}
             disabled={loading}
+            onClick={login}
             className="rounded-full w-full"
           >
             Go to Login to swap
