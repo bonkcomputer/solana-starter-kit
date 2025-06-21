@@ -1,11 +1,11 @@
 'use client'
 
-import { useWallets, usePrivy } from '@privy-io/react-auth'
+import { useSolanaWallets, usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 import { useGetProfiles } from './use-get-profiles'
 
 export function useCurrentWallet() {
-  const { wallets } = useWallets()
+  const { wallets } = useSolanaWallets()
   const { ready, authenticated } = usePrivy()
   const [walletAddress, setWalletAddress] = useState('')
   const [loadingMainUsername, setLoadingMainUsername] = useState(true)
@@ -29,39 +29,16 @@ export function useCurrentWallet() {
       return
     }
 
-    // Find Solana wallet - check wallet properties
-    const solanaWallet = wallets.find((wallet: any) => {
-      console.log('Checking wallet:', wallet)
-      
-      // Check for Solana-specific properties and address format
-      const isSolanaAddress = wallet.address && 
-        wallet.address.length >= 32 && 
-        wallet.address.length <= 44 && 
-        !wallet.address.startsWith('0x') &&
-        /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(wallet.address)
-      
-      // Check various possible properties that might indicate Solana
-      const hasSolanaProperty = Object.keys(wallet).some(key => 
-        wallet[key] === 'solana' || 
-        (typeof wallet[key] === 'string' && wallet[key].toLowerCase().includes('solana'))
-      )
-      
-      return isSolanaAddress || hasSolanaProperty
-    })
-
-    if (solanaWallet) {
-      console.log('Found Solana wallet:', solanaWallet.address)
-      setWalletAddress(solanaWallet.address)
+    // useSolanaWallets already filters for Solana wallets only
+    // So we can safely use the first available wallet
+    if (wallets.length > 0) {
+      const primaryWallet = wallets[0]
+      console.log('Found Solana wallet:', primaryWallet.address)
+      setWalletAddress(primaryWallet.address)
     } else {
-      // Check if we have any wallets at all - if yes, try the first one
-      if (wallets.length > 0) {
-        console.log('No clear Solana wallet found, using first available wallet:', wallets[0].address)
-        setWalletAddress(wallets[0].address)
-      } else {
-        console.log('No wallets found')
-        setWalletAddress('')
-        setLoadingMainUsername(false)
-      }
+      console.log('No Solana wallets found')
+      setWalletAddress('')
+      setLoadingMainUsername(false)
     }
   }, [wallets, ready, authenticated])
 

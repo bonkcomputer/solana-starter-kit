@@ -64,7 +64,7 @@ const KNOWN_TOKENS: Record<string, TokenMetadata> = {
   },
   [BCT_MINT]: {
     symbol: 'BCT',
-    logo: '/bctlogo.png',
+    logo: 'https://ipfs.io/ipfs/bafkreigxnxbmmov3vziotzzbcni4oja3qxdnrch6wjx6yqvm5xad2m3kce',
     decimals: 6,
     price: 0.001 // Placeholder price
   },
@@ -232,10 +232,13 @@ export async function GET() {
               const tokenOutMeta = await getTokenMetadata(mint)
               const valueUsd = amountOut * tokenOutMeta.price
 
+              // For BCT/SSE trades, always show the BCT/SSE logo regardless of buy/sell direction
+              const displayLogo = (mint === BCT_MINT || mint === SSE_MINT) ? tokenOutMeta.logo : tokenOutMeta.logo
+
               allTrades.push({
                 tokenIn: tokenInMeta.symbol,
                 tokenOut: tokenOutMeta.symbol,
-                tokenOutLogo: tokenOutMeta.logo,
+                tokenOutLogo: displayLogo,
                 amountOut: amountOut,
                 valueUsd: valueUsd,
                 time: timeAgo(tx.timestamp * 1000),
@@ -265,11 +268,18 @@ export async function GET() {
               const tokenOutMeta = await getTokenMetadata(tokenOutMint)
               const valueUsd = amountIn * tokenInMeta.price
 
+              // For BCT/SSE trades, always show the BCT/SSE logo regardless of buy/sell direction
+              const displayLogo = (mint === BCT_MINT || mint === SSE_MINT) ? tokenInMeta.logo : tokenOutMeta.logo
+
+              // For sell trades, show the amount of the token being sold (input amount)
+              // This ensures BCT->SOL trades show BCT amount, not SOL amount
+              const displayAmount = amountIn
+
               allTrades.push({
                 tokenIn: tokenInMeta.symbol,
                 tokenOut: tokenOutMeta.symbol,
-                tokenOutLogo: tokenOutMeta.logo,
-                amountOut: parseFloat(swapEvent.tokenOutputs.find(o => o.mint === tokenOutMint)?.rawTokenAmount.tokenAmount || '0') / (10 ** (swapEvent.tokenOutputs.find(o => o.mint === tokenOutMint)?.rawTokenAmount.decimals || 6)),
+                tokenOutLogo: displayLogo,
+                amountOut: displayAmount,
                 valueUsd: valueUsd,
                 time: timeAgo(tx.timestamp * 1000),
                 txHash: tx.signature,

@@ -108,9 +108,10 @@ export function CreateProfile({
   }
 
   return (
-    <>
-      <div className="w-full">
-        <h2 className="text-xl mb-3">Create Profile</h2>
+    <div className="w-full max-w-md mx-auto">
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold">Create Profile</h2>
+      </div>
         
         {/* Display wallet address */}
         {walletAddress && (
@@ -138,8 +139,10 @@ export function CreateProfile({
         {response && (
           <Alert type="success" message="Profile created successfully!" />
         )}
-        <div className="bg-foreground h-[1px] w-full my-4" />
-        <div className="flex flex-col space-y-4 items-center w-full">
+        
+        <div className="bg-border h-[1px] w-full my-6" />
+        
+        <div className="space-y-4">
           <div className="w-full">
             {identities &&
             identities.identities &&
@@ -212,21 +215,23 @@ export function CreateProfile({
                 )}
               </div>
             ) : (
-              <p className="text-xs text-center">
+              <div className="text-center py-8">
                 {profilesLoading && (
-                  <>
-                    Getting profiles from Tapestry.. Please wait
-                    <br />
-                  </>
+                  <div className="space-y-2">
+                    <LoadCircle />
+                    <p className="text-sm text-muted-foreground">
+                      Getting profiles from Tapestry.. Please wait
+                    </p>
+                  </div>
                 )}
 
                 {!profilesLoading && (
-                  <>
+                  <p className="text-sm text-muted-foreground">
                     We could not find any profiles on Tapestry.
                     <br /> Create one to get started!
-                  </>
+                  </p>
                 )}
-              </p>
+              </div>
             )}
           </div>
 
@@ -242,6 +247,7 @@ export function CreateProfile({
           >
             {creationLoading ? 'Importing...' : 'Import profile'}
           </Button>
+          
           <Button
             className="w-full text-xs underline justify-center"
             variant="ghost"
@@ -253,7 +259,6 @@ export function CreateProfile({
             Disconnect wallet
           </Button>
         </div>
-      </div>
-    </>
+    </div>
   )
 }

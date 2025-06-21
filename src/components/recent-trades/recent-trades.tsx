@@ -9,8 +9,25 @@ import { Skeleton } from '@/components/ui/skeleton'
 import Link from 'next/link'
 import { formatNumber } from '@/utils/format'
 
+const BCT_LOGO = 'https://ipfs.io/ipfs/bafkreigxnxbmmov3vziotzzbcni4oja3qxdnrch6wjx6yqvm5xad2m3kce'
+const SSE_LOGO = 'https://ipfs.io/ipfs/QmT4fG3jhXv3dcvEVdkvAqi8RjXEmEcLS48PsUA5zSb1RY'
+
 export function RecentTrades() {
   const { trades, isLoading, isError } = useRecentTrades()
+
+  // Helper function to get the correct logo for a trade
+  const getTradeDisplayLogo = (trade: any) => {
+    // For BCT trades, always show BCT logo
+    if (trade.tokenIn === 'BCT' || trade.tokenOut === 'BCT') {
+      return BCT_LOGO
+    }
+    // For SSE trades, always show SSE logo  
+    if (trade.tokenIn === 'SSE' || trade.tokenOut === 'SSE') {
+      return SSE_LOGO
+    }
+    // For other trades, use the original logic
+    return trade.tokenOutLogo
+  }
 
   if (isLoading) {
     return (
@@ -66,12 +83,12 @@ export function RecentTrades() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-6 w-6">
-                    {trade.tokenOutLogo ? (
+                    {getTradeDisplayLogo(trade) ? (
                       <Image
-                        src={trade.tokenOutLogo}
+                        src={getTradeDisplayLogo(trade)}
                         width={24}
                         height={24}
-                        alt={`${trade.tokenOut} logo`}
+                        alt={`${trade.tokenIn === 'BCT' || trade.tokenOut === 'BCT' ? 'BCT' : trade.tokenIn === 'SSE' || trade.tokenOut === 'SSE' ? 'SSE' : trade.tokenOut} logo`}
                         onError={(e) => {
                           // Fallback to first letter if image fails to load
                           const target = e.target as HTMLImageElement
@@ -103,7 +120,7 @@ export function RecentTrades() {
               <div className="flex items-center justify-between text-sm">
                 <span className="text-zinc-400">Amount</span>
                 <span>
-                  {formatNumber(trade.amountOut)} {trade.tokenOut}
+                  {formatNumber(trade.amountOut)} {trade.tokenIn === 'BCT' || trade.tokenIn === 'SSE' ? trade.tokenIn : trade.tokenOut}
                 </span>
               </div>
               <div className="flex items-center justify-between text-sm mt-1">
