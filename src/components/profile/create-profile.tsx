@@ -13,7 +13,7 @@ import { cn } from '@/utils/utils'
 import { usePrivy } from '@privy-io/react-auth'
 import { User } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 interface Props {
   setCreateProfileDialog: (isOpen: boolean) => void
@@ -26,11 +26,13 @@ export function CreateProfile({
   setIsProfileCreated,
   setProfileUsername,
 }: Props) {
-  const { walletAddress, loadingMainUsername } = useCurrentWallet()
-  const { logout } = usePrivy()
+  const { walletAddress, loadingMainUsername, mainUsername } = useCurrentWallet()
+  const { logout, user } = usePrivy()
 
   const [username, setUsername] = useState('')
   const [selectProfile, setSelectProfile] = useState<IProfileList | null>(null)
+  const [checkingExistingProfile, setCheckingExistingProfile] = useState(true)
+  const [existingProfile, setExistingProfile] = useState<any>(null)
 
   const {
     createProfile,
@@ -42,6 +44,90 @@ export function CreateProfile({
   const { data: identities, loading: profilesLoading } = useGetIdentities({
     walletAddress: walletAddress || '',
   })
+
+  // Check if user already has a profile
+  useEffect(() => {
+    const checkExistingProfile = async () => {
+      if (!user?.id) {
+        setCheckingExistingProfile(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/profiles/info?privyDid=${user.id}`)
+        if (response.ok) {
+          const profileData = await response.json()
+          if (profileData && profileData.username) {
+            setExistingProfile(profileData)
+          }
+        }
+      } catch (error) {
+        console.error('Error checking existing profile:', error)
+      } finally {
+        setCheckingExistingProfile(false)
+      }
+    }
+
+    checkExistingProfile()
+  }, [user?.id])
+
+  // If user already has a profile, show redirect message
+  if (checkingExistingProfile) {
+    return (
+      <div className="flex items-center justify-center w-full py-32">
+        <LoadCircle />
+        <p className="ml-2 text-sm text-muted-foreground">Checking existing profile...</p>
+      </div>
+    )
+  }
+
+  if (existingProfile) {
+    return (
+      <div className="w-full max-w-md mx-auto text-center py-8">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold">Profile Already Exists</h2>
+        </div>
+        
+        <div className="mb-6 p-4 bg-muted rounded-lg">
+          <p className="text-sm text-muted-foreground mb-2">You already have a profile:</p>
+          <p className="text-lg font-bold">{existingProfile.username}</p>
+        </div>
+        
+        <div className="space-y-3">
+          <Button
+            className="w-full"
+            onClick={() => {
+              setIsProfileCreated(true)
+              setProfileUsername(existingProfile.username)
+              setCreateProfileDialog(false)
+              window.location.href = `/${existingProfile.username}`
+            }}
+          >
+            Go to My Profile
+          </Button>
+          
+          <Button
+            className="w-full"
+            variant="secondary"
+            onClick={() => setCreateProfileDialog(false)}
+          >
+            Close
+          </Button>
+          
+          <Button
+            className="w-full text-xs underline"
+            variant="ghost"
+            onClick={() => {
+              logout()
+              setCreateProfileDialog(false)
+            }}
+          >
+            Disconnect wallet
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

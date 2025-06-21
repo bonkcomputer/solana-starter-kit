@@ -3,27 +3,38 @@ import { getTapestryProfile } from '@/lib/tapestry'
 import { socialfi } from '@/utils/socialfi'
 import { NextRequest, NextResponse } from 'next/server'
 
-// GET handler for fetching a profile by username
+// GET handler for fetching a profile by username or privyDid
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const username = searchParams.get('username')
+  const privyDid = searchParams.get('privyDid')
 
-  if (!username) {
-    return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+  if (!username && !privyDid) {
+    return NextResponse.json({ error: 'Username or privyDid is required' }, { status: 400 })
   }
 
   try {
     // 1. Check for the user in the local Prisma DB first.
-    const localUser = await prisma.user.findUnique({
-      where: { username },
-    })
+    let localUser = null
+    
+    if (privyDid) {
+      // Query by privyDid
+      localUser = await prisma.user.findUnique({
+        where: { privyDid },
+      })
+    } else if (username) {
+      // Query by username
+      localUser = await prisma.user.findUnique({
+        where: { username },
+      })
+    }
 
     if (localUser) {
       console.log('Found user in local DB:', localUser.username)
       
       // 2. Try to get additional information from Tapestry (social counts, etc.)
       try {
-        const tapestryProfile = await getTapestryProfile({ username })
+        const tapestryProfile = await getTapestryProfile({ username: localUser.username })
         if (tapestryProfile && tapestryProfile.profile && tapestryProfile.socialCounts) {
           // Merge local user data with Tapestry social data
           const enhancedProfile = {
@@ -41,34 +52,36 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(localUser)
     }
     
-    // 3. If not found locally, try to get from Tapestry directly
-    try {
-      const tapestryProfile = await getTapestryProfile({ username })
-      if (tapestryProfile && tapestryProfile.profile) {
-        // Handle different possible Tapestry profile structures
-        let profileData: any = null
-        
-        // Check if profile is an array or object
-        if (Array.isArray(tapestryProfile.profile) && tapestryProfile.profile.length > 0) {
-          profileData = tapestryProfile.profile[0]
-        } else if (tapestryProfile.profile && typeof tapestryProfile.profile === 'object') {
-          profileData = tapestryProfile.profile
+    // 3. If not found locally and we have a username, try to get from Tapestry directly
+    if (username) {
+      try {
+        const tapestryProfile = await getTapestryProfile({ username })
+        if (tapestryProfile && tapestryProfile.profile) {
+          // Handle different possible Tapestry profile structures
+          let profileData: any = null
+          
+          // Check if profile is an array or object
+          if (Array.isArray(tapestryProfile.profile) && tapestryProfile.profile.length > 0) {
+            profileData = tapestryProfile.profile[0]
+          } else if (tapestryProfile.profile && typeof tapestryProfile.profile === 'object') {
+            profileData = tapestryProfile.profile
+          }
+          
+          // Return Tapestry profile data in our expected format
+          const tapestryUser = {
+            username: profileData?.properties?.username || profileData?.username || username,
+            bio: profileData?.properties?.bio || profileData?.bio || null,
+            image: profileData?.properties?.image || profileData?.image || null,
+            solanaWalletAddress: profileData?.properties?.ownerWallet || profileData?.ownerWallet || null,
+            socialCounts: tapestryProfile.socialCounts || { followers: [0], following: [0] },
+            tapestryProfile: tapestryProfile.profile,
+            fromTapestry: true // Flag to indicate this is from Tapestry only
+          }
+          return NextResponse.json(tapestryUser)
         }
-        
-        // Return Tapestry profile data in our expected format
-        const tapestryUser = {
-          username: profileData?.properties?.username || profileData?.username || username,
-          bio: profileData?.properties?.bio || profileData?.bio || null,
-          image: profileData?.properties?.image || profileData?.image || null,
-          solanaWalletAddress: profileData?.properties?.ownerWallet || profileData?.ownerWallet || null,
-          socialCounts: tapestryProfile.socialCounts || { followers: [0], following: [0] },
-          tapestryProfile: tapestryProfile.profile,
-          fromTapestry: true // Flag to indicate this is from Tapestry only
-        }
-        return NextResponse.json(tapestryUser)
+      } catch (tapestryError: any) {
+        console.warn('Failed to fetch from Tapestry:', tapestryError.message)
       }
-    } catch (tapestryError: any) {
-      console.warn('Failed to fetch from Tapestry:', tapestryError.message)
     }
     
     return NextResponse.json({ error: 'User not found' }, { status: 404 })

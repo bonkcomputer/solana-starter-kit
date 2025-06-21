@@ -258,8 +258,16 @@ function TokenCard({ token }: { token: TokenHolding }) {
     return `${num.toFixed(6)} ${symbol}`
   }
 
+  // Check if this is a priority token (SOL or BCT)
+  const isPriorityToken = token.symbol === 'SOL' || token.symbol === 'BCT'
+  const isZeroBalance = parseFloat(token.balance) === 0
+
   return (
-    <div className="bg-muted p-4 rounded-lg flex items-center space-x-4">
+    <div className={`p-4 rounded-lg flex items-center space-x-4 ${
+      isPriorityToken 
+        ? 'bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-200 dark:from-blue-900/20 dark:to-green-900/20 dark:border-blue-700' 
+        : 'bg-muted'
+    }`}>
       <div className="w-12 h-12 rounded-full bg-muted-foreground flex-shrink-0 relative overflow-hidden">
         {token.logoURI ? (
           <Image
@@ -278,14 +286,42 @@ function TokenCard({ token }: { token: TokenHolding }) {
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <h4 className="font-semibold truncate">{token.symbol}</h4>
+        <h4 className={`font-semibold truncate flex items-center ${isPriorityToken ? 'text-blue-700 dark:text-blue-300' : ''}`}>
+          {token.symbol}
+          {isPriorityToken && (
+            <svg 
+              className="ml-2 w-4 h-4 text-yellow-500" 
+              fill="currentColor" 
+              viewBox="0 0 20 20"
+              aria-label="Verified token"
+            >
+              <path 
+                fillRule="evenodd" 
+                d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
+                clipRule="evenodd" 
+              />
+            </svg>
+          )}
+        </h4>
         <p className="text-sm text-muted-foreground truncate">{token.name}</p>
       </div>
       <div className="text-right">
-        <p className="font-semibold">{formatBalance(token.balance, token.symbol)}</p>
+        <p className={`font-semibold ${isZeroBalance && isPriorityToken ? 'text-orange-600 dark:text-orange-400' : ''}`}>
+          {formatBalance(token.balance, token.symbol)}
+          {isZeroBalance && isPriorityToken && (
+            <span className="ml-1 text-xs text-orange-500">
+              (Empty)
+            </span>
+          )}
+        </p>
         {token.valueUsd > 0 && (
           <p className="text-sm font-medium text-green-600">
             ${token.valueUsd.toFixed(2)}
+          </p>
+        )}
+        {token.priceUsd > 0 && (
+          <p className="text-xs text-muted-foreground">
+            ${token.priceUsd.toFixed(4)} each
           </p>
         )}
         <p className="text-xs text-muted-foreground">

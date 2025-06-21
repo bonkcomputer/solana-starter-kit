@@ -1,4 +1,4 @@
-# Profile System & Authentication Implementation
+# Profile System & Authentication Implementation update
 
 ## Overview
 Implementation of user authentication, profile management, social features, real-time portfolio tracking, and trading integration using Privy for authentication, Tapestry for social graph functionality, Jupiter for trading/pricing, and Prisma as backup storage.

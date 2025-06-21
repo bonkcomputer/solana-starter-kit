@@ -64,6 +64,27 @@ export const useCreateProfile = () => {
       console.log('Profile creation response:', { status: res.status, data });
 
       if (!res.ok) {
+        // Handle specific error cases
+        if (res.status === 409 && data.error === "User with this privyDid already exists") {
+          // User already has a profile, check what it is
+          try {
+            const existingProfileRes = await fetch(`/api/profiles/info?privyDid=${user.id}`);
+            if (existingProfileRes.ok) {
+              const existingProfile = await existingProfileRes.json();
+              setError(`You already have a profile: ${existingProfile.username}. Redirecting...`);
+              // Redirect to existing profile after a short delay
+              setTimeout(() => {
+                window.location.href = `/${existingProfile.username}`;
+              }, 2000);
+              return;
+            }
+          } catch (checkError) {
+            console.error('Error checking existing profile:', checkError);
+          }
+          setError("You already have a profile. Please check your account.");
+          return;
+        }
+        
         throw new Error(data.error || 'Failed to create profile');
       }
 
