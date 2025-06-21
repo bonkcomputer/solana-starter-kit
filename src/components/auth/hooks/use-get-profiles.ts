@@ -12,7 +12,7 @@ export function useGetProfiles({
 }: Props) {
   const [profiles, setProfiles] = useState<IProfileList[]>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     // If no wallet address, immediately set loading to false

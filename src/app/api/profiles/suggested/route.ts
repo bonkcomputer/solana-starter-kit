@@ -1,5 +1,5 @@
 // app/api/profiles/suggestedProfiles/route.ts
-import { socialfi } from '@/utils/socialfi'
+import { getSuggestedProfiles } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -14,11 +14,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const response = await socialfi.profiles.suggestedDetail({
-      apiKey: process.env.TAPESTRY_API_KEY || '',
-      identifier: walletAddress,
-    })
-
+    const response = await getSuggestedProfiles({ walletAddress })
     return NextResponse.json(response)
   } catch (error: any) {
     console.error('Error fetching suggested profiles:', error)

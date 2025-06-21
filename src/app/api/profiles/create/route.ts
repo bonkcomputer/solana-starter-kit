@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { socialfi } from "@/utils/socialfi";
+import { createTapestryProfile } from "@/lib/tapestry";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,6 +10,7 @@ export async function POST(req: NextRequest) {
     embeddedWalletAddress,
     solanaWalletAddress,
     privyDid,
+    execution = 'FAST_UNCONFIRMED' // Default to fastest execution
   } = await req.json();
 
   if (!privyDid || !username || !solanaWalletAddress) {
@@ -20,19 +21,14 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // 1. Create profile on Tapestry
-    const tapestryProfile = await socialfi.profiles.findOrCreateCreate(
-      {
-        apiKey: process.env.TAPESTRY_API_KEY || "",
-      },
-      {
-        walletAddress: solanaWalletAddress,
-        username,
-        bio,
-        image,
-        blockchain: "SOLANA",
-      }
-    );
+    // 1. Create profile on Tapestry with enhanced function
+    const tapestryProfile = await createTapestryProfile({
+      walletAddress: solanaWalletAddress,
+      username,
+      bio,
+      image,
+      execution
+    });
 
     if (!tapestryProfile) {
       throw new Error("Failed to create profile on Tapestry.");
@@ -50,7 +46,11 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    return NextResponse.json({ tapestryProfile, prismaUser: newUser }, { status: 201 });
+    return NextResponse.json({ 
+      tapestryProfile, 
+      prismaUser: newUser,
+      execution: execution // Return the execution method used
+    }, { status: 201 });
   } catch (error: any) {
     console.error("Error creating profile:", error);
 

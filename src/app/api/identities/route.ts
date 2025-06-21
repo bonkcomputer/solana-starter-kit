@@ -1,4 +1,4 @@
-import { socialfi } from '@/utils/socialfi'
+import { getTapestryIdentity } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -21,11 +21,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const response = await socialfi.identities.identitiesDetail({
-      id: walletAddress,
-      apiKey: process.env.TAPESTRY_API_KEY,
-    })
-
+    const response = await getTapestryIdentity({ walletAddress })
     console.log('Identities API response:', response)
     return NextResponse.json(response)
   } catch (error: any) {

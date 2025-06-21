@@ -1,10 +1,13 @@
-import { socialfi } from '@/utils/socialfi'
+import { prisma } from '@/lib/prisma'
+import { getFollowState } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const startId = searchParams.get('startId')
-  const endId = searchParams.get('endId')
+  const startId = searchParams.get('startId') // followerPrivyDid
+  const endId = searchParams.get('endId')     // followeePrivyDid
+  const followerUsername = searchParams.get('followerUsername')
+  const followeeUsername = searchParams.get('followeeUsername')
 
   if (!startId || !endId) {
     return NextResponse.json(
@@ -14,13 +17,41 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const response = await socialfi.followers.stateList({
-      apiKey: process.env.TAPESTRY_API_KEY || '',
-      startId,
-      endId,
+    // 1. Check local Prisma database first (faster)
+    const localFollowRelationship = await prisma.follow.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: startId,
+          followingId: endId,
+        },
+      },
     })
 
-    return NextResponse.json(response)
+    const isFollowingLocally = !!localFollowRelationship
+
+    // 2. Also check Tapestry if usernames are provided (for verification)
+    let tapestryFollowState = null
+    if (followerUsername && followeeUsername) {
+      try {
+        tapestryFollowState = await getFollowState({
+          followerUsername,
+          followeeUsername,
+        })
+      } catch (tapestryError: any) {
+        console.warn('Tapestry follow state check failed:', tapestryError.message)
+      }
+    }
+
+    // Return combined state information
+    return NextResponse.json({
+      isFollowing: isFollowingLocally,
+      localState: isFollowingLocally,
+      tapestryState: tapestryFollowState,
+      dataSource: {
+        local: true,
+        tapestry: !!tapestryFollowState
+      }
+    })
   } catch (error: any) {
     console.error('Error verifying follow state:', error)
     return NextResponse.json(

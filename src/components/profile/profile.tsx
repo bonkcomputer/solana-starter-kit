@@ -7,23 +7,67 @@ import { useGetProfileInfo } from '@/components/profile/hooks/use-get-profile-in
 import { User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
 interface Props {
   username: string
 }
 
+interface EnhancedProfile {
+  username: string
+  bio?: string
+  image?: string
+  solanaWalletAddress?: string
+  socialCounts?: {
+    followers: number
+    following: number
+  }
+  dataSource?: {
+    local: boolean
+    tapestry: boolean
+    socialData: boolean
+  }
+}
+
 export function Profile({ username }: Props) {
   const { profile } = useGetProfileInfo(username);
+  const [enhancedProfile, setEnhancedProfile] = useState<EnhancedProfile | null>(null)
+  const [loadingEnhanced, setLoadingEnhanced] = useState(false)
+
+  // Fetch enhanced profile data with social counts
+  useEffect(() => {
+    const fetchEnhancedProfile = async () => {
+      if (!username) return
+      
+      setLoadingEnhanced(true)
+      try {
+        const response = await fetch(`/api/profiles/enhanced?username=${username}`)
+        if (response.ok) {
+          const data = await response.json()
+          setEnhancedProfile(data)
+        }
+      } catch (error) {
+        console.warn('Failed to fetch enhanced profile data:', error)
+      } finally {
+        setLoadingEnhanced(false)
+      }
+    }
+
+    fetchEnhancedProfile()
+  }, [username])
+
+  // Use enhanced profile data if available, otherwise fall back to basic profile
+  const displayProfile = enhancedProfile || profile
 
   return (
     <Card>
       <div className="flex justify-between items-center">
         <div className="flex flex-col justify-center space-y-2 w-full h-full">
           <div className="flex items-end space-x-4">
-            {profile?.image ? (
+            {displayProfile?.image ? (
               <div>
                 <Image
-                  src={profile.image}
+                  src={displayProfile.image}
                   width={40}
                   height={40}
                   alt="avatar"
@@ -42,17 +86,38 @@ export function Profile({ username }: Props) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <p className="text-sm text-gray">{profile?.solanaWalletAddress}</p>
-            {profile?.solanaWalletAddress && <CopyPaste content={profile.solanaWalletAddress} />}
+            <p className="text-sm text-gray">{displayProfile?.solanaWalletAddress}</p>
+            {displayProfile?.solanaWalletAddress && <CopyPaste content={displayProfile.solanaWalletAddress} />}
           </div>
-          {/* Follower counts are not yet in the new IUser model, so this is commented out. */}
-          {/* <p>
-            {profile?.socialCounts.followers} followers |{' '}
-            {profile?.socialCounts.following} following
-          </p> */}
+
+          {/* Enhanced Social Counts */}
+          {enhancedProfile?.socialCounts && (
+            <div className="flex items-center space-x-4 text-sm text-gray">
+              <span>
+                <strong>{enhancedProfile.socialCounts.followers}</strong> followers
+              </span>
+              <span>
+                <strong>{enhancedProfile.socialCounts.following}</strong> following
+              </span>
+              {enhancedProfile.dataSource?.tapestry && (
+                <span className="text-xs text-green-500">• Tapestry</span>
+              )}
+            </div>
+          )}
+
           <div className="mt-4">
-            <p className="text-gray">{profile?.bio}</p>
+            <p className="text-gray">{displayProfile?.bio}</p>
           </div>
+
+          {/* Data source indicator for debugging */}
+          {enhancedProfile?.dataSource && (
+            <div className="text-xs text-muted-foreground">
+              Data: {enhancedProfile.dataSource.local && 'Local'} 
+              {enhancedProfile.dataSource.local && enhancedProfile.dataSource.tapestry && ' + '}
+              {enhancedProfile.dataSource.tapestry && 'Tapestry'}
+              {loadingEnhanced && ' (Loading...)'}
+            </div>
+          )}
         </div>
         <FollowButton username={username} />
       </div>

@@ -43,6 +43,9 @@ export function Header() {
   const router = useRouter()
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
 
+  // Determine if we should show create profile based on authentication and loading states
+  const showCreateProfile = ready && authenticated && walletAddress && (!loadingMainUsername || loadingTimeout) && (!profilesLoading || loadingTimeout) && !mainUsername
+
   // Debug logging
   useEffect(() => {
     console.log('Header state:', {
@@ -136,9 +139,6 @@ export function Header() {
       window.location.reload()
     }, 1000)
   }
-
-  // Determine if we should show create profile based on authentication and loading states
-  const showCreateProfile = ready && authenticated && walletAddress && (!loadingMainUsername || loadingTimeout) && (!profilesLoading || loadingTimeout) && !mainUsername
 
   // Determine loading message
   const getLoadingMessage = () => {

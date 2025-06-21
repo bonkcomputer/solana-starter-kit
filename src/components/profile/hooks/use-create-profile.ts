@@ -4,7 +4,7 @@ import { useState } from 'react';
 export const useCreateProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [response, setResponse] = useState(null);
+  const [response, setResponse] = useState<any>(null);
   const { user } = usePrivy();
 
   interface Props {

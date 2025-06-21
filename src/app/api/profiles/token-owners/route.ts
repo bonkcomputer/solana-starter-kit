@@ -1,4 +1,4 @@
-import { socialfi } from '@/utils/socialfi'
+import { getTokenOwners } from '@/lib/tapestry'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
@@ -13,11 +13,7 @@ export async function GET(req: Request) {
   }
 
   try {
-    const response = await socialfi.profiles.tokenOwnersDetail({
-      apiKey: process.env.TAPESTRY_API_KEY || '',
-      tokenAddress,
-    })
-
+    const response = await getTokenOwners({ tokenAddress })
     return NextResponse.json(response)
   } catch (error: any) {
     console.error('Error fetching profile token details:', error)

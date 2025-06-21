@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { socialfi } from '@/utils/socialfi';
+import { createTapestryProfile, getTapestryIdentity } from '@/lib/tapestry';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(req: NextRequest) {
@@ -16,18 +16,13 @@ export async function POST(req: NextRequest) {
     // Try to create profile on Tapestry first, but don't fail if it doesn't work
     let tapestryProfile = null;
     try {
-      tapestryProfile = await socialfi.profiles.findOrCreateCreate(
-        {
-          apiKey: process.env.TAPESTRY_API_KEY || '',
-        },
-        {
-          walletAddress: solanaWalletAddress,
-          username,
-          bio,
-          image,
-          blockchain: 'SOLANA',
-        },
-      );
+      tapestryProfile = await createTapestryProfile({
+        walletAddress: solanaWalletAddress,
+        username,
+        bio,
+        image,
+        execution: 'FAST_UNCONFIRMED'
+      });
     } catch (tapestryError: any) {
       console.warn('Tapestry profile creation failed, continuing with local creation:', tapestryError.message);
     }
@@ -109,15 +104,12 @@ export async function GET(req: NextRequest) {
     console.log('Found profiles in local DB:', profiles.length);
 
     if (profiles.length === 0) {
-      // Try to fetch from Tapestry as backup, but don't fail if it doesn't work
+      // Try to fetch from Tapestry as backup using enhanced function
       try {
         if (process.env.TAPESTRY_API_KEY) {
-          const tapestryResponse = await socialfi.identities.identitiesDetail({
-            id: walletAddress,
-            apiKey: process.env.TAPESTRY_API_KEY,
-          });
+          const tapestryResponse = await getTapestryIdentity({ walletAddress });
           
-          if (tapestryResponse?.identities?.length > 0) {
+          if (tapestryResponse?.identities && Array.isArray(tapestryResponse.identities) && tapestryResponse.identities.length > 0) {
             console.log('Found profiles in Tapestry:', tapestryResponse.identities.length);
             // Return Tapestry profiles in expected format
             const formattedTapestryProfiles = tapestryResponse.identities.map((identity: any) => ({

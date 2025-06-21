@@ -1,35 +1,54 @@
-import { socialfi } from '@/utils/socialfi'
+import { prisma } from '@/lib/prisma'
+import { followUser } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface FollowRequestBody {
-  followerUser: { username: string }
-  followeeUser: { username: string }
+  followerPrivyDid: string
+  followeePrivyDid: string
+  followerUsername: string
+  followeeUsername: string
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { followerUser, followeeUser }: FollowRequestBody = await req.json()
+    const { 
+      followerPrivyDid, 
+      followeePrivyDid, 
+      followerUsername, 
+      followeeUsername 
+    }: FollowRequestBody = await req.json()
 
-    if (!followerUser || !followeeUser) {
+    if (!followerPrivyDid || !followeePrivyDid || !followerUsername || !followeeUsername) {
       return NextResponse.json(
-        { error: 'followerUser and followeeUser are required' },
+        { error: 'Follower and followee information is required' },
         { status: 400 },
       )
     }
 
-    const response = await socialfi.followers.postFollowers(
-      {
-        apiKey: process.env.TAPESTRY_API_KEY || '',
-      },
-      {
-        startId: followerUser.username,
-        endId: followeeUser.username,
-      },
-    )
+    // 1. Follow on Tapestry first
+    try {
+      await followUser({
+        followerUsername,
+        followeeUsername,
+      })
+    } catch (tapestryError: any) {
+      console.warn('Tapestry follow failed, continuing with local creation:', tapestryError.message)
+    }
 
-    return NextResponse.json(response)
+    // 2. Create the follow relationship in the local Prisma database
+    const followRelationship = await prisma.follow.create({
+      data: {
+        followerId: followerPrivyDid,
+        followingId: followeePrivyDid,
+      },
+    })
+
+    return NextResponse.json(followRelationship)
   } catch (error: any) {
     console.error('Error processing follow request:', error)
+    if (error.code === 'P2002') { // Unique constraint violation - already following
+      return NextResponse.json({ error: 'Already following' }, { status: 409 })
+    }
     return NextResponse.json(
       { error: error.message || 'Internal Server Error' },
       { status: 500 },

@@ -1,19 +1,17 @@
 import { prisma } from '@/lib/prisma'
-import { socialfi } from '@/utils/socialfi'
+import { createTapestryComment } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
-// GET handler for fetching comments
-export async function GET(req: NextRequest) {
-  const { searchParams } = new URL(req.url)
-  // We'll fetch comments based on the profile's privyDid
+// GET handler for fetching comments for a specific profile
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
   const profileId = searchParams.get('profileId')
 
   if (!profileId) {
-    return NextResponse.json({ error: 'profileId is required' }, { status: 400 })
+    return NextResponse.json({ error: 'Profile ID is required' }, { status: 400 })
   }
 
   try {
-    // Fetch comments from the local Prisma database, including author and like information
     const comments = await prisma.comment.findMany({
       where: { profileId },
       include: {
@@ -23,17 +21,15 @@ export async function GET(req: NextRequest) {
             image: true,
           },
         },
-        likes: true, // Include likes for each comment
+        likes: true,
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
+      orderBy: { createdAt: 'desc' },
     })
 
     return NextResponse.json(comments)
   } catch (error) {
     console.error('[GET Comments Error]:', error)
-    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch comments'
     return NextResponse.json({ error: errorMessage }, { status: 500 })
   }
 }
@@ -47,32 +43,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    // 1. Write to Tapestry first
-    const tapestryComment = await socialfi.comments.commentsCreate(
-      { apiKey: process.env.TAPESTRY_API_KEY || '' },
-      {
-        profileId: authorUsername, // Tapestry uses usernames
-        targetProfileId: profileUsername,
-        text,
-      },
-    )
+    let tapestryId = null
 
-    // The Tapestry SDK's response structure might be different.
-    // Assuming the created comment object is available at `tapestryComment.comment`
-    const tapestryId = (tapestryComment as any)?.comment?.id;
-    if (!tapestryId) {
-        // Or handle this more gracefully, maybe by not creating the local comment
-        // if the Tapestry one fails in a way that doesn't throw an error.
-        throw new Error('Could not get comment ID from Tapestry response.');
+    // 1. Try to write to Tapestry first using enhanced function
+    try {
+      const tapestryComment = await createTapestryComment({
+        authorUsername,
+        targetUsername: profileUsername,
+        text,
+      })
+
+      // The Tapestry SDK's response structure might be different.
+      // Assuming the created comment object is available at `tapestryComment.comment`
+      tapestryId = (tapestryComment as any)?.comment?.id;
+      if (!tapestryId) {
+        console.warn('Could not get comment ID from Tapestry response, continuing with local creation');
+      }
+    } catch (tapestryError: any) {
+      console.warn('Tapestry comment creation failed, continuing with local creation:', tapestryError.message)
     }
 
-    // 2. Write to our local Prisma database
+    // 2. Write to our local Prisma database (always do this)
     const newComment = await prisma.comment.create({
       data: {
         text,
         authorId, // The author's privyDid
         profileId, // The privyDid of the profile being commented on
-        tapestryCommentId: tapestryId,
+        tapestryCommentId: tapestryId, // Will be null if Tapestry failed
       },
     })
 
