@@ -25,28 +25,41 @@ export function RecentTrades() {
   if (isError) {
     return (
       <div className="text-center text-red-500">
-        Failed to load recent trades. Please ensure your NEXT_PUBLIC_HELIUS_API_KEY is
-        set correctly.
+        <p>Failed to load recent trades.</p>
+        <p className="text-sm text-zinc-400 mt-2">
+          This could be due to API configuration. Showing fallback data below.
+        </p>
       </div>
     )
   }
 
-  if (!isLoading && trades?.length === 0) {
+  if (!isLoading && (!trades || trades.length === 0)) {
     return (
       <div className="text-center text-zinc-400 py-8">
-        No recent trades found for BCT or SSE.
+        <p>No recent trades found for BCT or SSE.</p>
+        <p className="text-sm mt-2">Live trades will appear here when available.</p>
       </div>
     )
   }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {trades?.map((trade) => (
+      {trades?.map((trade, index) => (
         <Link
-          href={`https://solscan.io/tx/${trade.txHash}`}
-          key={trade.txHash}
-          target="_blank"
+          href={trade.txHash.startsWith('mock_') || trade.txHash.startsWith('fallback_') 
+            ? '#' 
+            : `https://solscan.io/tx/${trade.txHash}`
+          }
+          key={`${trade.txHash}-${index}`}
+          target={trade.txHash.startsWith('mock_') || trade.txHash.startsWith('fallback_') 
+            ? '_self' 
+            : '_blank'
+          }
           rel="noopener noreferrer"
+          className={trade.txHash.startsWith('mock_') || trade.txHash.startsWith('fallback_') 
+            ? 'cursor-default' 
+            : 'cursor-pointer'
+          }
         >
           <Card className="bg-background border-border hover:border-primary transition-colors">
             <CardContent className="p-4">
@@ -59,6 +72,11 @@ export function RecentTrades() {
                         width={24}
                         height={24}
                         alt={`${trade.tokenOut} logo`}
+                        onError={(e) => {
+                          // Fallback to first letter if image fails to load
+                          const target = e.target as HTMLImageElement
+                          target.style.display = 'none'
+                        }}
                       />
                     ) : (
                       <AvatarFallback>
@@ -69,6 +87,11 @@ export function RecentTrades() {
                   <span className="font-medium">
                     {trade.tokenIn} → {trade.tokenOut}
                   </span>
+                  {(trade.txHash.startsWith('mock_') || trade.txHash.startsWith('fallback_')) && (
+                    <Badge variant="outline" className="text-xs bg-yellow-950/20 text-yellow-500 border-yellow-800">
+                      Demo
+                    </Badge>
+                  )}
                 </div>
                 <Badge
                   variant="outline"
