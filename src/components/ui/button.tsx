@@ -143,7 +143,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       href: _href,
       centered: _centered,
       ...domProps
-    } = props
+    } = props as ButtonProps
 
     return (
       <Comp
