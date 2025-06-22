@@ -9,9 +9,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { CopyPaste } from '@/components/common/copy-paste'
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { USDC_MINT } from '../constants'
+import { USDC_MINT, BCT_MINT } from '../constants'
 
 interface TokenChartWidgetProps {
   tokenAddress: string
@@ -97,6 +98,15 @@ export default function TokenChartWidget({
           <span className="text-zinc-400">{name}</span>
           <span className="text-zinc-400">Market Cap: ${marketCap}</span>
         </CardDescription>
+        {outputTokenAddress === BCT_MINT && (
+          <div className="flex items-center justify-center gap-2 mt-2 p-2 bg-muted/50 rounded-md">
+            <span className="text-xs text-muted-foreground">Contract Address:</span>
+            <span className="text-xs font-mono text-foreground">
+              {BCT_MINT.slice(0, 6)}...{BCT_MINT.slice(-6)}
+            </span>
+            <CopyPaste content={BCT_MINT} />
+          </div>
+        )}
       </CardHeader>
       <CardContent className="flex-grow">
         <Tabs defaultValue={defaultTab} className="w-full h-full">

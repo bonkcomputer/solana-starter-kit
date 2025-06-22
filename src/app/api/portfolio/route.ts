@@ -183,7 +183,7 @@ export async function GET(request: NextRequest) {
 
       tokenAssets.push({
         address: 'So11111111111111111111111111111111111111112',
-        name: 'Solana',
+                  name: 'SOL',
         symbol: 'SOL',
         decimals: 9,
         balance: solBalance.toString(),

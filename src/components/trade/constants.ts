@@ -40,7 +40,7 @@ export const DEFAULT_TOKENS: ITokenSearchResult[] = [
     volume_24h_usd: 76544935.249657,
   },
   {
-    name: 'Wrapped SOL',
+    name: 'SOL',
     symbol: 'SOL',
     address: 'So11111111111111111111111111111111111111112',
     decimals: 9,

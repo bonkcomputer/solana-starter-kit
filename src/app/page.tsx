@@ -42,7 +42,17 @@ export default function Page() {
               width={32}
               height={32}
             />
-            <span className="font-bold">BCT Trading Computer</span>
+            <span className="text-sm">
+              Social Features by{' '}
+              <Link
+                href="https://www.usetapestry.dev/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-yellow-500 hover:text-yellow-400 transition-colors"
+              >
+                Tapestry
+              </Link>
+            </span>
           </div>
           <nav className="flex items-center gap-6">
             <Link

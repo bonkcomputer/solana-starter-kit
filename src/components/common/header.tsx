@@ -54,6 +54,9 @@ export function Header() {
   })
   const rewardsButtonRef = useRef<HTMLDivElement>(null)
   const rewardsIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [showHomeTooltip, setShowHomeTooltip] = useState(false)
+  const [showSwapTooltip, setShowSwapTooltip] = useState(false)
+  const [showComputerTooltip, setShowComputerTooltip] = useState(false)
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
@@ -241,18 +244,40 @@ export function Header() {
           {/* All Buttons Group - Center */}
           <div className="flex items-center space-x-3">
             {/* Navigation Links */}
-            <Link
-              className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
-              href="/"
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowHomeTooltip(true)}
+              onMouseLeave={() => setShowHomeTooltip(false)}
             >
-              <Home className="h-3.5 w-3.5" />
-            </Link>
-            <Link
-              className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
-              href="/trade"
+              <Link
+                className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
+                href="/"
+              >
+                <Home className="h-3.5 w-3.5" />
+              </Link>
+              {showHomeTooltip && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded px-3 py-1.5 shadow-xl whitespace-nowrap z-50">
+                  <p className="text-xs text-muted-foreground">Home</p>
+                </div>
+              )}
+            </div>
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowSwapTooltip(true)}
+              onMouseLeave={() => setShowSwapTooltip(false)}
             >
-              <Coins className="h-3.5 w-3.5" />
-            </Link>
+              <Link
+                className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
+                href="/trade"
+              >
+                <Coins className="h-3.5 w-3.5" />
+              </Link>
+              {showSwapTooltip && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded px-3 py-1.5 shadow-xl whitespace-nowrap z-50">
+                  <p className="text-xs text-muted-foreground">Click to Swap</p>
+                </div>
+              )}
+            </div>
 
             {/* Rewards Button */}
             <div 
@@ -272,10 +297,10 @@ export function Header() {
               {showRewardsModal && (
                 <div className="absolute top-full mt-2 right-0 bg-background/95 backdrop-blur border border-border rounded-lg p-4 shadow-xl min-w-[220px] z-50">
                   <div className="text-center">
-                    <p className="text-xs text-muted-foreground mb-2">$BCTr Rewards Program</p>
+                    <p className="text-xs text-muted-foreground mb-2">Points System</p>
                     <div className="mb-3">
                       <div className="text-2xl font-mono font-bold text-foreground">{rewardsNumbers.amount}</div>
-                      <div className="text-sm text-muted-foreground">$BCTr</div>
+                      <div className="text-sm text-muted-foreground">Staking Rewards</div>
                       <div className="text-lg font-mono font-bold text-green-600 mt-1">{rewardsNumbers.value}</div>
                     </div>
                     <div className="flex items-center justify-center space-x-2">
@@ -294,24 +319,35 @@ export function Header() {
             </div>
 
             {/* Computer On/Off Button */}
-            <Button
-              onClick={handleComputerClick}
-              variant="default"
-              className={`
-                ${isComputerOn 
-                  ? 'bg-black border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400/10 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
-                  : 'bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10'
-                } 
-                ${computerGlow ? 'shadow-[0_0_30px_10px_rgba(250,204,21,0.8)] scale-105' : ''}
-                transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider relative overflow-hidden
-              `}
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowComputerTooltip(true)}
+              onMouseLeave={() => setShowComputerTooltip(false)}
             >
-              <Power className={`h-3.5 w-3.5 transition-all duration-300 ${isComputerOn ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : ''}`} />
-              <span>{isComputerOn ? 'ON' : 'OFF'}</span>
-              {isComputerOn && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent animate-pulse pointer-events-none" />
+              <Button
+                onClick={handleComputerClick}
+                variant="default"
+                className={`
+                  ${isComputerOn 
+                    ? 'bg-black border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400/10 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
+                    : 'bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10'
+                  } 
+                  ${computerGlow ? 'shadow-[0_0_30px_10px_rgba(250,204,21,0.8)] scale-105' : ''}
+                  transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider relative overflow-hidden
+                `}
+              >
+                <Power className={`h-3.5 w-3.5 transition-all duration-300 ${isComputerOn ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : ''}`} />
+                <span>{isComputerOn ? 'ON' : 'OFF'}</span>
+                {isComputerOn && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent animate-pulse pointer-events-none" />
+                )}
+              </Button>
+              {showComputerTooltip && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded px-3 py-1.5 shadow-xl whitespace-nowrap z-50">
+                  <p className="text-xs text-muted-foreground">Click to turn your Computer VM on</p>
+                </div>
               )}
-            </Button>
+            </div>
 
             {/* Stake Button with Countdown Modal */}
             <div 

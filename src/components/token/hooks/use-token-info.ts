@@ -71,6 +71,12 @@ export function useTokenInfo(id: string) {
   if (tokenInfo?.result) {
     const content = tokenInfo.result.content
     name = content?.metadata?.name || 'Unknown Token'
+    
+    // Override "Wrapped SOL" to just "SOL"
+    if (id === 'So11111111111111111111111111111111111111112' || name === 'Wrapped SOL') {
+      name = 'SOL'
+    }
+    
     imageUrl = content?.links?.image || content?.files?.[0]?.uri || ''
 
     if ('token_info' in tokenInfo.result) {
