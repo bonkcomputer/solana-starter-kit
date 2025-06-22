@@ -12,6 +12,9 @@ import {
   LogOut,
   User,
   Zap,
+  Power,
+  Gift,
+  Twitter,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -42,9 +45,26 @@ export function Header() {
   })
   const stakeButtonRef = useRef<HTMLDivElement>(null)
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [isComputerOn, setIsComputerOn] = useState(false)
+  const [computerGlow, setComputerGlow] = useState(false)
+  const [showRewardsModal, setShowRewardsModal] = useState(false)
+  const [rewardsNumbers, setRewardsNumbers] = useState({
+    amount: '0.00',
+    value: '0.00'
+  })
+  const rewardsButtonRef = useRef<HTMLDivElement>(null)
+  const rewardsIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
+  }, [])
+
+  // Load Computer button state from localStorage
+  useEffect(() => {
+    const savedComputerState = localStorage.getItem('bct-computer-on')
+    if (savedComputerState === 'true') {
+      setIsComputerOn(true)
+    }
   }, [])
 
   const handleCopy = (address: string) => {
@@ -151,43 +171,148 @@ export function Header() {
     }
   }, [showStakeModal])
 
+  const handleComputerClick = () => {
+    // Toggle the on/off state
+    const newState = !isComputerOn
+    setIsComputerOn(newState)
+    // Save to localStorage
+    localStorage.setItem('bct-computer-on', newState.toString())
+    // Trigger glow effect
+    setComputerGlow(true)
+    setTimeout(() => setComputerGlow(false), 600)
+    // Open BCT Computer App in new tab only when turning ON
+    if (newState === true) {
+      window.open('https://bonk.computer', '_blank')
+    }
+  }
+
+  // Animated rewards counter effect
+  useEffect(() => {
+    if (showRewardsModal) {
+      // Start the animated rewards counter
+      rewardsIntervalRef.current = setInterval(() => {
+        setRewardsNumbers({
+          amount: (Math.random() * 999999.99).toFixed(2),
+          value: `$${(Math.random() * 9999.99).toFixed(2)}`
+        })
+      }, 100) // Update every 100ms for fast animation
+    } else {
+      // Clear interval when modal is hidden
+      if (rewardsIntervalRef.current) {
+        clearInterval(rewardsIntervalRef.current)
+        rewardsIntervalRef.current = null
+      }
+    }
+
+    return () => {
+      if (rewardsIntervalRef.current) {
+        clearInterval(rewardsIntervalRef.current)
+      }
+    }
+  }, [showRewardsModal])
+
+  const handleTwitterClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // Prevent modal from closing
+    window.open('https://x.com/bonkcomputer', '_blank')
+  }
+
   return (
     <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center">
-        <div className="mr-4 hidden md:flex">
-          <Link className="mr-6 flex items-center space-x-2" href="/">
-            <div className="flex items-center space-x-2" onClick={handleLogoClick}>
-              <Image
-                src={bctLogo}
-                alt="BCT Logo"
-                width={32}
-                height={32}
-                className="cursor-pointer"
-              />
-              <span className="hidden font-bold sm:inline-block">
-                BCT Computer
-              </span>
-            </div>
-          </Link>
-        </div>
+      <div className="container flex h-14 items-center px-8">
+        <div className="flex items-center justify-between w-full">
+          {/* Logo - Left aligned */}
+          <div className="flex items-center">
+            <Link className="flex items-center space-x-2" href="/">
+              <div className="flex items-center space-x-2" onClick={handleLogoClick}>
+                <Image
+                  src={bctLogo}
+                  alt="BCT Logo"
+                  width={32}
+                  height={32}
+                  className="cursor-pointer"
+                />
+                <span className="hidden font-mono text-yellow-500 uppercase tracking-wider sm:inline-block">
+                  BCT Community Center
+                </span>
+              </div>
+            </Link>
+          </div>
 
-        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-          <nav className="flex items-center space-x-6 text-sm font-medium">
+          {/* All Buttons Group - Center */}
+          <div className="flex items-center space-x-3">
+            {/* Navigation Links */}
             <Link
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
               href="/"
             >
-              <Home className="h-4 w-4" />
+              <Home className="h-3.5 w-3.5" />
             </Link>
             <Link
-              className="transition-colors hover:text-foreground/80 text-foreground/60"
+              className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
               href="/trade"
             >
-              <Coins className="h-4 w-4" />
+              <Coins className="h-3.5 w-3.5" />
             </Link>
-          </nav>
 
-          <div className="flex items-center space-x-4">
+            {/* Rewards Button */}
+            <div 
+              ref={rewardsButtonRef}
+              className="relative"
+              onMouseEnter={() => setShowRewardsModal(true)}
+              onMouseLeave={() => setShowRewardsModal(false)}
+            >
+              <button
+                className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
+                aria-label="Rewards"
+              >
+                <Gift className="h-3.5 w-3.5" />
+              </button>
+              
+              {/* Animated Rewards Modal */}
+              {showRewardsModal && (
+                <div className="absolute top-full mt-2 right-0 bg-background/95 backdrop-blur border border-border rounded-lg p-4 shadow-xl min-w-[220px] z-50">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">$BCTr Rewards Program</p>
+                    <div className="mb-3">
+                      <div className="text-2xl font-mono font-bold text-foreground">{rewardsNumbers.amount}</div>
+                      <div className="text-sm text-muted-foreground">$BCTr</div>
+                      <div className="text-lg font-mono font-bold text-green-600 mt-1">{rewardsNumbers.value}</div>
+                    </div>
+                    <div className="flex items-center justify-center space-x-2">
+                      <p className="text-xs text-muted-foreground">Launching Soon</p>
+                      <button
+                        onClick={handleTwitterClick}
+                        className="p-1 rounded-full hover:bg-accent transition-colors duration-200"
+                        aria-label="Follow on Twitter"
+                      >
+                        <Twitter className="h-4 w-4 text-foreground hover:text-primary transition-colors" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Computer On/Off Button */}
+            <Button
+              onClick={handleComputerClick}
+              variant="default"
+              className={`
+                ${isComputerOn 
+                  ? 'bg-black border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400/10 shadow-[0_0_20px_rgba(250,204,21,0.5)]' 
+                  : 'bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10'
+                } 
+                ${computerGlow ? 'shadow-[0_0_30px_10px_rgba(250,204,21,0.8)] scale-105' : ''}
+                transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider relative overflow-hidden
+              `}
+            >
+              <Power className={`h-3.5 w-3.5 transition-all duration-300 ${isComputerOn ? 'drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : ''}`} />
+              <span>{isComputerOn ? 'ON' : 'OFF'}</span>
+              {isComputerOn && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent animate-pulse pointer-events-none" />
+              )}
+            </Button>
+
             {/* Stake Button with Countdown Modal */}
             <div 
               ref={stakeButtonRef}
@@ -197,9 +322,9 @@ export function Header() {
             >
               <Button
                 variant="default"
-                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 flex items-center space-x-2"
+                className="bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
               >
-                <Zap className="h-4 w-4" />
+                <Zap className="h-3.5 w-3.5" />
                 <span>Stake</span>
               </Button>
               
@@ -234,7 +359,13 @@ export function Header() {
                 </div>
               )}
             </div>
+          </div>
 
+          {/* Right section - User Profile/Login */}
+          <div className="flex items-center space-x-3 ml-8">
+            {/* Divider between buttons and user section */}
+            <div className="h-6 w-px bg-yellow-600/30" />
+            
             {/* Show username if logged in, otherwise show login button */}
             {ready && authenticated && userProfile ? (
               <div className="relative" ref={dropdownRef}>
@@ -299,9 +430,9 @@ export function Header() {
               <Button
                 onClick={handleLogin}
                 disabled={!ready}
-                className="flex items-center space-x-2"
+                className="bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
               >
-                <LogIn className="h-4 w-4" />
+                <LogIn className="h-3.5 w-3.5" />
                 <span>{authenticated && userProfile ? userProfile : 'Log in'}</span>
               </Button>
             )}
