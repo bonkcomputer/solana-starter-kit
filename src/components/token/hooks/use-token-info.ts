@@ -3,6 +3,10 @@
 import { TokenResponse } from '@/models/token.models'
 import { useEffect, useState } from 'react'
 
+// Simple cache for token data
+const tokenCache = new Map<string, { data: TokenResponse; timestamp: number }>()
+const CACHE_DURATION = 2 * 60 * 1000 // 2 minutes
+
 export function useTokenInfo(id: string) {
   const [tokenInfo, setTokenInfo] = useState<TokenResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
@@ -21,6 +25,16 @@ export function useTokenInfo(id: string) {
       }
 
       try {
+        // Check cache first
+        const cached = tokenCache.get(id)
+        if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+          if (isMounted) {
+            setTokenInfo(cached.data)
+            setError(null)
+          }
+          return
+        }
+
         const response = await fetch(`/api/token?id=${id}`)
         const data = await response.json()
 
@@ -30,6 +44,9 @@ export function useTokenInfo(id: string) {
           }
           throw new Error(data.error || `HTTP error! status: ${response.status}`)
         }
+
+        // Cache the successful response
+        tokenCache.set(id, { data, timestamp: Date.now() })
 
         if (isMounted) {
           setTokenInfo(data)

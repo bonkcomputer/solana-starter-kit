@@ -23,6 +23,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useCurrentWallet } from '../auth/hooks/use-current-wallet'
 import { CreateProfileContainer } from '../create-profile/create-profile-container'
 import { DialectNotificationComponent } from '../notifications/dialect-notifications-component'
+import { preloadService } from '@/utils/preload'
+import { performanceMonitor } from '@/utils/performance'
 import bctLogo from '@/app/bctlogo.png'
 
 export function Header() {
@@ -60,6 +62,9 @@ export function Header() {
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
+    // Initialize preloading and performance monitoring
+    preloadService.initializePreloading()
+    performanceMonitor.initialize()
   }, [])
 
   // Load Computer button state from localStorage
@@ -69,6 +74,13 @@ export function Header() {
       setIsComputerOn(true)
     }
   }, [])
+
+  // Preload user-specific data when wallet is connected
+  useEffect(() => {
+    if (walletAddress && authenticated) {
+      preloadService.initializePreloading(walletAddress)
+    }
+  }, [walletAddress, authenticated])
 
   const handleCopy = (address: string) => {
     navigator.clipboard.writeText(address)
