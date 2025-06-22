@@ -237,19 +237,48 @@ export function useJupiterSwap({
 
       toast.dismiss(preparingToastId)
 
-      const signedTransaction = await wallet.signTransaction(transaction)
-
+      let txSig: string
       const sendingToastId = toast.loading(
         LOADINGS.SEND_LOADING.title,
         LOADINGS.SEND_LOADING.content,
       )
 
-      const txSig = await connection.sendRawTransaction(
-        signedTransaction.serialize(),
-      )
-      setTxSignature(txSig)
+      try {
+        // Check if this is an external wallet or Privy embedded wallet
+        if (wallet.walletClientType && wallet.walletClientType !== 'privy') {
+          // External wallet - use sendTransaction method if available
+          console.log('Using external wallet sendTransaction method')
 
+          if (wallet.sendTransaction) {
+            txSig = await wallet.sendTransaction(transaction, connection)
+          } else {
+            // Fallback to sign and send
+            const signedTransaction = await wallet.signTransaction(transaction)
+            txSig = await connection.sendRawTransaction(
+              signedTransaction.serialize(),
+            )
+          }
+        } else {
+          // Privy embedded wallet - sign and send
+          console.log('Using Privy embedded wallet')
+          
+          const signedTransaction = await wallet.signTransaction(transaction)
+          txSig = await connection.sendRawTransaction(
+            signedTransaction.serialize(),
+          )
+        }
+      } catch (signError: any) {
+        toast.dismiss(sendingToastId)
+        console.error('Transaction signing/sending error:', signError)
+        toast.error('Failed to sign/send transaction', {
+          description: signError.message || 'Unknown error occurred',
+        })
+        return
+      }
+
+      setTxSignature(txSig)
       toast.dismiss(sendingToastId)
+
       const confirmToastId = toast.loading(
         LOADINGS.CONFIRM_LOADING.title,
         LOADINGS.CONFIRM_LOADING.content,
