@@ -11,6 +11,7 @@ import {
   LogIn,
   LogOut,
   User,
+  Zap,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -32,6 +33,15 @@ export function Header() {
   const dropdownRef = useRef(null)
   const router = useRouter()
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+  const [showStakeModal, setShowStakeModal] = useState(false)
+  const [countdownNumbers, setCountdownNumbers] = useState({
+    days: '??',
+    hours: '??',
+    minutes: '??',
+    seconds: '??'
+  })
+  const stakeButtonRef = useRef<HTMLDivElement>(null)
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
@@ -114,6 +124,33 @@ export function Header() {
     }
   }
 
+  // Animated countdown effect
+  useEffect(() => {
+    if (showStakeModal) {
+      // Start the animated countdown
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdownNumbers({
+          days: Math.floor(Math.random() * 30).toString().padStart(2, '0'),
+          hours: Math.floor(Math.random() * 24).toString().padStart(2, '0'),
+          minutes: Math.floor(Math.random() * 60).toString().padStart(2, '0'),
+          seconds: Math.floor(Math.random() * 60).toString().padStart(2, '0')
+        })
+      }, 100) // Update every 100ms for fast animation
+    } else {
+      // Clear interval when modal is hidden
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current)
+        countdownIntervalRef.current = null
+      }
+    }
+
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current)
+      }
+    }
+  }, [showStakeModal])
+
   return (
     <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -151,6 +188,53 @@ export function Header() {
           </nav>
 
           <div className="flex items-center space-x-4">
+            {/* Stake Button with Countdown Modal */}
+            <div 
+              ref={stakeButtonRef}
+              className="relative"
+              onMouseEnter={() => setShowStakeModal(true)}
+              onMouseLeave={() => setShowStakeModal(false)}
+            >
+              <Button
+                variant="default"
+                className="bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 flex items-center space-x-2"
+              >
+                <Zap className="h-4 w-4" />
+                <span>Stake</span>
+              </Button>
+              
+              {/* Animated Countdown Modal */}
+              {showStakeModal && (
+                <div className="absolute top-full mt-2 right-0 bg-background/95 backdrop-blur border border-border rounded-lg p-4 shadow-xl min-w-[200px] z-50">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">$BCT Staking Program</p>
+                    <p className="text-xs text-muted-foreground mb-3">Launching Soon</p>
+                    <div className="flex justify-center items-center space-x-3">
+                      <div className="text-center">
+                        <div className="text-lg font-mono font-bold text-foreground">{countdownNumbers.days}</div>
+                        <div className="text-xs text-muted-foreground">days</div>
+                      </div>
+                      <span className="text-foreground">:</span>
+                      <div className="text-center">
+                        <div className="text-lg font-mono font-bold text-foreground">{countdownNumbers.hours}</div>
+                        <div className="text-xs text-muted-foreground">hrs</div>
+                      </div>
+                      <span className="text-foreground">:</span>
+                      <div className="text-center">
+                        <div className="text-lg font-mono font-bold text-foreground">{countdownNumbers.minutes}</div>
+                        <div className="text-xs text-muted-foreground">min</div>
+                      </div>
+                      <span className="text-foreground">:</span>
+                      <div className="text-center">
+                        <div className="text-lg font-mono font-bold text-foreground">{countdownNumbers.seconds}</div>
+                        <div className="text-xs text-muted-foreground">sec</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Show username if logged in, otherwise show login button */}
             {ready && authenticated && userProfile ? (
               <div className="relative" ref={dropdownRef}>
