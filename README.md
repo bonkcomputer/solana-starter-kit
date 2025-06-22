@@ -1,13 +1,22 @@
 # Solana Starter Kit
 
-Welcome to the **Solana Starter Kit**! This comprehensive template provides everything you need to build modern blockchain applications on Solana, featuring real-time trading, social profiles, portfolio management, and seamless Web3 authentication.
+Welcome to the **Solana Starter Kit**! This comprehensive template provides everything you need to build modern blockchain applications on Solana, featuring real-time trading, social profiles, portfolio management, and seamless Web3 authentication. 
+
+**Developed by Bonk Computer with powerful enhancements from Tapestry** 🚀
 
 ## 🚀 Features
 
+### **🎉 Monumental Updates in Latest Release**
+- **Multi-Wallet Support** - Full support for external Solana wallets (Phantom, Solflare) AND Privy embedded wallets
+- **Referral System** - Built-in Jupiter swap referral fees (2.51% default) for monetization
+- **Enhanced UX** - Centered dialogs, improved error handling, seamless authentication flow
+- **Direct Jupiter API** - Direct integration with Jupiter's swap API for better reliability
+- **Smart Transaction Handling** - Automatic detection and handling of different wallet types
+
 ### **Core Functionality**
-- **Web3 Authentication** - Privy integration with email and wallet login
-- **Profile System** - User profiles with social features (comments, likes, follows)
-- **Real-time Trading** - Live BCT and SSE trading data with Jupiter integration
+- **Web3 Authentication** - Privy integration with email and wallet login (now with enhanced wallet detection)
+- **Profile System** - User profiles with social features (comments, likes, follows) powered by Tapestry
+- **Real-time Trading** - Live BCT and SSE trading data with Jupiter integration and referral fees
 - **Portfolio Management** - Real-time token prices and NFT viewing with total USD values
 - **Social Graph** - Tapestry integration for decentralized social features
 

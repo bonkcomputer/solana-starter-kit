@@ -1,6 +1,6 @@
 # Contributing to Solana Starter Kit
 
-First off, thank you for considering contributing to the Solana Starter Kit! It's people like you that make this a great tool for the Solana developer community.
+First off, thank you for considering contributing to the Solana Starter Kit! This project is developed by Bonk Computer with powerful enhancements from Tapestry. It's people like you that make this a great tool for the Solana developer community.
 
 ## Code of Conduct
 
@@ -34,7 +34,9 @@ Enhancement suggestions are tracked as GitHub issues. When creating an enhanceme
 2. If you've added code that should be tested, add tests
 3. Ensure the test suite passes
 4. Make sure your code follows the existing style (use the provided ESLint and Prettier configs)
-5. Issue that pull request!
+5. For swap/trading features, ensure both external wallets and Privy embedded wallets are supported
+6. Test with both BCT and SSE tokens when modifying trading functionality
+7. Issue that pull request!
 
 ## Development Setup
 
