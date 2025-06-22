@@ -62,6 +62,17 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   const url = new URL(request.url)
 
+  // Skip authentication and Privy-related requests
+  if (url.hostname.includes('privy.io') || 
+      url.hostname.includes('auth.privy.io') ||
+      url.pathname.includes('/api/auth') ||
+      url.pathname.includes('/api/profiles') ||
+      url.pathname.includes('/api/identities')) {
+    // Always use network for auth requests
+    event.respondWith(fetch(request))
+    return
+  }
+
   // Handle API requests with cache-first for token data, network-first for trades
   if (CACHEABLE_APIS.some(api => url.pathname.startsWith(api))) {
     if (url.pathname.startsWith('/api/token')) {

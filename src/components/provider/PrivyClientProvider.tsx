@@ -12,11 +12,13 @@ export function PrivyClientProvider({
 
   if (!privyAppId) {
     console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set')
+    console.error('Available env vars:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC')))
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-red-500 mb-2">Configuration Error</h1>
           <p className="text-gray-600">NEXT_PUBLIC_PRIVY_APP_ID is not configured</p>
+          <p className="text-xs text-gray-500 mt-2">Check browser console for more details</p>
         </div>
       </div>
     )

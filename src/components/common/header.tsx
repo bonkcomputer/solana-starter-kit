@@ -62,9 +62,10 @@ export function Header() {
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
-    // Initialize preloading and performance monitoring
-    preloadService.initializePreloading()
-    performanceMonitor.initialize()
+    // Temporarily disable preloading and performance monitoring for debugging
+    console.log('🔧 Preloading and performance monitoring temporarily disabled for debugging')
+    // preloadService.initializePreloading()
+    // performanceMonitor.initialize()
   }, [])
 
   // Load Computer button state from localStorage
@@ -75,10 +76,11 @@ export function Header() {
     }
   }, [])
 
-  // Preload user-specific data when wallet is connected
+  // Preload user-specific data when wallet is connected - temporarily disabled
   useEffect(() => {
     if (walletAddress && authenticated) {
-      preloadService.initializePreloading(walletAddress)
+      console.log('🔧 User-specific preloading temporarily disabled for debugging')
+      // preloadService.initializePreloading(walletAddress)
     }
   }, [walletAddress, authenticated])
 
@@ -150,6 +152,13 @@ export function Header() {
   }
 
   const handleLogin = () => {
+    console.log('Header login button clicked - Debug info:')
+    console.log('ready:', ready)
+    console.log('authenticated:', authenticated)
+    console.log('userProfile:', userProfile)
+    console.log('walletAddress:', walletAddress)
+    console.log('mainUsername:', mainUsername)
+    
     // If already authenticated and has profile, go to profile
     if (authenticated && userProfile) {
       router.push(`/${userProfile}`)

@@ -18,11 +18,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.privy.io https://privy.bonk.computer",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.privy.io https://privy.bonk.computer https://*.privy.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https: wss:",
+              "connect-src 'self' https: wss: https://*.privy.io",
               "frame-src 'self' https://auth.privy.io https://privy.bonk.computer https://birdeye.so",
               "frame-ancestors 'self' https://bcttrading.vercel.app https://auth.privy.io https://privy.bonk.computer",
             ].join('; '),

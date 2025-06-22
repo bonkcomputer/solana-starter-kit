@@ -318,8 +318,12 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
   }, [inputTokenMint, outputTokenMint, updateTokensInURL])
 
   useEffect(() => {
-    console.log('++++++:', walletAddress)
-  }, [walletAddress])
+    console.log('Swap Debug - walletAddress:', walletAddress)
+    console.log('Swap Debug - ready:', ready)
+    console.log('Swap Debug - authenticated:', authenticated)
+    console.log('Swap Debug - mainUsername:', mainUsername)
+    console.log('Swap Debug - wallets:', wallets)
+  }, [walletAddress, ready, authenticated, mainUsername, wallets])
 
   return (
     <div className="space-y-4 flex flex-col flex-grow">
@@ -356,23 +360,29 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
             {loading ? <Spinner /> : 'Execute Swap'}
           </Button>
         ) : (
-          <Button
-            variant={ButtonVariant.OUTLINE}
-            size={ButtonSize.LG}
-            disabled={!ready}
-            onClick={() => {
-              // If already authenticated and has profile, go to profile
-              if (authenticated && mainUsername) {
-                push(`/${mainUsername}`)
-              } else {
-                // Otherwise, trigger login
-                login()
-              }
-            }}
-            className="rounded-full w-full"
-          >
-            {!ready ? 'Loading...' : authenticated && mainUsername ? `Go to ${mainUsername}` : 'Go to Login to swap'}
-          </Button>
+                      <Button
+              variant={ButtonVariant.OUTLINE}
+              size={ButtonSize.LG}
+              disabled={!ready}
+              onClick={() => {
+                console.log('Login button clicked - Debug info:')
+                console.log('ready:', ready)
+                console.log('authenticated:', authenticated)
+                console.log('mainUsername:', mainUsername)
+                console.log('wallets:', wallets)
+                
+                // If already authenticated and has profile, go to profile
+                if (authenticated && mainUsername) {
+                  push(`/${mainUsername}`)
+                } else {
+                  // Otherwise, trigger login
+                  login()
+                }
+              }}
+              className="rounded-full w-full"
+            >
+              {!ready ? 'Loading...' : authenticated && mainUsername ? `Go to ${mainUsername}` : 'Login to Swap'}
+            </Button>
         )}
       </div>
 
