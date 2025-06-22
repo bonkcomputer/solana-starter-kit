@@ -108,7 +108,7 @@ export function PortfolioView({
 
   useEffect(() => {
     fetchPortfolioData()
-  }, [walletAddress])
+  }, [walletAddress, fetchPortfolioData])
 
   if (isLoading || loading) {
     return (

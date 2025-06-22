@@ -35,7 +35,7 @@ export function useGetProfiles({
         controller.abort()
         setError('Request timed out')
         setLoading(false)
-      }, 10000) // 10 second timeout
+      }, 5000) // 5 second timeout (reduced from 10)
 
       try {
         const url = new URL('/api/profiles', window.location.origin)
@@ -51,7 +51,11 @@ export function useGetProfiles({
         const data = await res.json()
 
         if (!res.ok) {
-          throw new Error(data.error || 'Failed to fetch profiles')
+          // Don't throw error for new users - just return empty profiles
+          console.log('No profiles found for user, this is normal for new users')
+          setProfiles([])
+          clearTimeout(timeoutId)
+          return
         }
 
         setProfiles(data.profiles || [])
@@ -61,8 +65,9 @@ export function useGetProfiles({
           console.log('Fetch aborted')
           return
         }
-        console.error('Error fetching profiles:', err)
-        setError(err.message || 'An unknown error occurred')
+        // Don't log errors for new users - just set empty profiles
+        console.log('No profiles found, user may be new')
+        setError(null) // Don't set error for new users
         setProfiles([])
       } finally {
         setLoading(false)

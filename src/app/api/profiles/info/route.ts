@@ -19,18 +19,20 @@ export async function GET(req: NextRequest) {
     
     if (privyDid) {
       // Query by privyDid
+      console.log('🔍 Checking Prisma DB for privyDid:', privyDid)
       localUser = await prisma.user.findUnique({
         where: { privyDid },
       })
     } else if (username) {
       // Query by username
+      console.log('🔍 Checking Prisma DB for username:', username)
       localUser = await prisma.user.findUnique({
         where: { username },
       })
     }
 
     if (localUser) {
-      console.log('Found user in local DB:', localUser.username)
+      console.log('✅ Found user in local DB:', localUser.username)
       
       // 2. Try to get additional information from Tapestry (social counts, etc.)
       try {
@@ -40,23 +42,32 @@ export async function GET(req: NextRequest) {
           const enhancedProfile = {
             ...localUser,
             socialCounts: tapestryProfile.socialCounts,
-            tapestryProfile: tapestryProfile.profile
+            tapestryProfile: tapestryProfile.profile,
+            source: 'prisma_with_tapestry'
           }
+          console.log('✅ Enhanced profile with Tapestry data for:', localUser.username)
           return NextResponse.json(enhancedProfile)
         }
       } catch (tapestryError: any) {
-        console.warn('Failed to fetch Tapestry profile data:', tapestryError.message)
+        console.warn('⚠️ Failed to fetch Tapestry profile data:', tapestryError.message)
       }
       
       // Return local user data even if Tapestry fails
-      return NextResponse.json(localUser)
+      console.log('✅ Returning local profile data for:', localUser.username)
+      return NextResponse.json({
+        ...localUser,
+        source: 'prisma_only'
+      })
     }
     
     // 3. If not found locally and we have a username, try to get from Tapestry directly
     if (username) {
+      console.log('🔍 User not found in Prisma, checking Tapestry for username:', username)
       try {
         const tapestryProfile = await getTapestryProfile({ username })
         if (tapestryProfile && tapestryProfile.profile) {
+          console.log('✅ Found profile in Tapestry for:', username)
+          
           // Handle different possible Tapestry profile structures
           let profileData: any = null
           
@@ -75,19 +86,30 @@ export async function GET(req: NextRequest) {
             solanaWalletAddress: profileData?.properties?.ownerWallet || profileData?.ownerWallet || null,
             socialCounts: tapestryProfile.socialCounts || { followers: [0], following: [0] },
             tapestryProfile: tapestryProfile.profile,
-            fromTapestry: true // Flag to indicate this is from Tapestry only
+            source: 'tapestry_only' // Flag to indicate this is from Tapestry only
           }
           return NextResponse.json(tapestryUser)
         }
       } catch (tapestryError: any) {
-        console.warn('Failed to fetch from Tapestry:', tapestryError.message)
+        console.warn('⚠️ Failed to fetch from Tapestry:', tapestryError.message)
       }
     }
     
+    // 4. If privyDid was provided but no user found, this is definitely a new user
+    if (privyDid) {
+      console.log('🆕 New user detected - privyDid not found in either database:', privyDid)
+      return NextResponse.json({ 
+        error: 'User not found',
+        isNewUser: true,
+        privyDid: privyDid
+      }, { status: 404 })
+    }
+    
+    console.log('❌ User not found in any database for:', username || privyDid)
     return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
   } catch (error: any) {
-    console.error('Error fetching profile info:', error.message)
+    console.error('❌ Error fetching profile info:', error.message)
     return NextResponse.json(
       { error: error.message || 'Failed to fetch profile' },
       { status: 500 },
@@ -138,3 +160,4 @@ export async function PUT(req: NextRequest) {
     )
   }
 }
+

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { createTapestryProfile } from "@/lib/tapestry";
+import { createTapestryProfile, getTapestryProfile } from "@/lib/tapestry";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -21,20 +21,67 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // 1. Create profile on Tapestry with enhanced function
-    const tapestryProfile = await createTapestryProfile({
-      walletAddress: solanaWalletAddress,
-      username,
-      bio,
-      image,
-      execution
+    // 1. First check if user already exists in Prisma DB
+    const existingUser = await prisma.user.findUnique({
+      where: { privyDid }
     });
 
-    if (!tapestryProfile) {
-      throw new Error("Failed to create profile on Tapestry.");
+    if (existingUser) {
+      console.log('User already exists in Prisma DB:', existingUser.username);
+      return NextResponse.json(
+        { 
+          error: "User with this privyDid already exists",
+          existingProfile: existingUser
+        },
+        { status: 409 }
+      );
     }
 
-    // 2. Create user in local Prisma database
+    // 2. Check if username is already taken
+    const existingUsername = await prisma.user.findUnique({
+      where: { username }
+    });
+
+    if (existingUsername) {
+      console.log('Username already taken:', username);
+      return NextResponse.json(
+        { error: "Username already exists" },
+        { status: 409 }
+      );
+    }
+
+    // 3. Check if profile exists on Tapestry only (migration case)
+    let tapestryProfile = null;
+    try {
+      const existingTapestryProfile = await getTapestryProfile({ username });
+      if (existingTapestryProfile && existingTapestryProfile.profile) {
+        console.log('Found existing Tapestry profile for username:', username);
+        tapestryProfile = existingTapestryProfile;
+      }
+    } catch (_tapestryError: any) {
+      console.log('No existing Tapestry profile found, will create new one');
+    }
+
+    // 4. Create or get profile on Tapestry
+    if (!tapestryProfile) {
+      console.log('Creating new Tapestry profile for:', username);
+      tapestryProfile = await createTapestryProfile({
+        walletAddress: solanaWalletAddress,
+        username,
+        bio,
+        image,
+        execution
+      });
+
+      if (!tapestryProfile) {
+        throw new Error("Failed to create profile on Tapestry.");
+      }
+    } else {
+      console.log('Using existing Tapestry profile for:', username);
+    }
+
+    // 5. Create user in local Prisma database
+    console.log('Creating new Prisma user for:', username);
     const newUser = await prisma.user.create({
       data: {
         privyDid,
@@ -46,11 +93,14 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log('✅ Successfully created profile for:', username);
     return NextResponse.json({ 
       tapestryProfile, 
       prismaUser: newUser,
-      execution: execution // Return the execution method used
+      execution: execution,
+      isNewTapestryProfile: !tapestryProfile // Indicates if we created a new Tapestry profile
     }, { status: 201 });
+
   } catch (error: any) {
     console.error("Error creating profile:", error);
 

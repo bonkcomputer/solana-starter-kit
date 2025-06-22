@@ -13,7 +13,7 @@ import { cn } from '@/utils/utils'
 import { usePrivy } from '@privy-io/react-auth'
 import { User } from 'lucide-react'
 import Image from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface Props {
   setCreateProfileDialog: (isOpen: boolean) => void
@@ -26,13 +26,11 @@ export function CreateProfile({
   setIsProfileCreated,
   setProfileUsername,
 }: Props) {
-  const { walletAddress, loadingMainUsername, mainUsername } = useCurrentWallet()
-  const { logout, user } = usePrivy()
+  const { walletAddress } = useCurrentWallet()
+  const { logout } = usePrivy()
 
   const [username, setUsername] = useState('')
   const [selectProfile, setSelectProfile] = useState<IProfileList | null>(null)
-  const [checkingExistingProfile, setCheckingExistingProfile] = useState(true)
-  const [existingProfile, setExistingProfile] = useState<any>(null)
 
   const {
     createProfile,
@@ -45,90 +43,6 @@ export function CreateProfile({
     walletAddress: walletAddress || '',
   })
 
-  // Check if user already has a profile
-  useEffect(() => {
-    const checkExistingProfile = async () => {
-      if (!user?.id) {
-        setCheckingExistingProfile(false)
-        return
-      }
-
-      try {
-        const response = await fetch(`/api/profiles/info?privyDid=${user.id}`)
-        if (response.ok) {
-          const profileData = await response.json()
-          if (profileData && profileData.username) {
-            setExistingProfile(profileData)
-          }
-        }
-      } catch (error) {
-        console.error('Error checking existing profile:', error)
-      } finally {
-        setCheckingExistingProfile(false)
-      }
-    }
-
-    checkExistingProfile()
-  }, [user?.id])
-
-  // If user already has a profile, show redirect message
-  if (checkingExistingProfile) {
-    return (
-      <div className="flex items-center justify-center w-full py-32">
-        <LoadCircle />
-        <p className="ml-2 text-sm text-muted-foreground">Checking existing profile...</p>
-      </div>
-    )
-  }
-
-  if (existingProfile) {
-    return (
-      <div className="w-full max-w-md mx-auto text-center py-8">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">Profile Already Exists</h2>
-        </div>
-        
-        <div className="mb-6 p-4 bg-muted rounded-lg">
-          <p className="text-sm text-muted-foreground mb-2">You already have a profile:</p>
-          <p className="text-lg font-bold">{existingProfile.username}</p>
-        </div>
-        
-        <div className="space-y-3">
-          <Button
-            className="w-full"
-            onClick={() => {
-              setIsProfileCreated(true)
-              setProfileUsername(existingProfile.username)
-              setCreateProfileDialog(false)
-              window.location.href = `/${existingProfile.username}`
-            }}
-          >
-            Go to My Profile
-          </Button>
-          
-          <Button
-            className="w-full"
-            variant="secondary"
-            onClick={() => setCreateProfileDialog(false)}
-          >
-            Close
-          </Button>
-          
-          <Button
-            className="w-full text-xs underline"
-            variant="ghost"
-            onClick={() => {
-              logout()
-              setCreateProfileDialog(false)
-            }}
-          >
-            Disconnect wallet
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (walletAddress && username) {
@@ -138,21 +52,15 @@ export function CreateProfile({
           setIsProfileCreated(true)
           setProfileUsername(username)
           setCreateProfileDialog(false)
-          // Force refresh to ensure all components get updated state
-          setTimeout(() => {
-            window.location.reload()
-          }, 500)
         }
       } catch (err) {
         console.error('Failed to create profile:', err)
-        // Error will be displayed through the error state in the UI
       }
     }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-
     const validValue = value.toLowerCase().replace(/[^a-z0-9]/g, '')
     setUsername(validValue)
   }
@@ -174,18 +82,13 @@ export function CreateProfile({
         setIsProfileCreated(true)
         setProfileUsername(elem.profile.username)
         setCreateProfileDialog(false)
-        // Add a small delay before reload to ensure state updates are processed
-        setTimeout(() => {
-          window.location.reload()
-        }, 100)
       }
     } catch (err) {
       console.error('Failed to import profile:', err)
-      // Error will be displayed through the error state in the UI
     }
   }
 
-  if (loadingMainUsername && profilesLoading) {
+  if (profilesLoading) {
     return (
       <div className="flex items-center justify-center w-full py-32">
         <LoadCircle />
@@ -229,11 +132,16 @@ export function CreateProfile({
         <div className="bg-border h-[1px] w-full my-6" />
         
         <div className="space-y-4">
-          <div className="w-full">
-            {identities &&
-            identities.identities &&
-            identities.identities.length > 0 ? (
-              <div className="w-full h-[200px] overflow-auto">
+          {/* Simple import section - only show if we found existing profiles */}
+          {identities && identities.identities && identities.identities.length > 0 && (
+            <>
+              <div className="text-center py-4">
+                <p className="text-sm text-muted-foreground">
+                  Found existing profiles. You can import one:
+                </p>
+              </div>
+              
+              <div className="w-full max-h-[200px] overflow-auto">
                 {identities.identities.map((identity, identityIndex) =>
                   identity?.profiles?.length > 0
                     ? identity.profiles.map((entry, profileIndex) => (
@@ -242,55 +150,40 @@ export function CreateProfile({
                           disabled={profilesLoading}
                           variant="ghost"
                           onClick={() => setSelectProfile(entry)}
-                          className="flex items-start justify-start w-full"
+                          className="flex items-start justify-start w-full mb-2"
                         >
                           <div
                             className={cn(
-                              'flex items-center border-2 rounded-sm w-full p-2 space-y-2',
+                              'flex items-center border rounded-sm w-full p-2',
                               {
-                                'border border-accent': selectProfile === entry,
-                                'border border-mutedLight':
-                                  selectProfile !== entry,
+                                'border-blue-500': selectProfile === entry,
+                                'border-gray-300': selectProfile !== entry,
                               },
                             )}
                           >
                             <div className="flex items-center space-x-2">
-                              <div className="relative rounded-full w-11 h-11 bg-muted-foreground shrink-0 flex items-center justify-center">
+                              <div className="relative rounded-full w-8 h-8 bg-gray-200 shrink-0 flex items-center justify-center">
                                 {entry.profile.image ? (
-                                  <div>
-                                    <Image
-                                      width={30}
-                                      height={30}
-                                      alt="avatar"
-                                      className="rounded-full object-cover"
-                                      src={entry.profile.image}
-                                      unoptimized
-                                    />
-                                  </div>
+                                  <Image
+                                    width={24}
+                                    height={24}
+                                    alt="avatar"
+                                    className="rounded-full object-cover"
+                                    src={entry.profile.image}
+                                    unoptimized
+                                  />
                                 ) : (
-                                  <User />
+                                  <User size={16} />
                                 )}
                               </div>
-                              <div className="w-2/3 flex flex-col items-start text-left">
-                                <h4 className="text-md font-bold truncate w-full">
+                              <div className="flex flex-col items-start text-left">
+                                <h4 className="text-sm font-semibold">
                                   {entry.profile?.username ?? 'No username'}
                                 </h4>
                                 {entry.profile?.bio && (
-                                  <p className="text-xs text-muted-foreground truncate w-full">
+                                  <p className="text-xs text-gray-500 truncate">
                                     {entry.profile?.bio}
                                   </p>
-                                )}
-                                {entry?.namespace?.faviconURL && (
-                                  <div className="mt-2 w-full">
-                                    <Image
-                                      width={15}
-                                      height={15}
-                                      alt="favicon"
-                                      className="rounded-full object-cover"
-                                      src={entry.namespace.faviconURL}
-                                      unoptimized
-                                    />
-                                  </div>
                                 )}
                               </div>
                             </div>
@@ -300,42 +193,26 @@ export function CreateProfile({
                     : null,
                 )}
               </div>
-            ) : (
-              <div className="text-center py-8">
-                {profilesLoading && (
-                  <div className="space-y-2">
-                    <LoadCircle />
-                    <p className="text-sm text-muted-foreground">
-                      Getting profiles from Tapestry.. Please wait
-                    </p>
-                  </div>
-                )}
 
-                {!profilesLoading && (
-                  <p className="text-sm text-muted-foreground">
-                    We could not find any profiles on Tapestry.
-                    <br /> Create one to get started!
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Button
-            className="w-full justify-center"
-            variant="secondary"
-            disabled={profilesLoading || selectProfile === null}
-            onClick={() => {
-              if (selectProfile) {
-                handleClick(selectProfile)
-              }
-            }}
-          >
-            {creationLoading ? 'Importing...' : 'Import profile'}
-          </Button>
+              <Button
+                className="w-full"
+                variant="secondary"
+                disabled={profilesLoading || selectProfile === null}
+                onClick={() => {
+                  if (selectProfile) {
+                    handleClick(selectProfile)
+                  }
+                }}
+              >
+                {creationLoading ? 'Importing...' : 'Import Selected Profile'}
+              </Button>
+              
+              <div className="bg-gray-200 h-[1px] w-full my-4" />
+            </>
+          )}
           
           <Button
-            className="w-full text-xs underline justify-center"
+            className="w-full text-xs underline"
             variant="ghost"
             onClick={() => {
               logout()

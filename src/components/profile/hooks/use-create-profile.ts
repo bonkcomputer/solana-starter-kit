@@ -33,7 +33,7 @@ export const useCreateProfile = () => {
 
     try {
       const embeddedWallet = user.linkedAccounts.find(
-        (account) => account.type === 'wallet' && account.walletClientType === 'privy'
+        (account) => account && account.type === 'wallet' && account.walletClientType === 'privy'
       );
 
       const embeddedWalletAddress =
@@ -54,42 +54,37 @@ export const useCreateProfile = () => {
 
       const res = await fetch('/api/profiles/create', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      console.log('Profile creation response:', { status: res.status, data });
+      console.log('Create profile API response:', { status: res.status, data });
 
-      if (!res.ok) {
+      if (res.ok) {
+        console.log('✅ Profile created successfully:', data);
+        setResponse(data);
+        return data;
+      } else {
         // Handle specific error cases
-        if (res.status === 409 && data.error === "User with this privyDid already exists") {
-          // User already has a profile, check what it is
-          try {
-            const existingProfileRes = await fetch(`/api/profiles/info?privyDid=${user.id}`);
-            if (existingProfileRes.ok) {
-              const existingProfile = await existingProfileRes.json();
-              setError(`You already have a profile: ${existingProfile.username}. Redirecting...`);
-              // Redirect to existing profile after a short delay
-              setTimeout(() => {
-                window.location.href = `/${existingProfile.username}`;
-              }, 2000);
+        if (res.status === 409) {
+          if (data.error === "User with this privyDid already exists") {
+            console.log('🔄 User already exists, redirecting to profile:', data.existingProfile?.username);
+            if (data.existingProfile?.username) {
+              window.location.href = `/${data.existingProfile.username}`;
               return;
             }
-          } catch (checkError) {
-            console.error('Error checking existing profile:', checkError);
+            setError("You already have a profile.");
+          } else if (data.error === "Username already exists") {
+            setError("This username is already taken. Please choose a different one.");
+          } else {
+            setError(data.error || "Profile creation failed");
           }
-          setError("You already have a profile. Please check your account.");
-          return;
+        } else {
+          setError(data.error || 'Failed to create profile');
         }
-        
-        throw new Error(data.error || 'Failed to create profile');
+        return null;
       }
-
-      setResponse(data);
-      return data;
     } catch (err: any) {
       console.error('Profile creation error:', err);
       setError(err.message);

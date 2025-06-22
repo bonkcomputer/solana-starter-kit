@@ -10,58 +10,28 @@ import {
   Home,
   LogIn,
   LogOut,
-  Menu,
-  RefreshCw,
   User,
-  Settings,
 } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useCurrentWallet } from '../auth/hooks/use-current-wallet'
-import { useGetProfiles } from '../auth/hooks/use-get-profiles'
 import { CreateProfileContainer } from '../create-profile/create-profile-container'
 import { DialectNotificationComponent } from '../notifications/dialect-notifications-component'
 import bctLogo from '@/app/bctlogo.png'
 
 export function Header() {
-  const { walletAddress, mainUsername: currentMainUsername, loadingMainUsername } = useCurrentWallet()
-  const [mainUsername, setMainUsername] = useState<string | null>(null)
-  const [isProfileCreated, setIsProfileCreated] = useState<boolean>(false)
-  const [profileUsername, setProfileUsername] = useState<string | null>(null)
-  const [loadingTimeout, setLoadingTimeout] = useState<boolean>(false)
-  const { profiles, loading: profilesLoading } = useGetProfiles({
-    walletAddress: walletAddress || '',
-  })
-  const { ready, authenticated, logout, user } = usePrivy()
+  const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
+  const [showCreateProfile, setShowCreateProfile] = useState(false)
+  const [userProfile, setUserProfile] = useState<string | null>(null)
+  const { ready, authenticated, logout } = usePrivy()
   const { login } = useLogin()
-  const disableLogin = !ready
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const dropdownRef = useRef(null)
   const router = useRouter()
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
-
-  // Determine if we should show create profile based on authentication and loading states
-  const showCreateProfile = ready && authenticated && walletAddress && (!loadingMainUsername || loadingTimeout) && (!profilesLoading || loadingTimeout) && !mainUsername
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Header state:', {
-      ready,
-      authenticated,
-      walletAddress,
-      mainUsername,
-      currentMainUsername,
-      profilesLength: profiles?.length || 0,
-      loadingMainUsername,
-      profilesLoading,
-      userId: user?.id,
-      loadingTimeout,
-      showCreateProfile
-    })
-  }, [ready, authenticated, walletAddress, mainUsername, currentMainUsername, profiles, loadingMainUsername, profilesLoading, user, loadingTimeout, showCreateProfile])
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
@@ -96,243 +66,168 @@ export function Header() {
     }
   }, [])
 
-  // Updated logic to handle profile states better
+  // Simple profile management - check once when authentication state changes
   useEffect(() => {
-    // Don't do anything if Privy isn't ready or user isn't authenticated
     if (!ready || !authenticated) {
-      setMainUsername(null)
+      setUserProfile(null)
+      setShowCreateProfile(false)
       return
     }
 
-    // Priority 1: Use currentMainUsername from useCurrentWallet if available
-    if (currentMainUsername) {
-      setMainUsername(currentMainUsername)
+    // If we already have a username, use it
+    if (mainUsername) {
+      setUserProfile(mainUsername)
+      setShowCreateProfile(false)
       return
     }
 
-    // Priority 2: Use profiles from direct API call
-    if (profiles && profiles.length > 0) {
-      setMainUsername(profiles[0].profile.username)
-      return
+    // If we have a wallet but no username, check for profile once
+    if (walletAddress && !mainUsername) {
+      checkProfile().then((username) => {
+        if (username) {
+          setUserProfile(username)
+          setShowCreateProfile(false)
+        } else {
+          // No profile found, show create profile dialog
+          setShowCreateProfile(true)
+        }
+      })
     }
-
-    // Priority 3: Handle profile creation completion
-    if (isProfileCreated && profileUsername) {
-      setMainUsername(profileUsername)
-      setIsProfileCreated(false)
-      setProfileUsername(null)
-      return
-    }
-
-    // If we're not loading and no profile is found, clear mainUsername
-    if (!loadingMainUsername && !profilesLoading) {
-      setMainUsername(null)
-    }
-  }, [currentMainUsername, profiles, isProfileCreated, profileUsername, ready, authenticated, loadingMainUsername, profilesLoading])
+  }, [ready, authenticated, walletAddress, mainUsername, checkProfile])
 
   const handleProfileCreated = (username: string) => {
-    setIsProfileCreated(true)
-    setProfileUsername(username)
-    setMainUsername(username)
-    // Force a page refresh to ensure all components get the updated state
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
+    setUserProfile(username)
+    setShowCreateProfile(false)
   }
 
-  // Determine loading message
-  const getLoadingMessage = () => {
-    if (!ready) return 'Loading...'
-    if (!authenticated) return null
-    if ((loadingMainUsername || profilesLoading) && !loadingTimeout) return 'Loading profile...'
-    if (!walletAddress) return 'No wallet connected'
-    return 'No profile found'
+  const handleProfileUsername = (username: string) => {
+    setUserProfile(username)
   }
 
-  // Add timeout mechanism to prevent infinite loading
-  useEffect(() => {
-    if (ready && authenticated && (loadingMainUsername || profilesLoading)) {
-      const timeout = setTimeout(() => {
-        console.warn('Profile loading timed out, forcing stop')
-        setLoadingTimeout(true)
-      }, 15000) // 15 second timeout
-
-      return () => clearTimeout(timeout)
+  const handleLogin = () => {
+    // If already authenticated and has profile, go to profile
+    if (authenticated && userProfile) {
+      router.push(`/${userProfile}`)
     } else {
-      setLoadingTimeout(false)
+      // Otherwise, trigger login
+      login()
     }
-  }, [ready, authenticated, loadingMainUsername, profilesLoading])
+  }
 
   return (
-    <>
-      <div className="border-b-1 border-muted flex items-center justify-center w-full p-3">
-        <div className="max-w-6xl w-full flex items-center justify-between">
-          <Link
-            href="/"
-            className="hover:opacity-80 flex items-center gap-3"
-          >
-            <Image
-              alt="logo"
-              src={bctLogo}
-              width={32}
-              height={32}
-              className="transition-transform hover:scale-110"
-              onClick={handleLogoClick}
-            />
-            <h1 className="text-2xl font-nabla">Trading Computer</h1>
+    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center">
+        <div className="mr-4 hidden md:flex">
+          <Link className="mr-6 flex items-center space-x-2" href="/">
+            <div className="flex items-center space-x-2" onClick={handleLogoClick}>
+              <Image
+                src={bctLogo}
+                alt="BCT Logo"
+                width={32}
+                height={32}
+                className="cursor-pointer"
+              />
+              <span className="hidden font-bold sm:inline-block">
+                BCT Computer
+              </span>
+            </div>
           </Link>
+        </div>
 
-          <nav className="flex items-center space-x-8">
+        <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+          <nav className="flex items-center space-x-6 text-sm font-medium">
             <Link
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
               href="/"
-              className="flex items-center hover:opacity-80 transition-opacity"
             >
-              <Home className="h-4 w-4 mr-2" />
-              <span>Home</span>
+              <Home className="h-4 w-4" />
             </Link>
-
             <Link
-              href="/token"
-              className="flex items-center hover:opacity-80 transition-opacity"
-            >
-              <Coins className="h-4 w-4 mr-2" />
-              <span>Tokens</span>
-            </Link>
-
-            <Link
+              className="transition-colors hover:text-foreground/80 text-foreground/60"
               href="/trade"
-              className="flex items-center hover:opacity-80 transition-opacity"
             >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              <span>Swap</span>
+              <Coins className="h-4 w-4" />
             </Link>
+          </nav>
 
-            {/* Authentication and Profile Section */}
-            {!ready ? (
-              <div className="text-sm text-muted-foreground">Loading...</div>
-            ) : authenticated ? (
-              mainUsername ? (
-                <div className="flex items-center relative" ref={dropdownRef}>
-                  <div className="relative">
-                    <Button
-                      variant="ghost"
-                      onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                      className="space-x-2"
-                    >
-                      <p className="truncate font-bold">{mainUsername}</p>
-                      <Menu size={20} />
-                    </Button>
-                    {isDropdownOpen && (
-                      <div className="absolute right-0 mt-2 w-56 bg-gray-800 shadow-lg rounded-md overflow-hidden z-50 border border-gray-700">
-                        {/* User Info Section */}
-                        <div className="px-4 py-3 border-b border-gray-700">
-                          <p className="text-sm font-medium">{mainUsername}</p>
-                          <p className="text-xs text-gray-400 truncate">
-                            {abbreviateWalletAddress({ address: walletAddress })}
-                          </p>
-                        </div>
+          <div className="flex items-center space-x-4">
+            {/* Show username if logged in, otherwise show login button */}
+            {ready && authenticated && userProfile ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center space-x-2 text-sm font-medium hover:text-foreground/80"
+                >
+                  <User className="h-4 w-4" />
+                  <span>{userProfile}</span>
+                </button>
 
-                        {/* Copy Wallet Address */}
-                        <Button
-                          variant="ghost"
-                          className="px-4 py-2 hover:bg-gray-700 w-full text-left justify-start"
-                          onClick={() => handleCopy(walletAddress)}
-                        >
-                          {copied ? (
-                            <Check size={16} className="mr-2" />
-                          ) : (
-                            <Clipboard size={16} className="mr-2" />
-                          )}
-                          Copy Address
-                        </Button>
-
-                        {/* My Profile */}
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            router.push(`/${mainUsername}`)
-                            setIsDropdownOpen(false)
-                          }}
-                          className="px-4 py-2 hover:bg-gray-700 w-full text-left justify-start"
-                        >
-                          <User size={16} className="mr-2" /> My Profile
-                        </Button>
-
-                        {/* Settings placeholder for future */}
-                        <Button
-                          variant="ghost"
-                          className="px-4 py-2 hover:bg-gray-700 w-full text-left justify-start opacity-50 cursor-not-allowed"
-                          disabled
-                        >
-                          <Settings size={16} className="mr-2" /> Settings
-                        </Button>
-
-                        {/* Logout */}
-                        <div className="border-t border-gray-700">
-                          <Button
-                            variant="ghost"
-                            className="px-4 py-2 hover:bg-gray-700 w-full text-left justify-start !text-red-400"
-                            onClick={() => {
-                              logout()
-                              setIsDropdownOpen(false)
-                              setMainUsername(null)
-                            }}
-                          >
-                            <LogOut size={16} className="mr-2" /> Log Out
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : showCreateProfile ? (
-                <CreateProfileContainer
-                  setIsProfileCreated={handleProfileCreated}
-                  setProfileUsername={setProfileUsername}
-                />
-              ) : (
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  {getLoadingMessage()}
-                  {loadingTimeout && (
+                {isDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 rounded-md border bg-popover p-1 shadow-md">
                     <button
-                      onClick={() => window.location.reload()}
-                      className="text-xs underline hover:opacity-80"
+                      onClick={() => {
+                        router.push(`/${userProfile}`)
+                        setIsDropdownOpen(false)
+                      }}
+                      className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                     >
-                      Refresh
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
                     </button>
-                  )}
-                </div>
-              )
+                    
+                    {walletAddress && (
+                      <button
+                        onClick={() => handleCopy(walletAddress)}
+                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                      >
+                        {copied ? (
+                          <Check className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Clipboard className="mr-2 h-4 w-4" />
+                        )}
+                        {copied ? 'Copied!' : abbreviateWalletAddress({ address: walletAddress })}
+                      </button>
+                    )}
+
+                    <div className="my-1 h-px bg-border" />
+                    
+                    <button
+                      onClick={() => {
+                        logout()
+                        setIsDropdownOpen(false)
+                        setUserProfile(null)
+                        setShowCreateProfile(false)
+                      }}
+                      className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : showCreateProfile ? (
+              <CreateProfileContainer
+                setIsProfileCreated={handleProfileCreated}
+                setProfileUsername={handleProfileUsername}
+              />
             ) : (
               <Button
-                variant="ghost"
-                className='!text-green-500'
-                disabled={disableLogin}
-                onClick={login}
+                onClick={handleLogin}
+                disabled={!ready}
+                className="flex items-center space-x-2"
               >
-                <LogIn className="h-4 w-4 mr-2" /> Log in
+                <LogIn className="h-4 w-4" />
+                <span>{authenticated && userProfile ? userProfile : 'Log in'}</span>
               </Button>
             )}
 
-            <div className="flex items-center gap-2">
+            {ready && authenticated && userProfile && (
               <DialectNotificationComponent />
-              <Link
-                href="https://github.com/Primitives-xyz/solana-starter-kit"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:opacity-80 flex items-center"
-              >
-                <Image
-                  width={20}
-                  height={20}
-                  alt="Github link"
-                  src="/logos/github-mark.svg"
-                />
-              </Link>
-            </div>
-          </nav>
+            )}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }

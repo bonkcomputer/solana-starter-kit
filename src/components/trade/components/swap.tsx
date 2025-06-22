@@ -15,7 +15,7 @@ import {
   formatRawAmount,
   formatUsdValue,
 } from '@/utils/format'
-import { useSolanaWallets, useLogin } from '@privy-io/react-auth'
+import { useSolanaWallets, useLogin, usePrivy } from '@privy-io/react-auth'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { SOL_MINT, BCT_MINT } from '../constants'
@@ -58,9 +58,10 @@ interface SwapProps {
 }
 
 export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
-  const { replace } = useRouter()
-  const { walletAddress } = useCurrentWallet()
+  const { replace, push } = useRouter()
+  const { walletAddress, mainUsername } = useCurrentWallet()
   const { ready, wallets } = useSolanaWallets()
+  const { authenticated } = usePrivy()
   const { login } = useLogin()
   const wallet = wallets[0]
   const searchParams = useSearchParams()
@@ -358,11 +359,19 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
           <Button
             variant={ButtonVariant.OUTLINE}
             size={ButtonSize.LG}
-            disabled={loading}
-            onClick={login}
+            disabled={!ready}
+            onClick={() => {
+              // If already authenticated and has profile, go to profile
+              if (authenticated && mainUsername) {
+                push(`/${mainUsername}`)
+              } else {
+                // Otherwise, trigger login
+                login()
+              }
+            }}
             className="rounded-full w-full"
           >
-            Go to Login to swap
+            {!ready ? 'Loading...' : authenticated && mainUsername ? `Go to ${mainUsername}` : 'Go to Login to swap'}
           </Button>
         )}
       </div>
