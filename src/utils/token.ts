@@ -315,13 +315,10 @@ export async function getCreateATAInstructions(
     tokenProgram,
   )
 
-  const computeUnitLimitInstruction = ComputeBudgetProgram.setComputeUnitLimit({
-    units: 32_000,
-  })
-
+  // Don't add compute unit limit here as Jupiter already includes it
   return {
     ata,
-    instructions: [computeUnitLimitInstruction, createInstruction],
+    instructions: [createInstruction],
     needsCreation: true,
   }
 }

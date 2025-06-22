@@ -53,6 +53,8 @@ export const DEFAULT_SLIPPAGE_VALUE = 50 // 0.5% as base value when needed
 export const PLATFORM_FEE_BPS = 80
 export const PLATFORM_FEE_ACCOUNT =
   '8jTiTDW9ZbMHvAD9SZWvhPfRx5gUgK7HACMdgbFp2tUz'
+export const REFERRAL_ACCOUNT = '3i9DA5ddTXwDLdaKRpK9BA4oXumVpPWWGuyD3YKxPs1j'
+export const REFERRAL_FEE_BPS = 251 // 2.51% referral fee
 
 export function useJupiterSwap({
   inputMint,
@@ -187,34 +189,50 @@ export function useJupiterSwap({
     )
 
     try {
-      const response = await fetch('/api/jupiter/swap', {
+      // Use Jupiter's direct swap API with referral parameters
+      const swapResponse = await fetch('https://quote-api.jup.ag/v6/swap', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           quoteResponse,
-          walletAddress,
-          mintAddress: outputMint,
-          slippageMode: 'auto',
+          userPublicKey: walletAddress,
+          wrapAndUnwrapSol: true,
           slippageBps: calculateAutoSlippage(priceImpact),
-          swapMode,
+          prioritizationFeeLamports: 10000, // Basic priority fee
+          dynamicComputeUnitLimit: true,
+          referralAccount: REFERRAL_ACCOUNT,
+          referralFeeBps: REFERRAL_FEE_BPS,
         }),
-      }).then((res) => res.json())
+      })
 
-      if (response.error) {
+      if (!swapResponse.ok) {
+        const errorData = await swapResponse.json()
         toast.dismiss(preparingToastId)
         toast.error(
           ERRORS.JUP_SWAP_API_ERR.title,
           ERRORS.JUP_SWAP_API_ERR.content,
         )
-        console.error('Jupiter swap error:', response.error)
+        console.error('Jupiter swap error:', errorData.error || swapResponse.statusText)
         return
       }
 
-      const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL || '')
+      const { swapTransaction } = await swapResponse.json()
+      
+      if (!swapTransaction) {
+        toast.dismiss(preparingToastId)
+        toast.error(
+          ERRORS.JUP_SWAP_API_ERR.title,
+          ERRORS.JUP_SWAP_API_ERR.content,
+        )
+        console.error('No swap transaction returned from Jupiter API')
+        return
+      }
+
+      const connection = new Connection(process.env.NEXT_PUBLIC_RPC_URL || 'https://api.mainnet-beta.solana.com')
       const transaction = VersionedTransaction.deserialize(
-        Buffer.from(response.transaction, 'base64'),
+        Buffer.from(swapTransaction, 'base64'),
       )
 
       toast.dismiss(preparingToastId)
@@ -341,3 +359,5 @@ function calculateAutoSlippage(priceImpactPct: string): number {
   if (impact <= 5.0) return 1000 // 10% slippage for very high impact
   return 1500 // 15% slippage for extreme impact
 }
+
+
