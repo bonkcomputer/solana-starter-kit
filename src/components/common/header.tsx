@@ -472,8 +472,6 @@ export function Header() {
                         setShowCreateProfile(false)
                         
                         // Clear any cached data in localStorage (except Computer state)
-                        const computerState = localStorage.getItem('bct-computer-on')
-                        
                         // Clear all localStorage except computer state
                         const keysToKeep = ['bct-computer-on']
                         const allKeys = Object.keys(localStorage)
