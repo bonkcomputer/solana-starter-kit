@@ -17,10 +17,29 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Trading Computer - A Modern Solana Trading Platform by Bonk Computer',
-  description:
-    'Trade Solana tokens with the most modern and efficient swap computer',
-}
+  title: "BonkComputer: Community Center",
+  description: "The First Meme Powered Community dApp with shared Virtual Machines and Social features by Tapestry. Built on Solana, Bonk Computer Utilizes $BCT, and in some cases $SOL and $BONK, to measure,quantify, and provide secure compute that transcends boundaries and creates new unthought of before possibilities for creating, collaborating, and sharing experiences. Bonk Computer, and $BCT, blew up as the hottest meme coin on Solana since the launch on the letsBONK.fun launchpad.  BCT attracted developers and tech enthusiasts who organized and formed the most active community in meme coins. With so many things coming up for BCT and Bonk Computer, value of the project will catch up to this pure explosion of adoption of the private secure VM and ai technologies provided and currently being utilized by so many people! Join our awesome organic and rapidly growing community now, and be a part of the future of the internet!",
+  openGraph: {
+    title: "BonkComputer: Community Center",
+    description: "The First Meme Powered Community dApp with shared Virtual Machines and Social features by Tapestry. Built on Solana, Bonk Computer Utilizes $BCT, and in some cases $SOL and $BONK, to measure,quantify, and provide secure compute that transcends boundaries and creates new unthought of before possibilities for creating, collaborating, and sharing experiences. Bonk Computer, and $BCT, blew up as the hottest meme coin on Solana since the launch on the letsBONK.fun launchpad.  BCT attracted developers and tech enthusiasts who organized and formed the most active community in meme coins. With so many things coming up for BCT and Bonk Computer, value of the project will catch up to this pure explosion of adoption of the private secure VM and ai technologies provided and currently being utilized by so many people! Join our awesome organic and rapidly growing community now, and be a part of the future of the internet!",
+    siteName: "BonkComputer: Community Center",
+    url: "https://www.cc.bonk.computer",
+    images: [
+      {
+        url: "/public/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Bonk Computer Community Center - The First Community Virtual Machine built with $BCT on Solana",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+      title: "BonkComputer: Community Center",
+    description: "The First Meme Powered Community dApp with shared Virtual Machines and Social features by Tapestry. Built on Solana, Bonk Computer Utilizes $BCT, and in some cases $SOL and $BONK, to measure,quantify, and provide secure compute that transcends boundaries and creates new unthought of before possibilities for creating, collaborating, and sharing experiences. Bonk Computer, and $BCT, blew up as the hottest meme coin on Solana since the launch on the letsBONK.fun launchpad.  BCT attracted developers and tech enthusiasts who organized and formed the most active community in meme coins. With so many things coming up for BCT and Bonk Computer, value of the project will catch up to this pure explosion of adoption of the private secure VM and ai technologies provided and currently being utilized by so many people! Join our awesome organic and rapidly growing community now, and be a part of the future of the internet!",
+    images: ["/public/twitter-image.png"],
+  },
+};
 
 export default function RootLayout({
   children,
