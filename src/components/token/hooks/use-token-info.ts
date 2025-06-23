@@ -54,21 +54,59 @@ export function useTokenInfo(id: string) {
           setError(null)
         }
 
-        // Fetch additional market data from Jupiter for all tokens
+        // Fetch real-time price and market data from Jupiter
         try {
           const priceResponse = await fetch(`https://api.jup.ag/price/v2?ids=${id}`)
           if (priceResponse.ok) {
             const priceData = await priceResponse.json()
             const tokenData = priceData.data?.[id]
             if (tokenData && isMounted) {
-              setJupiterMarketData({
-                price: parseFloat(tokenData.price || '0'),
-                marketCap: parseFloat(tokenData.marketCapFD || '0')
-              })
+              const tokenPrice = parseFloat(tokenData.price || '0')
+              
+              // For SOL, we know the circulating supply
+              if (id === 'So11111111111111111111111111111111111111112') {
+                const solCirculatingSupply = 570000000
+                setJupiterMarketData({
+                  price: tokenPrice,
+                  marketCap: tokenPrice * solCirculatingSupply
+                })
+              } else {
+                // For other tokens, try to get market cap from DexScreener API
+                try {
+                  const dexScreenerResponse = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${id}`)
+                  if (dexScreenerResponse.ok) {
+                    const dexData = await dexScreenerResponse.json()
+                    if (dexData.pairs && dexData.pairs.length > 0 && isMounted) {
+                      // Get the pair with highest liquidity
+                      const bestPair = dexData.pairs.reduce((prev: any, current: any) => 
+                        (current.liquidity?.usd || 0) > (prev.liquidity?.usd || 0) ? current : prev
+                      )
+                      
+                      const marketCap = bestPair.fdv || bestPair.marketCap || 0
+                      setJupiterMarketData({
+                        price: tokenPrice,
+                        marketCap: marketCap
+                      })
+                    } else {
+                      // If no market cap data available, just set price
+                      setJupiterMarketData({
+                        price: tokenPrice,
+                        marketCap: 0
+                      })
+                    }
+                  }
+                } catch (dexErr) {
+                  console.warn('Failed to fetch market cap from DexScreener:', dexErr)
+                  setJupiterMarketData({
+                    price: tokenPrice,
+                    marketCap: 0
+                  })
+                }
+              }
             }
           }
         } catch (jupiterErr) {
-          console.warn('Failed to fetch market data from Jupiter:', jupiterErr)
+          console.warn('Failed to fetch price from Jupiter:', jupiterErr)
         }
       } catch (err) {
         if (isMounted) {
@@ -127,6 +165,8 @@ export function useTokenInfo(id: string) {
       supply = tokenInfo.result.token_info?.supply || 0
       decimals = tokenInfo.result.token_info?.decimals || 0
       marketCap = (supply * price) / 10 ** decimals
+      
+
 
       // Format price based on magnitude
       if (price < 0.000001) {
@@ -139,7 +179,22 @@ export function useTokenInfo(id: string) {
         formattedPrice = price.toFixed(2)
       }
       
-      formattedMarketCap = `${(marketCap / 1_000_000).toFixed(2)}M`
+
+      
+      if (marketCap > 0) {
+        // Format market cap based on size
+        if (marketCap >= 1e9) {
+          formattedMarketCap = `${(marketCap / 1e9).toFixed(2)}B`
+        } else if (marketCap >= 1e6) {
+          formattedMarketCap = `${(marketCap / 1e6).toFixed(2)}M`
+        } else if (marketCap >= 1e3) {
+          formattedMarketCap = `${(marketCap / 1e3).toFixed(2)}K`
+        } else {
+          formattedMarketCap = `${marketCap.toFixed(2)}`
+        }
+      } else {
+        formattedMarketCap = 'N/A'
+      }
     }
 
     // Use Jupiter data if available (for better price and market cap accuracy)
@@ -159,7 +214,9 @@ export function useTokenInfo(id: string) {
       }
       
       // Format market cap based on size
-      if (marketCap >= 1e12) {
+      if (marketCap === 0) {
+        formattedMarketCap = 'N/A'
+      } else if (marketCap >= 1e12) {
         formattedMarketCap = `${(marketCap / 1e12).toFixed(2)}T`
       } else if (marketCap >= 1e9) {
         formattedMarketCap = `${(marketCap / 1e9).toFixed(2)}B`
@@ -168,7 +225,7 @@ export function useTokenInfo(id: string) {
       } else if (marketCap >= 1e3) {
         formattedMarketCap = `${(marketCap / 1e3).toFixed(2)}K`
       } else {
-        formattedMarketCap = marketCap.toFixed(2)
+        formattedMarketCap = `${marketCap.toFixed(2)}`
       }
     }
   }
