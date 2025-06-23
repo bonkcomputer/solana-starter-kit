@@ -163,8 +163,8 @@ export function Header() {
     // If already authenticated and has profile, go to profile
     if (authenticated && userProfile) {
       router.push(`/${userProfile}`)
-    } else {
-      // Otherwise, trigger login
+    } else if (!authenticated) {
+      // Only trigger login if not authenticated
       login()
     }
   }
@@ -465,11 +465,32 @@ export function Header() {
                     <div className="my-1 h-px bg-border" />
                     
                     <button
-                      onClick={() => {
-                        logout()
+                      onClick={async () => {
+                        // Clear all local state first
                         setIsDropdownOpen(false)
                         setUserProfile(null)
                         setShowCreateProfile(false)
+                        
+                        // Clear any cached data in localStorage (except Computer state)
+                        const computerState = localStorage.getItem('bct-computer-on')
+                        
+                        // Clear all localStorage except computer state
+                        const keysToKeep = ['bct-computer-on']
+                        const allKeys = Object.keys(localStorage)
+                        allKeys.forEach(key => {
+                          if (!keysToKeep.includes(key)) {
+                            localStorage.removeItem(key)
+                          }
+                        })
+                        
+                        // Clear session storage
+                        sessionStorage.clear()
+                        
+                        // Call Privy logout
+                        await logout()
+                        
+                        // Navigate to home page
+                        router.push('/')
                       }}
                       className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                     >

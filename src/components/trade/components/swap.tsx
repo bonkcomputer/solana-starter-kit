@@ -360,29 +360,29 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
             {loading ? <Spinner /> : 'Execute Swap'}
           </Button>
         ) : (
-                      <Button
-              variant={ButtonVariant.OUTLINE}
-              size={ButtonSize.LG}
-              disabled={!ready}
-              onClick={() => {
-                console.log('Login button clicked - Debug info:')
-                console.log('ready:', ready)
-                console.log('authenticated:', authenticated)
-                console.log('mainUsername:', mainUsername)
-                console.log('wallets:', wallets)
-                
-                // If already authenticated and has profile, go to profile
-                if (authenticated && mainUsername) {
-                  push(`/${mainUsername}`)
-                } else {
-                  // Otherwise, trigger login
-                  login()
-                }
-              }}
-              className="rounded-full w-full"
-            >
-              {!ready ? 'Loading...' : authenticated && mainUsername ? `Go to ${mainUsername}` : 'Login to Swap'}
-            </Button>
+          <Button
+            variant={ButtonVariant.OUTLINE}
+            size={ButtonSize.LG}
+            disabled={!ready}
+            onClick={() => {
+              console.log('Login button clicked - Debug info:')
+              console.log('ready:', ready)
+              console.log('authenticated:', authenticated)
+              console.log('mainUsername:', mainUsername)
+              console.log('wallets:', wallets)
+              
+              // If already authenticated and has profile, go to profile
+              if (authenticated && mainUsername) {
+                push(`/${mainUsername}`)
+              } else if (!authenticated) {
+                // Only trigger login if not authenticated
+                login()
+              }
+            }}
+            className="rounded-full w-full"
+          >
+            {!ready ? 'Loading...' : authenticated && mainUsername ? `Go to ${mainUsername}` : 'Login to Swap'}
+          </Button>
         )}
       </div>
 

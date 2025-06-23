@@ -10,7 +10,7 @@ export function useCurrentWallet() {
   const [mainUsername, setMainUsername] = useState<string | null>(null)
   const [loadingMainUsername, setLoadingMainUsername] = useState(false)
 
-  // Handle wallet detection
+  // Handle wallet detection and clear state on logout
   useEffect(() => {
     if (!ready) {
       setLoadingMainUsername(true)
@@ -18,6 +18,7 @@ export function useCurrentWallet() {
     }
 
     if (!authenticated) {
+      // Clear all state when user logs out
       setWalletAddress('')
       setMainUsername(null)
       setLoadingMainUsername(false)
@@ -34,6 +35,13 @@ export function useCurrentWallet() {
       setLoadingMainUsername(false)
     }
   }, [wallets, ready, authenticated])
+
+  // Clear username when authentication changes
+  useEffect(() => {
+    if (!authenticated && mainUsername) {
+      setMainUsername(null)
+    }
+  }, [authenticated, mainUsername])
 
   // Manual profile check function (not automatic)
   const checkProfile = async () => {
