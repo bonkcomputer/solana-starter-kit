@@ -11,6 +11,7 @@ export function useTokenInfo(id: string) {
   const [tokenInfo, setTokenInfo] = useState<TokenResponse | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
+  const [jupiterMarketData, setJupiterMarketData] = useState<{ price: number; marketCap: number } | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -52,6 +53,23 @@ export function useTokenInfo(id: string) {
           setTokenInfo(data)
           setError(null)
         }
+
+        // Fetch additional market data from Jupiter for all tokens
+        try {
+          const priceResponse = await fetch(`https://api.jup.ag/price/v2?ids=${id}`)
+          if (priceResponse.ok) {
+            const priceData = await priceResponse.json()
+            const tokenData = priceData.data?.[id]
+            if (tokenData && isMounted) {
+              setJupiterMarketData({
+                price: parseFloat(tokenData.price || '0'),
+                marketCap: parseFloat(tokenData.marketCapFD || '0')
+              })
+            }
+          }
+        } catch (jupiterErr) {
+          console.warn('Failed to fetch market data from Jupiter:', jupiterErr)
+        }
       } catch (err) {
         if (isMounted) {
           setError(err instanceof Error ? err.message : 'Unknown error')
@@ -81,6 +99,7 @@ export function useTokenInfo(id: string) {
   let decimals = 0
   let marketCap = 0
   let name = 'Unknown Token'
+  let symbol = ''
   let imageUrl = ''
   let formattedPrice = '0.000000'
   let formattedMarketCap = '0.00M'
@@ -88,10 +107,17 @@ export function useTokenInfo(id: string) {
   if (tokenInfo?.result) {
     const content = tokenInfo.result.content
     name = content?.metadata?.name || 'Unknown Token'
+    symbol = content?.metadata?.symbol || ''
     
     // Override "Wrapped SOL" to just "SOL"
     if (id === 'So11111111111111111111111111111111111111112' || name === 'Wrapped SOL') {
       name = 'SOL'
+      symbol = 'SOL'
+    }
+    
+    // For fungible tokens, also check token_info for symbol
+    if ('token_info' in tokenInfo.result && tokenInfo.result.token_info?.symbol) {
+      symbol = tokenInfo.result.token_info.symbol
     }
     
     imageUrl = content?.links?.image || content?.files?.[0]?.uri || ''
@@ -102,8 +128,48 @@ export function useTokenInfo(id: string) {
       decimals = tokenInfo.result.token_info?.decimals || 0
       marketCap = (supply * price) / 10 ** decimals
 
-      formattedPrice = price.toFixed(6)
+      // Format price based on magnitude
+      if (price < 0.000001) {
+        formattedPrice = price.toExponential(2)
+      } else if (price < 0.01) {
+        formattedPrice = price.toFixed(6)
+      } else if (price < 1) {
+        formattedPrice = price.toFixed(4)
+      } else {
+        formattedPrice = price.toFixed(2)
+      }
+      
       formattedMarketCap = `${(marketCap / 1_000_000).toFixed(2)}M`
+    }
+
+    // Use Jupiter data if available (for better price and market cap accuracy)
+    if (jupiterMarketData) {
+      price = jupiterMarketData.price
+      marketCap = jupiterMarketData.marketCap
+      
+      // Format price based on magnitude
+      if (price < 0.000001) {
+        formattedPrice = price.toExponential(2)
+      } else if (price < 0.01) {
+        formattedPrice = price.toFixed(6)
+      } else if (price < 1) {
+        formattedPrice = price.toFixed(4)
+      } else {
+        formattedPrice = price.toFixed(2)
+      }
+      
+      // Format market cap based on size
+      if (marketCap >= 1e12) {
+        formattedMarketCap = `${(marketCap / 1e12).toFixed(2)}T`
+      } else if (marketCap >= 1e9) {
+        formattedMarketCap = `${(marketCap / 1e9).toFixed(2)}B`
+      } else if (marketCap >= 1e6) {
+        formattedMarketCap = `${(marketCap / 1e6).toFixed(2)}M`
+      } else if (marketCap >= 1e3) {
+        formattedMarketCap = `${(marketCap / 1e3).toFixed(2)}K`
+      } else {
+        formattedMarketCap = marketCap.toFixed(2)
+      }
     }
   }
 
@@ -116,6 +182,7 @@ export function useTokenInfo(id: string) {
     decimals,
     marketCap: formattedMarketCap,
     name,
+    symbol,
     imageUrl,
   }
 }

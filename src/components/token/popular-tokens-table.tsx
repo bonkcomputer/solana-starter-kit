@@ -8,6 +8,23 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo } from 'react'
 
+// Token address to symbol mapping
+const TOKEN_SYMBOLS: Record<string, string> = {
+  'So11111111111111111111111111111111111111112': 'SOL',
+  'D3CVUkqyXZKgVBdRD7XfuRxQXFKJ86474XyFZrqAbonk': 'BCT',
+  'H4phNbsqjV5rqk8u6FUACTLB6rNZRTAPGnBb8KXJpump': 'SSE',
+  '3NZ9JMVBmGAqocybic2c7LQCJScmgsAZ6vQqTDzcqmJh': 'WBTC',
+  '7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs': 'WETH',
+  '4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R': 'RAY',
+  'HeLp6NuQkmYB4pYWo2zYs22mESHXPQYzXbB8n4V98jwC': 'AI16Z',
+  '61V8vBaqAGMpgDQi4JcAwo1dmBGHsyhzodcPqnEVpump': 'AIRIG',
+  '7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr': 'POPCAT',
+  'EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm': 'WIF',
+  'EqQFU4AoRVKJjQrpshmp89YxHAgNecCpJdMS8PJLpump': 'DOGWIFHAT',
+  '2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv': 'PNUT',
+  'HNg5PYJmtqcmzXrv6S9zP1CDKk5BgDuyFBxbvNApump': 'CHILLGUY',
+}
+
 export function PopularTokensTable() {
   // Use the same token list as in the TokenContainer component
   const tokenList = [
@@ -99,11 +116,19 @@ function TokenRow({
     generateRandomChange(-10, 20, index * 100 + 2),
   )
 
-  // Get symbol from name or use a placeholder
+  // Get symbol from mapping or extract from metadata
   const symbol = useMemo(() => {
-    if (tokenId === 'So11111111111111111111111111111111111111112') return 'SOL'
+    // First check our known token mapping
+    if (TOKEN_SYMBOLS[tokenId]) {
+      return TOKEN_SYMBOLS[tokenId]
+    }
+    // If token has symbol from metadata, use it
+    if (token.symbol) {
+      return token.symbol
+    }
+    // Fallback to extracting from name
     return token.name?.split(' ')[0]?.toUpperCase() || '...'
-  }, [tokenId, token.name])
+  }, [tokenId, token.name, token.symbol])
 
   return (
     <tr className="border-b border-border hover:bg-card/50">
