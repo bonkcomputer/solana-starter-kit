@@ -1,5 +1,6 @@
 // import { isSolanaWallet } from '@dynamic-labs/solana'
 import { useToastContent } from '@/components/starterkit/hooks/use-toast-content'
+import { JUPITER_CONFIG } from '@/config/jupiter'
 import { ConnectedSolanaWallet } from '@privy-io/react-auth'
 import { Connection, VersionedTransaction } from '@solana/web3.js'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -48,17 +49,11 @@ interface QuoteResponse {
   simplerRouteUsed?: boolean
 }
 
+// Re-export from centralized config
 export const DEFAULT_SLIPPAGE_BPS = 'auto' // Default to auto slippage
-export const DEFAULT_SLIPPAGE_VALUE = 50 // 0.5% as base value when needed
-
-// Jupiter v6 API uses platformFeeBps in the quote API for fee collection
-// The fee is taken from the output amount of the swap
-export const REFERRAL_ACCOUNT = '3i9DA5ddTXwDLdaKRpK9BA4oXumVpPWWGuyD3YKxPs1j'
-export const REFERRAL_FEE_BPS = 251 // 2.51% referral fee
-
-// Legacy platform fee constants (kept for reference)
-// export const PLATFORM_FEE_BPS = 80
-// export const PLATFORM_FEE_ACCOUNT = '8jTiTDW9ZbMHvAD9SZWvhPfRx5gUgK7HACMdgbFp2tUz'
+export const DEFAULT_SLIPPAGE_VALUE = JUPITER_CONFIG.DEFAULT_SLIPPAGE_BPS
+export const REFERRAL_ACCOUNT = JUPITER_CONFIG.REFERRAL_ACCOUNT
+export const REFERRAL_FEE_BPS = JUPITER_CONFIG.REFERRAL_FEE_BPS
 
 export function useJupiterSwap({
   inputMint,
@@ -119,7 +114,7 @@ export function useJupiterSwap({
       )
       // Note: We use platformFeeBps in the quote to ensure consistent fee calculation
       // Jupiter v6 doesn't support both platform and referral fees simultaneously
-      const QUOTE_URL = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${inputAmountInDecimals}&slippageBps=${DEFAULT_SLIPPAGE_VALUE}&platformFeeBps=${REFERRAL_FEE_BPS}&feeAccount=${REFERRAL_ACCOUNT}&swapMode=${swapMode}`
+      const QUOTE_URL = `${JUPITER_CONFIG.API_ENDPOINTS.QUOTE}?inputMint=${inputMint}&outputMint=${outputMint}&amount=${inputAmountInDecimals}&slippageBps=${DEFAULT_SLIPPAGE_VALUE}&platformFeeBps=${REFERRAL_FEE_BPS}&feeAccount=${REFERRAL_ACCOUNT}&swapMode=${swapMode}`
       
       const response = await fetch(QUOTE_URL)
       
@@ -196,7 +191,7 @@ export function useJupiterSwap({
 
     try {
       // Use Jupiter's direct swap API with referral parameters
-      const swapResponse = await fetch('https://quote-api.jup.ag/v6/swap', {
+      const swapResponse = await fetch(JUPITER_CONFIG.API_ENDPOINTS.SWAP, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -206,7 +201,7 @@ export function useJupiterSwap({
           userPublicKey: walletAddress,
           wrapAndUnwrapSol: true,
           slippageBps: calculateAutoSlippage(priceImpact),
-          prioritizationFeeLamports: 10000, // Basic priority fee
+          prioritizationFeeLamports: JUPITER_CONFIG.DEFAULT_PRIORITY_FEE_LAMPORTS,
           dynamicComputeUnitLimit: true,
           // Note: Fee parameters are already included in the quoteResponse from the quote API
           // Jupiter v6 uses platformFeeBps from the quote, not referral parameters in swap
@@ -350,7 +345,7 @@ export function useJupiterSwap({
 
       // Add timeout to prevent infinite pending
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Transaction confirmation timeout')), 60000) // 60 second timeout
+        setTimeout(() => reject(new Error('Transaction confirmation timeout')), JUPITER_CONFIG.TRANSACTION_TIMEOUT_MS)
       )
       
       const tx = await Promise.race([
@@ -467,16 +462,18 @@ export function useJupiterSwap({
 function calculateAutoSlippage(priceImpactPct: string): number {
   const impact = Math.abs(parseFloat(priceImpactPct))
 
-  // Default to 0.5% (50 bps) if no price impact or invalid
-  if (!impact || isNaN(impact)) return 50
+  // Default to base slippage if no price impact or invalid
+  if (!impact || isNaN(impact)) return JUPITER_CONFIG.DEFAULT_SLIPPAGE_BPS
 
-  // Scale slippage based on price impact
-  if (impact <= 0.1) return 50 // 0.5% slippage for very low impact
-  if (impact <= 0.5) return 100 // 1% slippage for low impact
-  if (impact <= 1.0) return 200 // 2% slippage for medium impact
-  if (impact <= 2.0) return 500 // 5% slippage for high impact
-  if (impact <= 5.0) return 1000 // 10% slippage for very high impact
-  return 1500 // 15% slippage for extreme impact
+  // Scale slippage based on price impact using config tiers
+  const { SLIPPAGE_TIERS } = JUPITER_CONFIG
+  
+  if (impact <= SLIPPAGE_TIERS.VERY_LOW.maxImpact) return SLIPPAGE_TIERS.VERY_LOW.slippage
+  if (impact <= SLIPPAGE_TIERS.LOW.maxImpact) return SLIPPAGE_TIERS.LOW.slippage
+  if (impact <= SLIPPAGE_TIERS.MEDIUM.maxImpact) return SLIPPAGE_TIERS.MEDIUM.slippage
+  if (impact <= SLIPPAGE_TIERS.HIGH.maxImpact) return SLIPPAGE_TIERS.HIGH.slippage
+  if (impact <= SLIPPAGE_TIERS.VERY_HIGH.maxImpact) return SLIPPAGE_TIERS.VERY_HIGH.slippage
+  return SLIPPAGE_TIERS.EXTREME.slippage
 }
 
 
