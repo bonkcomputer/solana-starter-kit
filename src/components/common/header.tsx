@@ -58,8 +58,20 @@ export function Header() {
   const rewardsButtonRef = useRef<HTMLDivElement>(null)
   const rewardsIntervalRef = useRef<NodeJS.Timeout | null>(null)
   const [showHomeTooltip, setShowHomeTooltip] = useState(false)
-  const [showSwapTooltip, setShowSwapTooltip] = useState(false)
-  const [showComputerTooltip, setShowComputerTooltip] = useState(false)
+  const [showSwapModal, setShowSwapModal] = useState(false)
+  const [swapNumbers, setSwapNumbers] = useState({
+    revenue: '0.00',
+    transactions: '0'
+  })
+  const swapButtonRef = useRef<HTMLDivElement>(null)
+  const swapIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [showComputerModal, setShowComputerModal] = useState(false)
+  const [computerNumbers, setComputerNumbers] = useState({
+    activeUsers: '0',
+    uptime: '0.0%'
+  })
+  const computerButtonRef = useRef<HTMLDivElement>(null)
+  const computerIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
@@ -241,6 +253,56 @@ export function Header() {
     window.open('https://x.com/bonkcomputer', '_blank')
   }
 
+  // Animated swap stats effect
+  useEffect(() => {
+    if (showSwapModal) {
+      // Start the animated swap stats
+      swapIntervalRef.current = setInterval(() => {
+        setSwapNumbers({
+          revenue: `$${(Math.random() * 99999.99).toFixed(2)}`,
+          transactions: Math.floor(Math.random() * 999999).toLocaleString()
+        })
+      }, 100) // Update every 100ms for fast animation
+    } else {
+      // Clear interval when modal is hidden
+      if (swapIntervalRef.current) {
+        clearInterval(swapIntervalRef.current)
+        swapIntervalRef.current = null
+      }
+    }
+
+    return () => {
+      if (swapIntervalRef.current) {
+        clearInterval(swapIntervalRef.current)
+      }
+    }
+  }, [showSwapModal])
+
+  // Animated computer stats effect
+  useEffect(() => {
+    if (showComputerModal) {
+      // Start the animated computer stats
+      computerIntervalRef.current = setInterval(() => {
+        setComputerNumbers({
+          activeUsers: Math.floor(Math.random() * 9999).toLocaleString(),
+          uptime: `${(Math.random() * 100).toFixed(1)}%`
+        })
+      }, 100) // Update every 100ms for fast animation
+    } else {
+      // Clear interval when modal is hidden
+      if (computerIntervalRef.current) {
+        clearInterval(computerIntervalRef.current)
+        computerIntervalRef.current = null
+      }
+    }
+
+    return () => {
+      if (computerIntervalRef.current) {
+        clearInterval(computerIntervalRef.current)
+      }
+    }
+  }, [showComputerModal])
+
   return (
     <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center px-8">
@@ -284,9 +346,14 @@ export function Header() {
               )}
             </div>
             <div 
+              ref={swapButtonRef}
               className="relative"
-              onMouseEnter={() => setShowSwapTooltip(true)}
-              onMouseLeave={() => setShowSwapTooltip(false)}
+              onMouseEnter={() => {
+                setShowSwapModal(true)
+              }}
+              onMouseLeave={() => {
+                setShowSwapModal(false)
+              }}
             >
               <Link
                 className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
@@ -294,9 +361,21 @@ export function Header() {
               >
                 <Coins className="h-3.5 w-3.5" />
               </Link>
-              {showSwapTooltip && (
-                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded px-3 py-1.5 shadow-xl whitespace-nowrap z-50">
-                  <p className="text-xs text-muted-foreground">Click to Swap</p>
+              {/* Swap Stats Modal */}
+              {showSwapModal && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded-lg p-4 shadow-xl min-w-[250px] z-50">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-3">Support the Project</p>
+                    <div className="mb-3">
+                      <div className="text-2xl font-mono font-bold text-foreground">{swapNumbers.revenue}</div>
+                      <div className="text-sm text-muted-foreground">Generated Revenue</div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-2xl font-mono font-bold text-primary">{swapNumbers.transactions}</div>
+                      <div className="text-sm text-muted-foreground">Total Transactions</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Swap here to support BCT!</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -342,9 +421,14 @@ export function Header() {
 
             {/* Computer On/Off Button */}
             <div 
+              ref={computerButtonRef}
               className="relative"
-              onMouseEnter={() => setShowComputerTooltip(true)}
-              onMouseLeave={() => setShowComputerTooltip(false)}
+              onMouseEnter={() => {
+                setShowComputerModal(true)
+              }}
+              onMouseLeave={() => {
+                setShowComputerModal(false)
+              }}
             >
               <Button
                 onClick={handleComputerClick}
@@ -364,9 +448,23 @@ export function Header() {
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/10 to-transparent animate-pulse pointer-events-none" />
                 )}
               </Button>
-              {showComputerTooltip && (
-                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded px-3 py-1.5 shadow-xl whitespace-nowrap z-50">
-                  <p className="text-xs text-muted-foreground">Click to turn your Computer VM on</p>
+              
+              {/* Computer VM Stats Modal */}
+              {showComputerModal && (
+                <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-background/95 backdrop-blur border border-border rounded-lg p-4 shadow-xl min-w-[220px] z-50">
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground mb-2">BCT Computer VM</p>
+                    <p className="text-xs text-muted-foreground mb-3">{isComputerOn ? 'Status: ONLINE' : 'Status: OFFLINE'}</p>
+                    <div className="mb-3">
+                      <div className="text-2xl font-mono font-bold text-foreground">{computerNumbers.activeUsers}</div>
+                      <div className="text-sm text-muted-foreground">Active Users</div>
+                    </div>
+                    <div className="mb-3">
+                      <div className="text-2xl font-mono font-bold text-green-600">{computerNumbers.uptime}</div>
+                      <div className="text-sm text-muted-foreground">Uptime</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Click to {isComputerOn ? 'visit' : 'power on'}</p>
+                  </div>
                 </div>
               )}
             </div>
