@@ -498,7 +498,7 @@ export function Header() {
                   </div>
                 )}
               </div>
-            ) : showCreateProfile ? (
+            ) : (showCreateProfile && authenticated) ? (
               <CreateProfileContainer
                 setIsProfileCreated={handleProfileCreated}
                 setProfileUsername={handleProfileUsername}

@@ -249,6 +249,7 @@ export function useJupiterSwap({
         }
         
         console.error('Jupiter swap error:', errorData.error || swapResponse.statusText)
+        setLoading(false)
         return
       }
 
@@ -261,6 +262,7 @@ export function useJupiterSwap({
           ERRORS.JUP_SWAP_API_ERR.content,
         )
         console.error('No swap transaction returned from Jupiter API')
+        setLoading(false)
         return
       }
 
@@ -334,6 +336,7 @@ export function useJupiterSwap({
             description: signError.message || 'Unknown error occurred',
           })
         }
+        setLoading(false)
         return
       }
 
@@ -345,13 +348,21 @@ export function useJupiterSwap({
         LOADINGS.CONFIRM_LOADING.content,
       )
 
-      const tx = await connection.confirmTransaction(
-        {
-          signature: txSig,
-          ...(await connection.getLatestBlockhash()),
-        },
-        'confirmed',
+      // Add timeout to prevent infinite pending
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Transaction confirmation timeout')), 60000) // 60 second timeout
       )
+      
+      const tx = await Promise.race([
+        connection.confirmTransaction(
+          {
+            signature: txSig,
+            ...(await connection.getLatestBlockhash()),
+          },
+          'confirmed',
+        ),
+        timeoutPromise
+      ]) as any
 
       if (tx.value.err) {
         toast.dismiss(confirmToastId)
@@ -362,12 +373,30 @@ export function useJupiterSwap({
         toast.success(SUCCESS.TX_SUCCESS.title, SUCCESS.TX_SUCCESS.content)
         setIsFullyConfirmed(true)
       }
-    } catch (error) {
+    } catch (error: any) {
       toast.dismiss()
-      toast.error(ERRORS.TX_FAILED_ERR.title, ERRORS.TX_FAILED_ERR.content)
+      
+      // Check if it's a user rejection
+      if (error.message?.includes('User rejected') || 
+          error.message?.includes('rejected the request') ||
+          error.code === 4001) {
+        toast.error('Transaction Cancelled', {
+          description: 'You rejected the transaction request',
+          duration: 3000,
+        })
+      } else if (error.message?.includes('timeout')) {
+        toast.error('Transaction Timeout', {
+          description: `Transaction is taking longer than expected. Check the status here: https://solscan.io/tx/${txSignature}`,
+          duration: 10000,
+        })
+      } else {
+        toast.error(ERRORS.TX_FAILED_ERR.title, ERRORS.TX_FAILED_ERR.content)
+      }
+      
       console.error('Error in swap', error)
     } finally {
       setLoading(false)
+      setIsFullyConfirmed(false)
     }
   }
 

@@ -43,13 +43,34 @@ export function useCurrentWallet() {
     }
   }, [authenticated, mainUsername])
 
+  // Force clear cache on logout
+  useEffect(() => {
+    if (!authenticated && ready) {
+      // Clear any cached profile data
+      if ('caches' in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            if (name.includes('api')) {
+              caches.delete(name)
+            }
+          })
+        })
+      }
+    }
+  }, [authenticated, ready])
+
   // Manual profile check function (not automatic)
   const checkProfile = async () => {
     if (!walletAddress || !authenticated) return null
 
     try {
       setLoadingMainUsername(true)
-      const response = await fetch(`/api/profiles?walletAddress=${walletAddress}`)
+      const response = await fetch(`/api/profiles?walletAddress=${walletAddress}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      })
       const data = await response.json()
       
       if (data.profiles && data.profiles.length > 0) {
