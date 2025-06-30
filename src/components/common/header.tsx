@@ -164,7 +164,7 @@ export function Header() {
     setUserProfile(username)
   }
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     console.log('Header login button clicked - Debug info:')
     console.log('ready:', ready)
     console.log('authenticated:', authenticated)
@@ -177,7 +177,12 @@ export function Header() {
       router.push(`/${userProfile}`)
     } else if (!authenticated) {
       // Only trigger login if not authenticated
-      login()
+      try {
+        await login()
+        console.log('Login initiated successfully')
+      } catch (error) {
+        console.error('Login error:', error)
+      }
     }
   }
 
