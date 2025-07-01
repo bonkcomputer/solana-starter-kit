@@ -112,19 +112,25 @@ export async function GET(req: NextRequest) {
           if (tapestryResponse?.identities && Array.isArray(tapestryResponse.identities) && tapestryResponse.identities.length > 0) {
             console.log('Found profiles in Tapestry:', tapestryResponse.identities.length);
             // Return Tapestry profiles in expected format
-            const formattedTapestryProfiles = tapestryResponse.identities.map((identity: any) => ({
-              profile: {
-                username: identity.profiles?.[0]?.username || 'Unknown',
-                image: identity.profiles?.[0]?.image || null,
-                bio: identity.profiles?.[0]?.bio || null,
-              },
-              wallets: {
-                address: walletAddress,
-                embeddedAddress: null,
-              }
-            }));
+            const formattedTapestryProfiles = tapestryResponse.identities
+              .filter((identity: any) => identity.profiles?.[0]?.username) // Only include profiles with usernames
+              .map((identity: any) => ({
+                profile: {
+                  username: identity.profiles[0].username,
+                  image: identity.profiles[0]?.image || null,
+                  bio: identity.profiles[0]?.bio || null,
+                },
+                wallets: {
+                  address: walletAddress,
+                  embeddedAddress: null,
+                }
+              }));
             
-            return NextResponse.json({ profiles: formattedTapestryProfiles });
+            // Only return Tapestry profiles if we found valid profiles with usernames
+            if (formattedTapestryProfiles.length > 0) {
+              return NextResponse.json({ profiles: formattedTapestryProfiles });
+            }
+            // If no valid Tapestry profiles found, fall through to check local database
           }
         }
       } catch (tapestryError: any) {

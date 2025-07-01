@@ -23,6 +23,19 @@ export async function GET(req: NextRequest) {
   try {
     const response = await getTapestryIdentity({ walletAddress })
     console.log('Identities API response:', response)
+    
+    // Filter out identities without usernames to prevent 'Unknown' profiles
+    if (response?.identities && Array.isArray(response.identities)) {
+      const filteredIdentities = response.identities.filter((identity: any) => 
+        identity.profiles?.[0]?.username
+      )
+      
+      return NextResponse.json({
+        ...response,
+        identities: filteredIdentities
+      })
+    }
+    
     return NextResponse.json(response)
   } catch (error: any) {
     console.error('Error fetching profiles:', error)
