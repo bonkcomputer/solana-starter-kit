@@ -22,6 +22,7 @@ model User {
   image                 String?
   solanaWalletAddress   String?
   embeddedWalletAddress String?
+  lastUsernameChange    DateTime? // Track when username was last changed
   following             Follow[]  @relation("Followers")
   followers             Follow[]  @relation("Following")
   authoredComments      Comment[] @relation("AuthoredComments")

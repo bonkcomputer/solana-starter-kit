@@ -3,6 +3,7 @@
 import { Card } from '@/components/common/card'
 import { CopyPaste } from '@/components/common/copy-paste'
 import { Bio } from '@/components/profile/bio'
+import { UsernameEditor } from '@/components/profile/username-editor'
 import { useGetProfileInfo } from '@/components/profile/hooks/use-get-profile-info'
 import { User } from 'lucide-react'
 import Image from 'next/image'
@@ -13,6 +14,15 @@ interface Props {
 
 export function MyProfile({ username }: Props) {
   const { profile, refetch } = useGetProfileInfo(username)
+
+  const handleUsernameUpdate = (newUsername: string) => {
+    // Refresh profile data after username change
+    refetch()
+    // Optionally redirect to new username URL
+    if (typeof window !== 'undefined') {
+      window.location.href = `/${newUsername}`
+    }
+  }
 
   return (
     <Card>
@@ -47,6 +57,11 @@ export function MyProfile({ username }: Props) {
             {profile?.socialCounts.followers} followers |{' '}
             {profile?.socialCounts.following} following
           </p> */}
+          <UsernameEditor 
+            username={username} 
+            data={profile} 
+            onUsernameUpdate={handleUsernameUpdate}
+          />
           <Bio username={username} data={profile} refetch={refetch} />
         </div>
       </div>

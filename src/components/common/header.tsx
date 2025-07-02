@@ -128,7 +128,10 @@ export function Header() {
 
   // Simple profile management - check once when authentication state changes
   useEffect(() => {
+    console.log('🔄 Header useEffect - Auth state:', { ready, authenticated, walletAddress, mainUsername, showCreateProfile })
+    
     if (!ready || !authenticated) {
+      console.log('❌ Not ready or not authenticated, clearing state')
       setUserProfile(null)
       setShowCreateProfile(false)
       return
@@ -136,6 +139,7 @@ export function Header() {
 
     // If we already have a username, use it
     if (mainUsername) {
+      console.log('✅ Already have mainUsername:', mainUsername)
       setUserProfile(mainUsername)
       setShowCreateProfile(false)
       return
@@ -143,17 +147,28 @@ export function Header() {
 
     // If we have a wallet but no username, check for profile once
     if (walletAddress && !mainUsername) {
+      console.log('🔍 Checking profile for wallet:', walletAddress)
       checkProfile().then((username) => {
         if (username) {
+          console.log('✅ Found username:', username)
           setUserProfile(username)
           setShowCreateProfile(false)
         } else {
+          console.log('❓ No profile found, showing create profile dialog')
           // No profile found, show create profile dialog
           setShowCreateProfile(true)
         }
       })
     }
-  }, [ready, authenticated, walletAddress, mainUsername, checkProfile])
+  }, [ready, authenticated, walletAddress, mainUsername])
+
+  // Separate effect to ensure create profile dialog shows when needed
+  useEffect(() => {
+    if (ready && authenticated && walletAddress && !mainUsername && !userProfile) {
+      console.log('🔥 Force showing create profile dialog - conditions met')
+      setShowCreateProfile(true)
+    }
+  }, [ready, authenticated, walletAddress, mainUsername, userProfile])
 
   const handleProfileCreated = (username: string) => {
     setUserProfile(username)
@@ -528,6 +543,10 @@ export function Header() {
             <div className="h-6 w-px bg-yellow-600/30" />
             
             {/* Show username if logged in, otherwise show login button */}
+            {(() => {
+              console.log('🎨 Header render logic:', { ready, authenticated, userProfile, showCreateProfile })
+              return null
+            })()}
             {ready && authenticated && userProfile ? (
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -601,11 +620,28 @@ export function Header() {
                   </div>
                 )}
               </div>
-            ) : (showCreateProfile && authenticated) ? (
-              <CreateProfileContainer
-                setIsProfileCreated={handleProfileCreated}
-                setProfileUsername={handleProfileUsername}
-              />
+            ) : (showCreateProfile && authenticated && ready) ? (
+              <>
+                {console.log('🎯 Showing CreateProfileContainer')}
+                <CreateProfileContainer
+                  setIsProfileCreated={handleProfileCreated}
+                  setProfileUsername={handleProfileUsername}
+                />
+              </>
+                          ) : ready && authenticated && walletAddress && !userProfile ? (
+              <>
+                {console.log('🚨 Authenticated user without profile - should show create profile')}
+                <Button
+                  onClick={() => {
+                    console.log('🔧 Manual trigger: showing create profile dialog')
+                    setShowCreateProfile(true)
+                  }}
+                  className="bg-red-600 border border-red-500 text-white hover:bg-red-700 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
+                >
+                  <User className="h-3.5 w-3.5" />
+                  <span>Create Profile</span>
+                </Button>
+              </>
             ) : (
               <Button
                 onClick={handleLogin}
