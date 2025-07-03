@@ -4,7 +4,6 @@ import { Comments } from '@/components/profile/comments/comments'
 import { FollowList } from '@/components/profile/follow-list'
 import { MyProfile } from '@/components/profile/my-profile'
 import { DisplaySuggestedAndGlobal } from '@/components/suggested-and-creators-invite/hooks/display-suggested-and-global'
-import { getFollowers, getFollowing } from '@/lib/tapestry'
 import type { IGetSocialResponse } from '@/models/profile.models'
 import { PublicKey } from '@solana/web3.js'
 import { useEffect, useState } from 'react'
@@ -27,52 +26,41 @@ export function ProfileContent({ username }: Props) {
     async function init() {
       setIsLoading(true)
       try {
-        // Check if the input is a valid Solana public key
         let actualUsername = username
 
         try {
-          // If this succeeds, it's a valid public key
           new PublicKey(username)
-
-          // Look up profiles for this wallet address
           const profilesResponse = await fetch(
             `/api/profiles?walletAddress=${username}`,
           )
-          const profiles = await profilesResponse.json()
-
-          // If profiles exist, use the first one's username
-          if (profiles && profiles.length > 0) {
-            actualUsername = profiles[0].username
+          const profilesData = await profilesResponse.json()
+          if (profilesData.profiles && profilesData.profiles.length > 0) {
+            actualUsername = profilesData.profiles[0].username
             setProfileUsername(actualUsername)
           }
         } catch {
-          // Not a public key, use as username directly
           actualUsername = username
         }
 
-        // Fetch followers and following with better error handling
-        try {
-          const followersData = await getFollowers({
-            username: actualUsername,
-          })
-          setFollowers(followersData)
-        } catch (error) {
-          console.warn('Failed to fetch followers:', error)
+        const [followersResponse, followingResponse] = await Promise.all([
+          fetch(`/api/followers/list?username=${actualUsername}&type=followers`),
+          fetch(`/api/followers/list?username=${actualUsername}&type=following`)
+        ])
+
+        if (!followersResponse.ok || !followingResponse.ok) {
+          console.error("Failed to fetch social data")
           setFollowers({ profiles: [], page: 0, pageSize: 0 })
+          setFollowing({ profiles: [], page: 0, pageSize: 0 })
+          return
         }
 
-        try {
-          const followingData = await getFollowing({
-            username: actualUsername,
-          })
-          setFollowing(followingData)
-        } catch (error) {
-          console.warn('Failed to fetch following:', error)
-          setFollowing({ profiles: [], page: 0, pageSize: 0 })
-        }
+        const followersData = await followersResponse.json()
+        const followingData = await followingResponse.json()
+
+        setFollowers({ profiles: followersData.list, page: 0, pageSize: 0 })
+        setFollowing({ profiles: followingData.list, page: 0, pageSize: 0 })
       } catch (error) {
-        console.error('Error initializing profile:', error)
-        // Set default values on error
+        console.error('Failed to initialize profile content:', error)
         setFollowers({ profiles: [], page: 0, pageSize: 0 })
         setFollowing({ profiles: [], page: 0, pageSize: 0 })
       } finally {
@@ -80,16 +68,8 @@ export function ProfileContent({ username }: Props) {
       }
     }
 
-    init()
-  }, [username])
-
-  // Add special case handling for the wallet address the user is trying to view
-  // Special case handling for specific wallet
-  useEffect(() => {
-    if (username === '8jTiTDW9ZbMHvAD9SZWvhPfRx5gUgK7HACMdgbFp2tUz') {
-      console.log('Special case detected in profile content')
-      setProfileUsername('8jTiTDW9ZbMHvAD9SZWvhPfRx5gUgK7HACMdgbFp2tUz')
-      setIsLoading(false)
+    if (username) {
+      init()
     }
   }, [username])
 

@@ -1,17 +1,71 @@
 import { prisma } from '@/lib/prisma'
-import { createTapestryComment } from '@/lib/tapestry'
+import { createTapestryComment, getTapestryCommentsAndLikes } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 // GET handler for fetching comments for a specific profile
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const profileId = searchParams.get('profileId')
+  const profileUsername = searchParams.get('profileUsername') // Switched to username for Tapestry
+  const profileId = searchParams.get('profileId') // Kept for author mapping
 
-  if (!profileId) {
-    return NextResponse.json({ error: 'Profile ID is required' }, { status: 400 })
+  if (!profileUsername || !profileId) {
+    return NextResponse.json({ error: 'Profile username and ID are required' }, { status: 400 })
   }
 
   try {
+    // 1. Fetch comments from Tapestry as the source of truth
+    const tapestryComments = await getTapestryCommentsAndLikes({ targetUsername: profileUsername });
+
+    // 2. Sync Tapestry comments with the local Prisma database
+    if (tapestryComments && tapestryComments.length > 0) {
+        const authorUsernames = tapestryComments.map((c: any) => c.author.username).filter(Boolean);
+        const authors = await prisma.user.findMany({
+            where: { username: { in: authorUsernames } },
+            select: { privyDid: true, username: true }
+        });
+        const authorMap = new Map(authors.map(a => [a.username, a.privyDid]));
+
+        for (const tapComment of tapestryComments) {
+            const authorDid = authorMap.get(tapComment.author.username);
+            if (!authorDid) continue; // Skip if we can't map author
+
+            const createdComment = await prisma.comment.upsert({
+                where: { tapestryCommentId: tapComment.id },
+                update: {}, // No fields to update, just ensure it exists
+                create: {
+                    tapestryCommentId: tapComment.id,
+                    text: tapComment.text,
+                    authorId: authorDid,
+                    profileId: profileId, // The privyDid of the profile being commented on
+                },
+            });
+            // Sync likes for each comment
+            if (tapComment.likes && tapComment.likes.length > 0) {
+                const likeUsernames = tapComment.likes.map((l: any) => l.profile.username).filter(Boolean);
+                const likers = await prisma.user.findMany({
+                    where: { username: { in: likeUsernames } },
+                    select: { privyDid: true, username: true }
+                });
+                const likerMap = new Map(likers.map(l => [l.username, l.privyDid]));
+
+                for (const tapLike of tapComment.likes) {
+                    const likerDid = likerMap.get(tapLike.profile.username);
+                    if (!likerDid) continue;
+
+                    await prisma.like.upsert({
+                        where: { userId_commentId: { userId: likerDid, commentId: createdComment.id } },
+                        update: {},
+                        create: {
+                            userId: likerDid,
+                            commentId: createdComment.id,
+                        },
+                    });
+                }
+            }
+        }
+    }
+
+    // 3. Fetch the fully hydrated comments from Prisma
     const comments = await prisma.comment.findMany({
       where: { profileId },
       include: {
@@ -21,7 +75,15 @@ export async function GET(request: NextRequest) {
             image: true,
           },
         },
-        likes: true,
+        likes: {
+            include: {
+                user: {
+                    select: {
+                        username: true,
+                    }
+                }
+            }
+        }
       },
       orderBy: { createdAt: 'desc' },
     })

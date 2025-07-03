@@ -248,6 +248,25 @@ export const createTapestryComment = async ({
   }
 }
 
+export const getTapestryCommentsAndLikes = async ({
+  targetUsername,
+}: {
+  targetUsername: string;
+}) => {
+  try {
+    const response = await socialfi.comments.commentsList({
+      apiKey: process.env.TAPESTRY_API_KEY || '',
+      targetProfileId: targetUsername,
+    });
+    // The SDK should return a list of comments, each with likes.
+    // If the structure is different, this may need adjustment.
+    return response.comments || [];
+  } catch (error: any) {
+    console.warn('Tapestry get comments error:', error.message || error);
+    return []; // Return empty array on error to prevent crashes
+  }
+};
+
 // Likes Functions
 export const createTapestryLike = async ({
   username,

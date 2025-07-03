@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { socialfi } from '@/utils/socialfi'
+import { updateTapestryUsername } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 
 // PUT handler for updating username with weekly limit validation
@@ -76,24 +77,14 @@ export async function PUT(req: NextRequest) {
 
     // 4. Update username on Tapestry first
     try {
-      // For Tapestry, we need to update the profile properties differently
-      // The username change might require creating a new profile or using a different API
-      await socialfi.profiles.profilesUpdate(
-        {
-          apiKey: process.env.TAPESTRY_API_KEY || '',
-          id: existingUser.username, // Use current username as ID
-        },
-        { 
-          properties: [
-            { key: 'username', value: newUsername }
-          ]
-        }
-      )
+      await updateTapestryUsername({
+        oldUsername: existingUser.username,
+        newUsername: newUsername,
+      })
     } catch (tapestryError: any) {
-      console.warn('Tapestry username update failed:', tapestryError.message)
-      // Continue with local update even if Tapestry fails
-      // Note: Tapestry might not support username changes directly
-      // In that case, we'll rely on our local database as the source of truth
+      console.warn('Tapestry username update failed, but continuing with local update:', tapestryError.message)
+      // We will still update our local DB even if Tapestry fails
+      // to maintain app functionality. A sync process could fix this later.
     }
 
     // 5. Update username in local Prisma database
