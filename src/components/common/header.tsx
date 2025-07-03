@@ -4,7 +4,6 @@ import { Button } from '@/components/common/button'
 import { abbreviateWalletAddress } from '@/components/common/tools'
 import { useLogin, usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
-import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet'
 import {
   Check,
   Clipboard,
@@ -32,9 +31,8 @@ import bctLogo from '@/app/bctlogo.png'
 import { preloadService } from '@/utils/preload'
 
 export function Header() {
-  const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
+  const { walletAddress, mainUsername, loadingMainUsername } = useCurrentWallet()
   const [showCreateProfile, setShowCreateProfile] = useState(false)
-  const [userProfile, setUserProfile] = useState<string | null>(null)
   const { ready, authenticated, logout, user, exportWallet } = usePrivy()
   const { login } = useLogin()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -100,6 +98,16 @@ export function Header() {
     }
   }, [walletAddress, authenticated])
 
+  useEffect(() => {
+    if (!loadingMainUsername && authenticated) {
+      if (mainUsername) {
+        setShowCreateProfile(false)
+      } else {
+        setShowCreateProfile(true)
+      }
+    }
+  }, [mainUsername, loadingMainUsername, authenticated])
+
   const _handleCopy = (address: string) => {
     navigator.clipboard.writeText(address)
     setCopied(true)
@@ -114,51 +122,14 @@ export function Header() {
   }
 
   const copyWalletAddress = () => {
-    if (solanaWalletAddress) {
-      navigator.clipboard.writeText(solanaWalletAddress)
+    if (walletAddress) {
+      navigator.clipboard.writeText(walletAddress)
       toast.success('Wallet address copied to clipboard')
     }
   }
 
-  // Get Solana wallet address with proper validation - prioritize connected Solana wallet, then embedded wallet
-  const potentialConnectedWallet = user?.linkedAccounts?.find(
-    (account): account is any =>
-      account.type === 'wallet' &&
-      (account as any).chainType === 'solana'
-  ) as any | undefined
-
-  const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
-    ? potentialConnectedWallet
-    : undefined
-  
-  // For embedded wallets, validate if it's a proper Solana wallet
-  const embeddedWallet = user?.wallet
-  let solanaWalletAddress: string | undefined
-  let isEmailUser = false
-  
-  if (connectedSolanaWallet?.address && isValidSolanaAddress(connectedSolanaWallet.address)) {
-    // Use connected Solana wallet address
-    solanaWalletAddress = connectedSolanaWallet.address
-    console.log('🟣 Using connected Solana wallet:', solanaWalletAddress)
-  } else if (embeddedWallet?.address) {
-    // Validate embedded wallet is actually a Solana address
-    const validation = validateWalletAddress(embeddedWallet.address)
-    if (validation.isValid && validation.isSolana) {
-      solanaWalletAddress = embeddedWallet.address
-      console.log('🧠 Using embedded Solana wallet:', solanaWalletAddress)
-    } else {
-      console.warn('⚠️ Embedded wallet validation failed:', validation.error, embeddedWallet.address)
-    }
-  }
-
-  // Check if user is email-based (no external wallet)
-  if (user?.email?.address && !connectedSolanaWallet) {
-    isEmailUser = true
-  }
-
-  // Display info for the wallet button
-  const displayInfo = solanaWalletAddress 
-    ? abbreviateWalletAddress({ address: solanaWalletAddress })
+  const displayInfo = walletAddress 
+    ? abbreviateWalletAddress({ address: walletAddress })
     : user?.email?.address 
     ? user.email.address.slice(0, 8) + '...'
     : 'No Wallet'
@@ -166,64 +137,37 @@ export function Header() {
   const handleExportWallet = async () => {
     if (!user) return
     try {
-      // Check if user connected with external wallet (with validation)
-      const potentialConnectedWallet = user.linkedAccounts?.find(
-        (account): account is any =>
-          account.type === 'wallet' &&
-          (account as any).chainType === 'solana'
-      ) as any | undefined
-      
-      const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
-        ? potentialConnectedWallet
-        : undefined
-      
-      // Check if it's truly an external wallet (not Privy embedded)
-      const hasExternalWallet = !!(connectedSolanaWallet && 
-        connectedSolanaWallet.walletClientType !== 'privy')
-      
-      // Debug logging
-      console.log('🔍 Export wallet debug info:', {
-        hasExternalWallet,
-        connectedSolanaWallet: connectedSolanaWallet ? {
-          walletClientType: connectedSolanaWallet.walletClientType,
-          address: connectedSolanaWallet.address
-        } : null,
-        embeddedWallet: user.wallet ? {
-          address: user.wallet.address,
-          walletClientType: user.wallet.walletClientType
-        } : null,
-        solanaWalletAddress, // Add this to debug
-        user // Log entire user object for debugging
-      })
-      
-      // Users with external Solana wallets get private key from their wallet
-      if (hasExternalWallet) {
-        console.log('📄 External wallet user: Please get private key from your wallet')
-        toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)')
-        return
-      }
-      
-      const embeddedSolanaWallet = user.linkedAccounts.find(
-        (account) =>
-          account.type === 'wallet' &&
-          (account as any).chainType === 'solana' &&
-          (account as any).walletClientType === 'privy',
-      ) as any | undefined;
+        const potentialConnectedWallet = user.linkedAccounts?.find(
+            (account): account is any =>
+            account.type === 'wallet' &&
+            (account as any).chainType === 'solana'
+        ) as any | undefined
+        
+        const hasExternalWallet = !!(potentialConnectedWallet && potentialConnectedWallet.walletClientType !== 'privy')
+        
+        if (hasExternalWallet) {
+            toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)')
+            return
+        }
+        
+        const embeddedSolanaWallet = user.linkedAccounts.find(
+            (account) =>
+            account.type === 'wallet' &&
+            (account as any).chainType === 'solana' &&
+            (account as any).walletClientType === 'privy',
+        ) as any | undefined;
 
-      if (embeddedSolanaWallet) {
-        console.log('🔑 Attempting to export embedded Solana wallet by address:', embeddedSolanaWallet.address);
-        await exportWallet(embeddedSolanaWallet.address);
-        toast.success('Private key export initiated - check the modal');
-        return;
-      }
-      
-      // Embedded wallet: Use Privy exportWallet() with no arguments as a fallback
-      console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
-      await exportWallet()
-      toast.success('Private key export initiated - check the modal')
+        if (embeddedSolanaWallet) {
+            await exportWallet(embeddedSolanaWallet.address);
+            toast.success('Private key export initiated - check the modal');
+            return;
+        }
+        
+        await exportWallet()
+        toast.success('Private key export initiated - check the modal')
     } catch (error) {
-      console.error('Wallet export error:', error)
-      toast.error('Failed to export wallet')
+        console.error('Wallet export error:', error)
+        toast.error('Failed to export wallet')
     }
   }
 
@@ -250,70 +194,16 @@ export function Header() {
     }
   }, [])
 
-  // Simple profile management - check once when authentication state changes
-  useEffect(() => {
-    console.log('🔄 Header useEffect - Auth state:', { ready, authenticated, walletAddress, mainUsername, showCreateProfile })
-    
-    if (!ready || !authenticated) {
-      console.log('❌ Not ready or not authenticated, clearing state')
-      setUserProfile(null)
-      setShowCreateProfile(false)
-      return
-    }
-
-    // If we already have a username, use it
-    if (mainUsername) {
-      console.log('✅ Already have mainUsername:', mainUsername)
-      setUserProfile(mainUsername)
-      setShowCreateProfile(false)
-      return
-    }
-
-    // If we have a wallet but no username, check for profile once
-    if (walletAddress && !mainUsername) {
-      console.log('🔍 Checking profile for wallet:', walletAddress)
-      checkProfile().then((username) => {
-        if (username) {
-          console.log('✅ Found username:', username)
-          setUserProfile(username)
-          setShowCreateProfile(false)
-        } else {
-          console.log('❓ No profile found, showing create profile dialog')
-          // No profile found, show create profile dialog
-          setShowCreateProfile(true)
-        }
-      })
-    }
-  }, [ready, authenticated, walletAddress, mainUsername, checkProfile, showCreateProfile])
-
-  // Separate effect to ensure create profile dialog shows when needed
-  useEffect(() => {
-    if (ready && authenticated && walletAddress && !mainUsername && !userProfile) {
-      console.log('🔥 Force showing create profile dialog - conditions met')
-      setShowCreateProfile(true)
-    }
-  }, [ready, authenticated, walletAddress, mainUsername, userProfile])
-
-  const handleProfileCreated = (username: string) => {
-    setUserProfile(username)
-    setShowCreateProfile(false)
-  }
-
-  const handleProfileUsername = (username: string) => {
-    setUserProfile(username)
-  }
-
   const handleLogin = async () => {
     console.log('Header login button clicked - Debug info:')
     console.log('ready:', ready)
     console.log('authenticated:', authenticated)
-    console.log('userProfile:', userProfile)
     console.log('walletAddress:', walletAddress)
     console.log('mainUsername:', mainUsername)
     
     // If already authenticated and has profile, go to profile
-    if (authenticated && userProfile) {
-      router.push(`/${userProfile}`)
+    if (authenticated && mainUsername) {
+      router.push(`/${mainUsername}`)
     } else if (!authenticated) {
       // Only trigger login if not authenticated
       try {
@@ -677,42 +567,42 @@ export function Header() {
             
             {/* Show username if logged in, otherwise show login button */}
             {(() => {
-              console.log('🎨 Header render logic:', { ready, authenticated, userProfile, showCreateProfile })
+              console.log('🎨 Header render logic:', { ready, authenticated, walletAddress, showCreateProfile })
               return null
             })()}
-            {ready && authenticated && userProfile ? (
+            {ready && authenticated && walletAddress ? (
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 text-sm font-medium hover:text-foreground/80"
                 >
-                  {solanaWalletAddress ? '🟣' : (user?.email?.address ? '📧' : '⚠️')}
+                  {walletAddress ? '🟣' : (user?.email?.address ? '📧' : '⚠️')}
                   <span className="hidden sm:inline">{displayInfo}</span>
                   <span className="sm:hidden">
-                    {solanaWalletAddress ? `${solanaWalletAddress.slice(0, 3)}...${solanaWalletAddress.slice(-3)}` : (user?.email?.address ? user.email.address.slice(0, 8) + '...' : 'No Wallet')}
+                    {walletAddress ? `${walletAddress.slice(0, 3)}...${walletAddress.slice(-3)}` : (user?.email?.address ? user.email.address.slice(0, 8) + '...' : 'No Wallet')}
                   </span>
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 rounded-md border bg-popover p-1 shadow-md">
-                    {userProfile && (
+                    {walletAddress && (
                       <button
                         onClick={() => {
-                          router.push(`/${userProfile}`)
+                          router.push(`/${walletAddress}`)
                           setIsDropdownOpen(false)
                         }}
                         className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                       >
                         <User className="mr-2 h-4 w-4" />
-                        Profile: {userProfile}
+                        Profile: {walletAddress}
                       </button>
                     )}
                     
                     {/* Wallet Information Section */}
                     <div className="px-2 py-1.5 text-xs text-muted-foreground border-b border-border mb-1">
                       {user?.email?.address && <div className="break-all">Email: {user.email.address}</div>}
-                      {solanaWalletAddress && <div className="break-all">Solana Wallet: {solanaWalletAddress}</div>}
-                      <div>Type: {isEmailUser ? 'Email Account' : 'Solana Wallet Account'}</div>
+                      {walletAddress && <div className="break-all">Solana Wallet: {walletAddress}</div>}
+                      <div>Type: {user?.email?.address ? 'Email Account' : 'Solana Wallet Account'}</div>
                       <div>Network: Solana Mainnet</div>
                     </div>
                     
@@ -726,7 +616,7 @@ export function Header() {
                       </button>
                     )}
                     
-                    {solanaWalletAddress && (
+                    {walletAddress && (
                       <button
                         onClick={copyWalletAddress}
                         className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
@@ -754,7 +644,6 @@ export function Header() {
                       onClick={async () => {
                         // Clear all local state first
                         setIsDropdownOpen(false)
-                        setUserProfile(null)
                         setShowCreateProfile(false)
                         
                         // Clear any cached data in localStorage (except Computer state)
@@ -791,23 +680,11 @@ export function Header() {
               <>
                 {console.log('🎯 Showing CreateProfileContainer')}
                 <CreateProfileContainer
-                  setIsProfileCreated={handleProfileCreated}
-                  setProfileUsername={handleProfileUsername}
-                />
-              </>
-                          ) : ready && authenticated && walletAddress && !userProfile ? (
-              <>
-                {console.log('🚨 Authenticated user without profile - should show create profile')}
-                <Button
-                  onClick={() => {
-                    console.log('🔧 Manual trigger: showing create profile dialog')
-                    setShowCreateProfile(true)
+                  setIsProfileCreated={() => setShowCreateProfile(false)}
+                  setProfileUsername={(_username) => {
+                    // This function is no longer used in the new logic
                   }}
-                  className="bg-red-600 border border-red-500 text-white hover:bg-red-700 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
-                >
-                  <User className="h-3.5 w-3.5" />
-                  <span>Create Profile</span>
-                </Button>
+                />
               </>
             ) : (
               <Button
@@ -816,11 +693,11 @@ export function Header() {
                 className="bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
               >
                 <LogIn className="h-3.5 w-3.5" />
-                <span>{authenticated && userProfile ? userProfile : 'Log in'}</span>
+                <span>{authenticated && walletAddress ? walletAddress : 'Log in'}</span>
               </Button>
             )}
 
-            {ready && authenticated && userProfile && (
+            {ready && authenticated && walletAddress && (
               <DialectNotificationComponent />
             )}
           </div>

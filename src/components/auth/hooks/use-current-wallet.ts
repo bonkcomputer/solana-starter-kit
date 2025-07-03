@@ -1,90 +1,80 @@
 'use client'
 
-import { useSolanaWallets, usePrivy } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
+import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet'
 
 export function useCurrentWallet() {
-  const { wallets } = useSolanaWallets()
-  const { ready, authenticated } = usePrivy()
-  const [walletAddress, setWalletAddress] = useState('')
+  const { user, ready, authenticated } = usePrivy()
+  const [walletAddress, setWalletAddress] = useState<string | null>(null)
   const [mainUsername, setMainUsername] = useState<string | null>(null)
-  const [loadingMainUsername, setLoadingMainUsername] = useState(false)
+  const [loadingMainUsername, setLoadingMainUsername] = useState(true)
 
-  // Handle wallet detection and clear state on logout
   useEffect(() => {
     if (!ready) {
-      setLoadingMainUsername(true)
-      return
+      return // Wait for Privy to be ready
     }
 
     if (!authenticated) {
-      // Clear all state when user logs out
-      setWalletAddress('')
+      setWalletAddress(null)
       setMainUsername(null)
       setLoadingMainUsername(false)
       return
     }
 
-    // Get the first Solana wallet
-    if (wallets.length > 0) {
-      const primaryWallet = wallets[0]
-      setWalletAddress(primaryWallet.address)
-      setLoadingMainUsername(false)
-    } else {
-      setWalletAddress('')
-      setLoadingMainUsername(false)
-    }
-  }, [wallets, ready, authenticated])
+    // New, robust wallet detection logic
+    const potentialConnectedWallet = user?.linkedAccounts?.find(
+      (account): account is any =>
+        account.type === 'wallet' &&
+        (account as any).chainType === 'solana'
+    ) as any | undefined
 
-  // Clear username when authentication changes
-  useEffect(() => {
-    if (!authenticated && mainUsername) {
-      setMainUsername(null)
-    }
-  }, [authenticated, mainUsername])
+    const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
+      ? potentialConnectedWallet
+      : undefined
+    
+    const embeddedWallet = user?.wallet
+    let finalSolanaWalletAddress: string | undefined
 
-  // Force clear cache on logout
-  useEffect(() => {
-    if (!authenticated && ready) {
-      // Clear any cached profile data
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('api')) {
-              caches.delete(name)
-            }
-          })
-        })
+    if (connectedSolanaWallet?.address && isValidSolanaAddress(connectedSolanaWallet.address)) {
+      finalSolanaWalletAddress = connectedSolanaWallet.address
+    } else if (embeddedWallet?.address) {
+      const validation = validateWalletAddress(embeddedWallet.address)
+      if (validation.isValid && validation.isSolana) {
+        finalSolanaWalletAddress = embeddedWallet.address
       }
     }
-  }, [authenticated, ready])
+    setWalletAddress(finalSolanaWalletAddress || null)
+  }, [user, ready, authenticated])
 
-  // Manual profile check function (not automatic)
-  const checkProfile = async () => {
-    if (!walletAddress || !authenticated) return null
+  useEffect(() => {
+    if (walletAddress) {
+      checkProfile(walletAddress)
+    } else if (ready && authenticated) {
+        // If ready and authenticated but we have no valid solana wallet
+        setLoadingMainUsername(false)
+        setMainUsername(null)
+    }
+  }, [walletAddress, ready, authenticated])
 
+  // Automatic profile check function
+  const checkProfile = async (address: string) => {
     try {
       setLoadingMainUsername(true)
-      const response = await fetch(`/api/profiles?walletAddress=${walletAddress}`, {
+      const response = await fetch(`/api/profiles?walletAddress=${address}`, {
         cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
       })
       const data = await response.json()
       
       if (data.profiles && data.profiles.length > 0) {
         const username = data.profiles[0].profile?.username || data.profiles[0].username
         setMainUsername(username)
-        return username
       } else {
         setMainUsername(null)
-        return null
       }
     } catch (error) {
       console.error('Error checking profile:', error)
       setMainUsername(null)
-      return null
     } finally {
       setLoadingMainUsername(false)
     }
@@ -94,6 +84,6 @@ export function useCurrentWallet() {
     walletAddress, 
     mainUsername, 
     loadingMainUsername,
-    checkProfile
+    checkProfile: () => walletAddress ? checkProfile(walletAddress) : Promise.resolve(null)
   }
 }

@@ -1,6 +1,5 @@
 'use client'
 
-import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { debounce } from 'lodash'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
@@ -9,23 +8,26 @@ import {
   SOL_MINT,
   SortOptionsDetails,
 } from '../constants'
-import { ITokenSearchResult } from '../models/jupiter/jup-api-models'
 import {
+  ITokenSearchResult,
+} from '@/components/trade/models/jupiter/jup-api-models'
+import {
+  TokenSearchService,
   searchTokensByAddress,
   searchTokensByKeyword,
-} from '../services/token-search-service'
+} from '@/components/trade/services/token-search-service'
 import { useGetProfilePortfolio } from './birdeye/use-get-profile-portfolio'
 
-export function useTokenSearch() {
+export function useTokenSearch(walletAddress: string | null) {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<ITokenSearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [verifiedOnly, setVerifiedOnly] = useState(true)
-  const { walletAddress } = useCurrentWallet()
-  const { data, loading: getProfilePortfolioLoading } = useGetProfilePortfolio({
-    walletAddress,
-  })
+  const { data: portfolio, loading: getProfilePortfolioLoading } =
+    useGetProfilePortfolio({
+      walletAddress,
+    })
 
   const sortOptions = [
     { label: 'marketcap', value: SortOptionsDetails.MARKETCAP },
@@ -38,9 +40,9 @@ export function useTokenSearch() {
 
   // Convert wallet items to token format
   const walletTokens = useMemo(() => {
-    if (data?.length) return []
+    if (portfolio?.length) return []
 
-    return data.map((item) => {
+    return portfolio.map((item) => {
       let address = item.address
       if (address === BAD_SOL_MINT) {
         address = SOL_MINT
@@ -64,7 +66,7 @@ export function useTokenSearch() {
         market_cap: 0,
       }
     })
-  }, [data]).filter((token) => token.name)
+  }, [portfolio]).filter((token) => token.name)
 
   // Process wallet tokens when they're available
   useEffect(() => {
@@ -120,6 +122,10 @@ export function useTokenSearch() {
     debouncedSearch(searchQuery)
     return () => debouncedSearch.cancel()
   }, [searchQuery, debouncedSearch])
+
+  const getTokenSearchService = () => {
+    return new TokenSearchService(portfolio || [])
+  }
 
   return {
     searchQuery,
