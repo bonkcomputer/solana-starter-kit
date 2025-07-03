@@ -203,6 +203,21 @@ export function Header() {
         return
       }
       
+      // --- Surgical fix: Find the correct Solana embedded wallet in linkedAccounts ---
+      const solanaEmbeddedWallet = user.linkedAccounts?.find(
+        (account: any) =>
+          account.type === 'wallet' &&
+          account.chainType === 'solana' &&
+          account.walletClientType === 'privy'
+      )
+      if (solanaEmbeddedWallet) {
+        console.log('🔑 Attempting to export Solana embedded wallet:', solanaEmbeddedWallet)
+        await exportWallet({ id: (solanaEmbeddedWallet as any).id, chainType: 'solana' } as any)
+        toast.success('Private key export initiated - check the modal')
+        return
+      }
+      // --- End surgical fix ---
+      
       // Users with embedded wallets: Use the solanaWalletAddress we already validated
       if (solanaWalletAddress && !hasExternalWallet) {
         console.log('🔑 Attempting to export wallet with address:', solanaWalletAddress)
