@@ -7,6 +7,7 @@ import { UsernameEditor } from '@/components/profile/username-editor'
 import { useGetProfileInfo } from '@/components/profile/hooks/use-get-profile-info'
 import { User } from 'lucide-react'
 import Image from 'next/image'
+import { WalletDropdownMenu } from './WalletDropdownMenu'
 
 interface Props {
   username: string
@@ -51,6 +52,7 @@ export function MyProfile({ username }: Props) {
           <div className="flex items-center space-x-4">
             <p className="text-sm text-gray">{profile?.solanaWalletAddress}</p>
             {profile?.solanaWalletAddress && <CopyPaste content={profile.solanaWalletAddress} />}
+            <WalletDropdownMenu />
           </div>
           {/* Follower counts are not yet in the new IUser model, so this is commented out. */}
           {/* <p>

@@ -8,6 +8,7 @@ import { User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import { WalletDropdownMenu } from './WalletDropdownMenu'
 
 interface Props {
   username: string
@@ -88,6 +89,7 @@ export function Profile({ username }: Props) {
           <div className="flex items-center space-x-4">
             <p className="text-sm text-gray">{displayProfile?.solanaWalletAddress}</p>
             {displayProfile?.solanaWalletAddress && <CopyPaste content={displayProfile.solanaWalletAddress} />}
+            <WalletDropdownMenu />
           </div>
 
           {/* Enhanced Social Counts */}

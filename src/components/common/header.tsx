@@ -34,7 +34,7 @@ export function Header() {
   const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
   const [showCreateProfile, setShowCreateProfile] = useState(false)
   const [userProfile, setUserProfile] = useState<string | null>(null)
-  const { ready, authenticated, logout, user } = usePrivy()
+  const { ready, authenticated, logout, user, exportWallet } = usePrivy()
   const { login } = useLogin()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -202,11 +202,10 @@ export function Header() {
       
       // Users with embedded wallets: Use Privy's built-in wallet export modal
       if (user.wallet?.address) {
-        const { exportWallet } = require('@privy-io/react-auth');
-        await exportWallet({ address: user.wallet.address });
-        toast.success('Private key export initiated - check the modal');
+        await exportWallet({ address: user.wallet.address })
+        toast.success('Private key export initiated - check the modal')
       } else {
-        toast.error('No embedded wallet address found');
+        toast.error('No embedded wallet address found')
       }
     } catch (error) {
       console.error('Wallet export error:', error)
