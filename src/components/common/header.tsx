@@ -3,6 +3,8 @@
 import { Button } from '@/components/common/button'
 import { abbreviateWalletAddress } from '@/components/common/tools'
 import { useLogin, usePrivy } from '@privy-io/react-auth'
+import { toast } from 'sonner'
+import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet'
 import {
   Check,
   Clipboard,
@@ -32,7 +34,7 @@ export function Header() {
   const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
   const [showCreateProfile, setShowCreateProfile] = useState(false)
   const [userProfile, setUserProfile] = useState<string | null>(null)
-  const { ready, authenticated, logout } = usePrivy()
+  const { ready, authenticated, logout, user } = usePrivy()
   const { login } = useLogin()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -97,10 +99,117 @@ export function Header() {
     }
   }, [walletAddress, authenticated])
 
-  const handleCopy = (address: string) => {
+  const _handleCopy = (address: string) => {
     navigator.clipboard.writeText(address)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  const copyEmail = () => {
+    if (user?.email?.address) {
+      navigator.clipboard.writeText(user.email.address)
+      toast.success('Email copied to clipboard')
+    }
+  }
+
+  const copyWalletAddress = () => {
+    if (solanaWalletAddress) {
+      navigator.clipboard.writeText(solanaWalletAddress)
+      toast.success('Wallet address copied to clipboard')
+    }
+  }
+
+  // Get Solana wallet address with proper validation - prioritize connected Solana wallet, then embedded wallet
+  const potentialConnectedWallet = user?.linkedAccounts?.find(
+    (account): account is any =>
+      account.type === 'wallet' &&
+      (account as any).chainType === 'solana'
+  ) as any | undefined
+
+  const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
+    ? potentialConnectedWallet
+    : undefined
+  
+  // For embedded wallets, validate if it's a proper Solana wallet
+  const embeddedWallet = user?.wallet
+  let solanaWalletAddress: string | undefined
+  let isEmailUser = false
+  
+  if (connectedSolanaWallet?.address && isValidSolanaAddress(connectedSolanaWallet.address)) {
+    // Use connected Solana wallet address
+    solanaWalletAddress = connectedSolanaWallet.address
+    console.log('🟣 Using connected Solana wallet:', solanaWalletAddress)
+  } else if (embeddedWallet?.address) {
+    // Validate embedded wallet is actually a Solana address
+    const validation = validateWalletAddress(embeddedWallet.address)
+    if (validation.isValid && validation.isSolana) {
+      solanaWalletAddress = embeddedWallet.address
+      console.log('🧠 Using embedded Solana wallet:', solanaWalletAddress)
+    } else {
+      console.warn('⚠️ Embedded wallet validation failed:', validation.error, embeddedWallet.address)
+    }
+  }
+
+  // Check if user is email-based (no external wallet)
+  if (user?.email?.address && !connectedSolanaWallet) {
+    isEmailUser = true
+  }
+
+  // Display info for the wallet button
+  const displayInfo = solanaWalletAddress 
+    ? abbreviateWalletAddress({ address: solanaWalletAddress })
+    : user?.email?.address 
+    ? user.email.address.slice(0, 8) + '...'
+    : 'No Wallet'
+
+  const handleExportWallet = async () => {
+    if (!user) return
+    
+    try {
+      // Check if user connected with external wallet (with validation)
+      const potentialConnectedWallet = user.linkedAccounts?.find(
+        (account): account is any =>
+          account.type === 'wallet' &&
+          (account as any).chainType === 'solana'
+      ) as any | undefined
+      
+      const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
+        ? potentialConnectedWallet
+        : undefined
+      
+      // Check if it's truly an external wallet (not Privy embedded)
+      const hasExternalWallet = !!(connectedSolanaWallet && 
+        connectedSolanaWallet.walletClientType !== 'privy')
+      
+      // Debug logging
+      console.log('🔍 Export wallet debug info:', {
+        hasExternalWallet,
+        connectedSolanaWallet: connectedSolanaWallet ? {
+          walletClientType: connectedSolanaWallet.walletClientType,
+          address: connectedSolanaWallet.address
+        } : null,
+        embeddedWallet: user.wallet ? {
+          address: user.wallet.address,
+          walletClientType: user.wallet.walletClientType
+        } : null
+      })
+      
+      // Users with external Solana wallets get private key from their wallet
+      if (hasExternalWallet) {
+        console.log('📄 External wallet user: Please get private key from your wallet')
+        toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)')
+        return
+      }
+      
+      // Users with embedded wallets: Use Privy's built-in wallet export
+      console.log('🔑 Using Privy wallet export for embedded wallet user')
+      // For now, show a message that this feature is coming soon
+      toast.info('Wallet export feature coming soon for embedded wallets')
+      
+    } catch (error) {
+      console.error('Wallet export error:', error)
+      toast.error('Failed to export wallet')
+    }
   }
 
   const handleLogoClick = () => {
@@ -160,7 +269,7 @@ export function Header() {
         }
       })
     }
-  }, [ready, authenticated, walletAddress, mainUsername])
+  }, [ready, authenticated, walletAddress, mainUsername, checkProfile, showCreateProfile])
 
   // Separate effect to ensure create profile dialog shows when needed
   useEffect(() => {
@@ -553,26 +662,49 @@ export function Header() {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 text-sm font-medium hover:text-foreground/80"
                 >
-                  <User className="h-4 w-4" />
-                  <span>{userProfile}</span>
+                  {solanaWalletAddress ? '🟣' : (user?.email?.address ? '📧' : '⚠️')}
+                  <span className="hidden sm:inline">{displayInfo}</span>
+                  <span className="sm:hidden">
+                    {solanaWalletAddress ? `${solanaWalletAddress.slice(0, 3)}...${solanaWalletAddress.slice(-3)}` : (user?.email?.address ? user.email.address.slice(0, 8) + '...' : 'No Wallet')}
+                  </span>
                 </button>
 
                 {isDropdownOpen && (
                   <div className="absolute right-0 top-full mt-2 w-48 rounded-md border bg-popover p-1 shadow-md">
-                    <button
-                      onClick={() => {
-                        router.push(`/${userProfile}`)
-                        setIsDropdownOpen(false)
-                      }}
-                      className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </button>
-                    
-                    {walletAddress && (
+                    {userProfile && (
                       <button
-                        onClick={() => handleCopy(walletAddress)}
+                        onClick={() => {
+                          router.push(`/${userProfile}`)
+                          setIsDropdownOpen(false)
+                        }}
+                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile: {userProfile}
+                      </button>
+                    )}
+                    
+                    {/* Wallet Information Section */}
+                    <div className="px-2 py-1.5 text-xs text-muted-foreground border-b border-border mb-1">
+                      {user?.email?.address && <div className="break-all">Email: {user.email.address}</div>}
+                      {solanaWalletAddress && <div className="break-all">Solana Wallet: {solanaWalletAddress}</div>}
+                      <div>Type: {isEmailUser ? 'Email Account' : 'Solana Wallet Account'}</div>
+                      <div>Network: Solana Mainnet</div>
+                    </div>
+                    
+                    {user?.email?.address && (
+                      <button
+                        onClick={copyEmail}
+                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                      >
+                        <Clipboard className="mr-2 h-4 w-4" />
+                        Copy Email
+                      </button>
+                    )}
+                    
+                    {solanaWalletAddress && (
+                      <button
+                        onClick={copyWalletAddress}
                         className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                       >
                         {copied ? (
@@ -580,9 +712,17 @@ export function Header() {
                         ) : (
                           <Clipboard className="mr-2 h-4 w-4" />
                         )}
-                        {copied ? 'Copied!' : abbreviateWalletAddress({ address: walletAddress })}
+                        {copied ? 'Copied!' : 'Copy Solana Address'}
                       </button>
                     )}
+
+                    <button
+                      onClick={handleExportWallet}
+                      className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                      <Power className="mr-2 h-4 w-4" />
+                      Export Private Key
+                    </button>
 
                     <div className="my-1 h-px bg-border" />
                     
