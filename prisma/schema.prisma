@@ -23,6 +23,8 @@ model User {
   solanaWalletAddress   String?
   embeddedWalletAddress String?
   lastUsernameChange    DateTime? // Track when username was last changed
+  lastImageChange       DateTime?
+  syncStatus            String    @default("PENDING") // PENDING, SYNCED, FAILED
   following             Follow[]  @relation("Followers")
   followers             Follow[]  @relation("Following")
   authoredComments      Comment[] @relation("AuthoredComments")
@@ -35,6 +37,7 @@ model Follow {
   followingId String
   follower    User     @relation("Following", fields: [followerId], references: [privyDid])
   following   User     @relation("Followers", fields: [followingId], references: [privyDid])
+  syncStatus  String   @default("PENDING") // PENDING, SYNCED, FAILED
 
   @@id([followerId, followingId])
 }
@@ -49,6 +52,7 @@ model Comment {
   author            User     @relation("AuthoredComments", fields: [authorId], references: [privyDid])
   profile           User     @relation("ProfileComments", fields: [profileId], references: [privyDid])
   likes             Like[]
+  syncStatus        String   @default("PENDING") // PENDING, SYNCED, FAILED
 }
 
 model Like {
@@ -58,6 +62,7 @@ model Like {
   commentId String
   user      User     @relation(fields: [userId], references: [privyDid])
   comment   Comment  @relation(fields: [commentId], references: [id])
+  syncStatus String  @default("PENDING") // PENDING, SYNCED, FAILED
 
   @@unique([userId, commentId])
 }

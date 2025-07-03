@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { getTapestryProfile } from '@/lib/tapestry'
-import { socialfi } from '@/utils/socialfi'
 import { NextRequest, NextResponse } from 'next/server'
+import { inngest } from "@/api/inngest"
 
 // GET handler for fetching a profile by username or privyDid
 export async function GET(req: NextRequest) {
@@ -129,29 +129,61 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    // 1. Update on Tapestry first
-    await socialfi.profiles.profilesUpdate(
-      {
-        apiKey: process.env.TAPESTRY_API_KEY || '',
-        id: username,
-      },
-      { 
-        bio, 
-        image,
-        ...(properties && { properties }) // Include custom properties if provided
-      }
-    )
+    const dataToUpdateInPrisma: { bio?: string, image?: string, lastImageChange?: Date } = {};
+    const dataToUpdateInTapestry: { bio?: string, image?: string, properties?: any } = {};
 
-    // 2. Update our local Prisma database
+    if (bio !== undefined) {
+      dataToUpdateInPrisma.bio = bio;
+      dataToUpdateInTapestry.bio = bio;
+    }
+    
+    if (properties) {
+        dataToUpdateInTapestry.properties = properties;
+    }
+
+    // If the user is trying to update their image, check the rate limit.
+    if (image !== undefined) {
+      const user = await prisma.user.findUnique({ where: { privyDid } });
+
+      if (user?.lastImageChange) {
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
+        if (user.lastImageChange > oneMonthAgo) {
+          const nextAllowedChange = new Date(user.lastImageChange);
+          nextAllowedChange.setMonth(nextAllowedChange.getMonth() + 1);
+          
+          return NextResponse.json(
+            { 
+              error: 'Profile picture can only be changed once per month.',
+              nextAllowedChange: nextAllowedChange.toISOString(),
+            },
+            { status: 429 } // Too Many Requests
+          );
+        }
+      }
+      // If checks pass, add image and timestamp to the update payloads
+      dataToUpdateInPrisma.image = image;
+      dataToUpdateInPrisma.lastImageChange = new Date();
+      dataToUpdateInTapestry.image = image;
+    }
+
+    // 1. Update our local Prisma database immediately
     const updatedUser = await prisma.user.update({
       where: { privyDid },
-      data: {
-        bio,
-        image,
-      },
-    })
+      data: dataToUpdateInPrisma,
+    });
 
-    return NextResponse.json(updatedUser)
+    // 2. Send an event to Inngest to handle the Tapestry sync in the background
+    await inngest.send({
+        name: "profile/updated",
+        data: {
+            username: updatedUser.username,
+            dataToUpdate: dataToUpdateInTapestry,
+        },
+    });
+
+    return NextResponse.json(updatedUser);
   } catch (error: any) {
     console.error('Error updating profile:', error)
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { unfollowUser } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
+import { inngest } from "@/api/inngest";
 
 interface UnfollowRequestBody {
   followerPrivyDid: string;
@@ -25,14 +26,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 1. Unfollow on Tapestry first
+    // 1. Unfollow on Tapestry first. This is the source of truth.
     try {
       await unfollowUser({
         followerUsername,
         followeeUsername,
       })
     } catch (tapestryError: any) {
-      console.warn('Tapestry unfollow failed, continuing with local removal:', tapestryError.message)
+      console.error('Tapestry unfollow failed. Aborting local update.', tapestryError.message)
+      // If the primary action fails, we should not update our local DB.
+      return NextResponse.json({ error: 'Failed to perform unfollow action on-chain.' }, { status: 500 });
     }
 
     // 2. Delete the follow relationship in the local Prisma database
@@ -44,6 +47,12 @@ export async function POST(req: NextRequest) {
         },
       },
     })
+
+    // 3. Send an event to Inngest for background sync
+    await inngest.send({
+        name: "user/unfollowed",
+        data: { followerUsername, followeeUsername },
+    });
 
     return NextResponse.json({ success: true })
   } catch (error: any) {

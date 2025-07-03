@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma'
-import { followUser } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
+import { inngest } from "@/api/inngest";
 
 interface FollowRequestBody {
   followerPrivyDid: string
@@ -25,23 +25,24 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 1. Follow on Tapestry first
-    try {
-      await followUser({
-        followerUsername,
-        followeeUsername,
-      })
-    } catch (tapestryError: any) {
-      console.warn('Tapestry follow failed, continuing with local creation:', tapestryError.message)
-    }
-
-    // 2. Create the follow relationship in the local Prisma database
+    // 1. Create the follow relationship in the local Prisma database
     const followRelationship = await prisma.follow.create({
       data: {
         followerId: followerPrivyDid,
         followingId: followeePrivyDid,
       },
     })
+
+    // 2. Send an event to Inngest for background sync
+    await inngest.send({
+        name: "user/followed",
+        data: { 
+            followerUsername, 
+            followeeUsername,
+            followerId: followerPrivyDid,
+            followeeId: followeePrivyDid,
+        },
+    });
 
     return NextResponse.json(followRelationship)
   } catch (error: any) {

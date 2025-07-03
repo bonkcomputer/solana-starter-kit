@@ -2,7 +2,7 @@
 
 import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { Alert } from '@/components/common/alert'
-import { Button } from '@/components/common/button'
+import { Button } from '@/components/ui/custom-button'
 import { LoadCircle } from '@/components/common/load-circle'
 import { Input } from '@/components/form/input'
 import { SubmitButton } from '@/components/form/submit-button'
@@ -11,9 +11,9 @@ import { useGetIdentities } from '@/components/profile/hooks/use-get-identities'
 import { IProfileList } from '@/models/profile.models'
 import { cn } from '@/utils/utils'
 import { usePrivy } from '@privy-io/react-auth'
-import { User } from 'lucide-react'
+import { User, Upload } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface Props {
   setCreateProfileDialog: (isOpen: boolean) => void
@@ -30,6 +30,12 @@ export function CreateProfile({
   const { logout } = usePrivy()
 
   const [username, setUsername] = useState('')
+  const [bio, setBio] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [selectProfile, setSelectProfile] = useState<IProfileList | null>(null)
 
   const {
@@ -43,11 +49,39 @@ export function CreateProfile({
     walletAddress: walletAddress || '',
   })
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (walletAddress && username) {
       try {
-        const result = await createProfile({ username, walletAddress })
+        let imageUrl = '';
+        if (imageFile) {
+            setIsUploading(true);
+            const formData = new FormData();
+            formData.append('file', imageFile);
+
+            const uploadResponse = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!uploadResponse.ok) {
+                throw new Error('Failed to upload image');
+            }
+
+            const { url } = await uploadResponse.json();
+            imageUrl = url;
+            setIsUploading(false);
+        }
+
+        const result = await createProfile({ username, walletAddress, bio, image: imageUrl })
         if (result) {
           setIsProfileCreated(true)
           setProfileUsername(username)
@@ -55,6 +89,7 @@ export function CreateProfile({
         }
       } catch (err) {
         console.error('Failed to create profile:', err)
+        setIsUploading(false);
       }
     }
   }
@@ -110,17 +145,55 @@ export function CreateProfile({
           </div>
         )}
         
-        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          <div className="flex items-center">
-            <Input
-              value={username}
-              onChange={handleInputChange}
-              name="username"
-              placeholder="username"
-            />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border overflow-hidden">
+                {imagePreview ? (
+                  <Image src={imagePreview} alt="Profile preview" fill className="object-cover" />
+                ) : (
+                  <User className="w-10 h-10 text-muted-foreground" />
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                className="hidden"
+                accept="image/*"
+                id="profile-image-upload"
+                title="Upload profile picture"
+              />
+              <label htmlFor="profile-image-upload" className="absolute bottom-0 right-0">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full h-8 w-8 p-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Upload profile picture"
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </label>
+            </div>
+            <div className="flex-grow space-y-3">
+              <Input
+                value={username}
+                onChange={handleInputChange}
+                name="username"
+                placeholder="username"
+              />
+              <Input
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                name="bio"
+                placeholder="Tell us about yourself..."
+              />
+            </div>
           </div>
-          <SubmitButton>
-            {creationLoading ? 'Creating...' : 'Create Profile'}
+          <SubmitButton disabled={isUploading || creationLoading}>
+            {isUploading ? 'Uploading...' : creationLoading ? 'Creating...' : 'Create Profile'}
           </SubmitButton>
         </form>
 

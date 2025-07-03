@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { createTapestryProfile, getTapestryProfile } from "@/lib/tapestry";
 import { NextRequest, NextResponse } from "next/server";
+import { inngest } from "@/api/inngest"; // Import our Inngest client
 
 export async function POST(req: NextRequest) {
   const {
@@ -80,26 +81,32 @@ export async function POST(req: NextRequest) {
       console.log('Using existing Tapestry profile for:', username);
     }
 
-    // 5. Create user in local Prisma database
-    console.log('Creating new Prisma user for:', username);
+    // 5. Create user in local Prisma database immediately with PENDING status
     const newUser = await prisma.user.create({
       data: {
         privyDid,
         username,
         bio,
         image,
-        embeddedWalletAddress,
         solanaWalletAddress,
+        embeddedWalletAddress,
+        syncStatus: 'PENDING', // Set the initial status
       },
     });
 
-    console.log('✅ Successfully created profile for:', username);
+    // 6. Send an event to Inngest to handle the Tapestry sync in the background
+    await inngest.send({
+      name: "profile/created",
+      data: {
+        user: newUser,
+      },
+    });
+
+    // 7. Return a success response to the user immediately
     return NextResponse.json({ 
-      tapestryProfile, 
-      prismaUser: newUser,
-      execution: execution,
-      isNewTapestryProfile: !tapestryProfile // Indicates if we created a new Tapestry profile
-    }, { status: 201 });
+        prismaUser: newUser,
+        status: "Profile creation is pending, syncing to the decentralized network." 
+    }, { status: 202 }); // 202 Accepted indicates the request is being processed
 
   } catch (error: any) {
     console.error("Error creating profile:", error);

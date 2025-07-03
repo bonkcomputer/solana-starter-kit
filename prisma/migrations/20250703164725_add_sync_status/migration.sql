@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "syncStatus" TEXT NOT NULL DEFAULT 'PENDING';

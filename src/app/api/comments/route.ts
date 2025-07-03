@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { createTapestryComment, getTapestryCommentsAndLikes } from '@/lib/tapestry'
+import { getTapestryCommentsAndLikes } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
+import { inngest } from "@/api/inngest"
 
 // GET handler for fetching comments for a specific profile
 export async function GET(request: NextRequest) {
@@ -87,37 +88,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    let tapestryId = null
-
-    // 1. Try to write to Tapestry first using enhanced function
-    try {
-      const tapestryComment = await createTapestryComment({
-        authorUsername,
-        targetUsername: profileUsername,
-        text,
-      })
-
-      // The Tapestry SDK's response structure might be different.
-      // Assuming the created comment object is available at `tapestryComment.comment`
-      tapestryId = (tapestryComment as any)?.comment?.id;
-      if (!tapestryId) {
-        console.warn('Could not get comment ID from Tapestry response, continuing with local creation');
-      }
-    } catch (tapestryError: any) {
-      console.warn('Tapestry comment creation failed, continuing with local creation:', tapestryError.message)
-    }
-
-    // 2. Write to our local Prisma database (always do this)
+    // 1. Write to our local Prisma database immediately
     const newComment = await prisma.comment.create({
       data: {
         text,
-        authorId, // The author's privyDid
-        profileId, // The privyDid of the profile being commented on
-        tapestryCommentId: tapestryId, // Will be null if Tapestry failed
+        authorId,
+        profileId,
       },
-    })
+    });
 
-    return NextResponse.json(newComment)
+    // 2. Send an event to Inngest for background sync
+    await inngest.send({
+        name: "comment/created",
+        data: { 
+            commentData: newComment,
+            authorUsername,
+            profileUsername,
+        },
+    });
+
+    return NextResponse.json(newComment);
   } catch (error) {
     console.error('[POST Comment Error]:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to create comment'
