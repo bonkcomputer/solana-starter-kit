@@ -9,16 +9,45 @@ export function PrivyClientProvider({
   children: React.ReactNode
 }) {
   const privyAppId = process.env.NEXT_PUBLIC_PRIVY_APP_ID
+  const solanaRpcUrl = process.env.NEXT_PUBLIC_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+  const walletConnectProjectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
 
+  // Robust env var checks
   if (!privyAppId) {
-    console.error('NEXT_PUBLIC_PRIVY_APP_ID is not set')
-    console.error('Available env vars:', Object.keys(process.env).filter(key => key.startsWith('NEXT_PUBLIC')))
+    const errorMsg = 'NEXT_PUBLIC_PRIVY_APP_ID is required';
+    console.error('PrivyClientProvider error:', errorMsg);
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-red-500 mb-2">Configuration Error</h1>
-          <p className="text-gray-600">NEXT_PUBLIC_PRIVY_APP_ID is not configured</p>
-          <p className="text-xs text-gray-500 mt-2">Check browser console for more details</p>
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8 max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Configuration Error</h2>
+          <p className="text-red-600 mb-4">{errorMsg}</p>
+          <p className="text-sm text-gray-700">Please check your environment configuration and refresh the page.</p>
+        </div>
+      </div>
+    )
+  }
+  if (!solanaRpcUrl) {
+    const errorMsg = 'NEXT_PUBLIC_SOLANA_RPC_URL is required';
+    console.error('PrivyClientProvider error:', errorMsg);
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8 max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Configuration Error</h2>
+          <p className="text-red-600 mb-4">{errorMsg}</p>
+          <p className="text-sm text-gray-700">Please check your environment configuration and refresh the page.</p>
+        </div>
+      </div>
+    )
+  }
+  if (!walletConnectProjectId) {
+    const errorMsg = 'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is required for WalletConnect functionality.';
+    console.error('PrivyClientProvider error:', errorMsg);
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-8 max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Configuration Error</h2>
+          <p className="text-red-600 mb-4">{errorMsg}</p>
+          <p className="text-sm text-gray-700">Please check your environment configuration and refresh the page.</p>
         </div>
       </div>
     )
@@ -29,24 +58,31 @@ export function PrivyClientProvider({
       appId={privyAppId}
       config={{
         loginMethods: ['email', 'wallet'],
-        appearance: { 
+        appearance: {
           walletChainType: 'solana-only',
           theme: 'dark',
           accentColor: '#10b981', // Green accent color
-          logo: 'https://trade.bonk.computer/bctlogo.png'
+          logo: '/bctlogo.svg',
         },
         externalWallets: {
-          solana: { 
-            connectors: toSolanaWalletConnectors()
+          solana: {
+            connectors: toSolanaWalletConnectors({ shouldAutoConnect: true }),
           },
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
           requireUserPasswordOnCreate: false,
         },
+        solanaClusters: [
+          {
+            name: 'mainnet-beta',
+            rpcUrl: solanaRpcUrl,
+          },
+        ],
+        walletConnectCloudProjectId: walletConnectProjectId,
         mfa: {
           noPromptOnMfaRequired: false,
-        }
+        },
       }}
     >
       {children}

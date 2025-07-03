@@ -203,30 +203,10 @@ export function Header() {
         return
       }
       
-      // --- Surgical fix: Find the correct Solana embedded wallet in linkedAccounts ---
-      const solanaEmbeddedWallet = user.linkedAccounts?.find(
-        (account: any) =>
-          account.type === 'wallet' &&
-          account.chainType === 'solana' &&
-          account.walletClientType === 'privy'
-      )
-      if (solanaEmbeddedWallet) {
-        console.log('🔑 Attempting to export Solana embedded wallet:', solanaEmbeddedWallet)
-        await exportWallet({ id: (solanaEmbeddedWallet as any).id, chainType: 'solana' } as any)
-        toast.success('Private key export initiated - check the modal')
-        return
-      }
-      // --- End surgical fix ---
-      
-      // Users with embedded wallets: Use the solanaWalletAddress we already validated
-      if (solanaWalletAddress && !hasExternalWallet) {
-        console.log('🔑 Attempting to export wallet with address:', solanaWalletAddress)
-        await exportWallet({ address: solanaWalletAddress, chainType: 'solana' } as any)
-        toast.success('Private key export initiated - check the modal')
-      } else {
-        console.error('❌ No valid Solana wallet address found for export')
-        toast.error('No valid wallet address found')
-      }
+      // Embedded wallet: Use Privy exportWallet() with no arguments
+      console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
+      await exportWallet()
+      toast.success('Private key export initiated - check the modal')
     } catch (error) {
       console.error('Wallet export error:', error)
       toast.error('Failed to export wallet')
