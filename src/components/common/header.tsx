@@ -202,7 +202,7 @@ export function Header() {
       
       // Users with embedded wallets: Use Privy's built-in wallet export modal
       if (user.wallet?.address) {
-        await exportWallet({ address: user.wallet.address })
+        await exportWallet({ address: user.wallet.address, chainType: 'solana' } as any)
         toast.success('Private key export initiated - check the modal')
       } else {
         toast.error('No embedded wallet address found')

@@ -67,7 +67,7 @@ export function WalletDropdownMenu() {
         return;
       }
       if (user.wallet?.address) {
-        await exportWallet({ address: user.wallet.address });
+        await exportWallet({ address: user.wallet.address, chainType: 'solana' } as any);
         toast.success('Private key export initiated - check the modal');
       } else {
         toast.error('No embedded wallet address found');
