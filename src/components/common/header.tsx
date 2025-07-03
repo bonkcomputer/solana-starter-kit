@@ -164,7 +164,6 @@ export function Header() {
 
   const handleExportWallet = async () => {
     if (!user) return
-    
     try {
       // Check if user connected with external wallet (with validation)
       const potentialConnectedWallet = user.linkedAccounts?.find(
@@ -201,11 +200,14 @@ export function Header() {
         return
       }
       
-      // Users with embedded wallets: Use Privy's built-in wallet export
-      console.log('🔑 Using Privy wallet export for embedded wallet user')
-      // For now, show a message that this feature is coming soon
-      toast.info('Wallet export feature coming soon for embedded wallets')
-      
+      // Users with embedded wallets: Use Privy's built-in wallet export modal
+      if (user.wallet?.address) {
+        const { exportWallet } = require('@privy-io/react-auth');
+        await exportWallet({ address: user.wallet.address });
+        toast.success('Private key export initiated - check the modal');
+      } else {
+        toast.error('No embedded wallet address found');
+      }
     } catch (error) {
       console.error('Wallet export error:', error)
       toast.error('Failed to export wallet')
