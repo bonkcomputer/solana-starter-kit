@@ -1,5 +1,4 @@
 import { prisma } from '@/lib/prisma'
-import { socialfi } from '@/utils/socialfi'
 import { updateTapestryUsername } from '@/lib/tapestry'
 import { NextRequest, NextResponse } from 'next/server'
 

@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     // 2. Sync Tapestry comments with the local Prisma database
     if (tapestryComments && tapestryComments.length > 0) {
-        const authorUsernames = tapestryComments.map((c: any) => c.author.username).filter(Boolean);
+        const authorUsernames = tapestryComments.map((c: any) => c.author?.username).filter(Boolean);
         const authors = await prisma.user.findMany({
             where: { username: { in: authorUsernames } },
             select: { privyDid: true, username: true }
@@ -26,42 +26,24 @@ export async function GET(request: NextRequest) {
         const authorMap = new Map(authors.map(a => [a.username, a.privyDid]));
 
         for (const tapComment of tapestryComments) {
+            if (!tapComment.author?.username) continue; // Safety check for author
             const authorDid = authorMap.get(tapComment.author.username);
             if (!authorDid) continue; // Skip if we can't map author
 
-            const createdComment = await prisma.comment.upsert({
-                where: { tapestryCommentId: tapComment.id },
-                update: {}, // No fields to update, just ensure it exists
+            await prisma.comment.upsert({
+                where: { tapestryCommentId: tapComment.comment.id },
+                update: {
+                    text: tapComment.comment.text,
+                 }, // No fields to update, just ensure it exists
                 create: {
-                    tapestryCommentId: tapComment.id,
-                    text: tapComment.text,
+                    tapestryCommentId: tapComment.comment.id,
+                    text: tapComment.comment.text,
                     authorId: authorDid,
                     profileId: profileId, // The privyDid of the profile being commented on
                 },
             });
-            // Sync likes for each comment
-            if (tapComment.likes && tapComment.likes.length > 0) {
-                const likeUsernames = tapComment.likes.map((l: any) => l.profile.username).filter(Boolean);
-                const likers = await prisma.user.findMany({
-                    where: { username: { in: likeUsernames } },
-                    select: { privyDid: true, username: true }
-                });
-                const likerMap = new Map(likers.map(l => [l.username, l.privyDid]));
-
-                for (const tapLike of tapComment.likes) {
-                    const likerDid = likerMap.get(tapLike.profile.username);
-                    if (!likerDid) continue;
-
-                    await prisma.like.upsert({
-                        where: { userId_commentId: { userId: likerDid, commentId: createdComment.id } },
-                        update: {},
-                        create: {
-                            userId: likerDid,
-                            commentId: createdComment.id,
-                        },
-                    });
-                }
-            }
+            // The batch comment fetching from Tapestry does not include likes.
+            // Likes will be handled via their own API route and synced on write.
         }
     }
 

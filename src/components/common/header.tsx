@@ -203,7 +203,21 @@ export function Header() {
         return
       }
       
-      // Embedded wallet: Use Privy exportWallet() with no arguments
+      const embeddedSolanaWallet = user.linkedAccounts.find(
+        (account) =>
+          account.type === 'wallet' &&
+          (account as any).chainType === 'solana' &&
+          (account as any).walletClientType === 'privy',
+      ) as any | undefined;
+
+      if (embeddedSolanaWallet) {
+        console.log('🔑 Attempting to export embedded Solana wallet by address:', embeddedSolanaWallet.address);
+        await exportWallet(embeddedSolanaWallet.address);
+        toast.success('Private key export initiated - check the modal');
+        return;
+      }
+      
+      // Embedded wallet: Use Privy exportWallet() with no arguments as a fallback
       console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
       await exportWallet()
       toast.success('Private key export initiated - check the modal')

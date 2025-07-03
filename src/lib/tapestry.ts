@@ -313,3 +313,27 @@ export const deleteTapestryLike = async ({
     throw error
   }
 }
+
+export const updateTapestryUsername = async ({
+  oldUsername,
+  newUsername
+}: {
+  oldUsername: string
+  newUsername: string
+}) => {
+  try {
+    const response = await socialfi.profiles.profilesUpdate(
+      {
+        apiKey: process.env.TAPESTRY_API_KEY || '',
+        id: oldUsername,
+      },
+      {
+        username: newUsername,
+      },
+    )
+    return response
+  } catch (error: any) {
+    console.error('Tapestry username update error:', error.message || error)
+    throw error
+  }
+}

@@ -40,15 +40,15 @@ model Follow {
 }
 
 model Comment {
-  id          String   @id @default(cuid())
-  text        String
-  createdAt   DateTime @default(now())
-  authorId    String
-  profileId   String
-  tapestryCommentId String?
-  author      User     @relation("AuthoredComments", fields: [authorId], references: [privyDid])
-  profile     User     @relation("ProfileComments", fields: [profileId], references: [privyDid])
-  likes       Like[]
+  id                String   @id @default(cuid())
+  text              String
+  createdAt         DateTime @default(now())
+  authorId          String
+  profileId         String
+  tapestryCommentId String?  @unique
+  author            User     @relation("AuthoredComments", fields: [authorId], references: [privyDid])
+  profile           User     @relation("ProfileComments", fields: [profileId], references: [privyDid])
+  likes             Like[]
 }
 
 model Like {
