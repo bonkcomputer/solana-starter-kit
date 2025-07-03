@@ -62,20 +62,29 @@ export function WalletDropdownMenu() {
     if (!user) return;
     try {
       const hasExternalWallet = !!(connectedSolanaWallet && connectedSolanaWallet.walletClientType !== 'privy');
+      
+      // Debug logging
+      console.log('🔍 Export wallet debug info:', {
+        hasExternalWallet,
+        connectedSolanaWallet,
+        embeddedWallet,
+        solanaWalletAddress,
+        user
+      });
+      
       if (hasExternalWallet) {
         toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)');
         return;
       }
-      if (user.wallet?.address) {
-        const validation = validateWalletAddress(user.wallet.address);
-        if (validation.isValid && validation.isSolana) {
-          await exportWallet({ address: user.wallet.address, chainType: 'solana' } as any);
-          toast.success('Private key export initiated - check the modal');
-        } else {
-          toast.error('Embedded wallet is not a valid Solana address');
-        }
+      
+      // Use the solanaWalletAddress we already validated
+      if (solanaWalletAddress && !hasExternalWallet) {
+        console.log('🔑 Attempting to export wallet with address:', solanaWalletAddress);
+        await exportWallet({ address: solanaWalletAddress, chainType: 'solana' } as any);
+        toast.success('Private key export initiated - check the modal');
       } else {
-        toast.error('No embedded wallet address found');
+        console.error('❌ No valid Solana wallet address found for export');
+        toast.error('No valid wallet address found');
       }
     } catch (error) {
       console.error('Wallet export error:', error);

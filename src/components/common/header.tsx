@@ -191,7 +191,9 @@ export function Header() {
         embeddedWallet: user.wallet ? {
           address: user.wallet.address,
           walletClientType: user.wallet.walletClientType
-        } : null
+        } : null,
+        solanaWalletAddress, // Add this to debug
+        user // Log entire user object for debugging
       })
       
       // Users with external Solana wallets get private key from their wallet
@@ -201,17 +203,14 @@ export function Header() {
         return
       }
       
-      // Users with embedded wallets: Only export if it's a valid Solana address
-      if (user.wallet?.address) {
-        const validation = validateWalletAddress(user.wallet.address)
-        if (validation.isValid && validation.isSolana) {
-          await exportWallet({ address: user.wallet.address, chainType: 'solana' } as any)
-          toast.success('Private key export initiated - check the modal')
-        } else {
-          toast.error('Embedded wallet is not a valid Solana address')
-        }
+      // Users with embedded wallets: Use the solanaWalletAddress we already validated
+      if (solanaWalletAddress && !hasExternalWallet) {
+        console.log('🔑 Attempting to export wallet with address:', solanaWalletAddress)
+        await exportWallet({ address: solanaWalletAddress, chainType: 'solana' } as any)
+        toast.success('Private key export initiated - check the modal')
       } else {
-        toast.error('No embedded wallet address found')
+        console.error('❌ No valid Solana wallet address found for export')
+        toast.error('No valid wallet address found')
       }
     } catch (error) {
       console.error('Wallet export error:', error)
