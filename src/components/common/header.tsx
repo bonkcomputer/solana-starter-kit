@@ -29,6 +29,7 @@ import { DialectNotificationComponent } from '../notifications/dialect-notificat
 // import { preloadService } from '@/utils/preload'
 // import { performanceMonitor } from '@/utils/performance'
 import bctLogo from '@/app/bctlogo.png'
+import { preloadService } from '@/utils/preload'
 
 export function Header() {
   const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
@@ -305,6 +306,15 @@ export function Header() {
       try {
         await login()
         console.log('Login initiated successfully')
+        // After login, re-initialize preloading for the new user
+        // Use setTimeout to ensure user and walletAddress are updated
+        setTimeout(() => {
+          if (walletAddress) {
+            preloadService.initializePreloading(walletAddress)
+          } else {
+            preloadService.initializePreloading()
+          }
+        }, 0)
       } catch (error) {
         console.error('Login error:', error)
       }
@@ -746,6 +756,9 @@ export function Header() {
                         
                         // Clear session storage
                         sessionStorage.clear()
+                        
+                        // Clear preloaded cache
+                        preloadService.clearCache()
                         
                         // Call Privy logout
                         await logout()

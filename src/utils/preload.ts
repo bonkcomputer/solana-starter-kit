@@ -125,6 +125,11 @@ export class PreloadService {
       this.preloadImages()
     }
   }
+
+  // Clear all cached preloaded data (user-specific and global)
+  public clearCache() {
+    this.preloadCache.clear();
+  }
 }
 
 // Export singleton instance
