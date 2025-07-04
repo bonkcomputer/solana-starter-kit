@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, WalletWithMetadata } from '@privy-io/react-auth';
 import { toast } from 'sonner';
-import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet';
+import { isValidSolanaAddress, validateWalletAddress } from '../../lib/Solana/validation';
 import { Clipboard, Power, LogOut } from 'lucide-react';
 import { abbreviateWalletAddress } from '@/components/common/tools';
 
@@ -60,40 +60,35 @@ export function WalletDropdownMenu() {
 
   const handleExportWallet = async () => {
     if (!user) return;
+    
     try {
-      const hasExternalWallet = !!(connectedSolanaWallet && connectedSolanaWallet.walletClientType !== 'privy');
-      
-      // Debug logging
-      console.log('🔍 Export wallet debug info:', {
-        hasExternalWallet,
-        connectedSolanaWallet,
-        embeddedWallet,
-        solanaWalletAddress,
-        user
-      });
-      
-      if (hasExternalWallet) {
-        toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)');
-        return;
-      }
-
-      const embeddedSolanaWallet = user.linkedAccounts.find(
-        (account) =>
+      // Check if user connected with external wallet (with validation)
+      const potentialConnectedWallet = user.linkedAccounts?.find(
+        (account): account is WalletWithMetadata =>
           account.type === 'wallet' &&
-          (account as any).chainType === 'solana' &&
-          (account as any).walletClientType === 'privy',
-      ) as any | undefined;
+          (account as WalletWithMetadata).chainType === 'solana'
+      ) as WalletWithMetadata | undefined;
+      
+      const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
+        ? potentialConnectedWallet
+        : undefined;
 
-      if (embeddedSolanaWallet) {
-        console.log('🔑 Attempting to export embedded Solana wallet by address:', embeddedSolanaWallet.address);
-        await exportWallet(embeddedSolanaWallet.address);
-        toast.success('Private key export initiated - check the modal');
+      if (connectedSolanaWallet) {
+        console.log('🔑 Attempting to export embedded Solana wallet by address:', connectedSolanaWallet.address);
+        try {
+          await exportWallet({ address: connectedSolanaWallet.address });
+          toast.success('Private key export initiated - check the modal');
+        } catch (error) {
+          console.error('Wallet export error (external wallet):', error);
+          toast.error('Private key export is not supported for external wallets. Please use your wallet app to export your private key.');
+        }
         return;
       }
 
       // Embedded wallet: Use Privy exportWallet() with no arguments
       console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments');
       await exportWallet();
+      toast.success('Private key export initiated - check the modal');
     } catch (error) {
       console.error('Wallet export error:', error);
       toast.error('Failed to export wallet');
