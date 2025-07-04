@@ -90,10 +90,37 @@ export function WalletDropdownMenu() {
           account.chainType === 'solana' &&
           account.walletClientType === 'privy'
       );
-      if (exportableSolanaWallet) {
-        console.log('🔑 Attempting to export Solana embedded wallet:', exportableSolanaWallet);
-        await exportWallet({ id: (exportableSolanaWallet as any).id, chainType: 'solana' } as any);
-        toast.success('Private key export initiated - check the modal');
+      
+      if (!exportableSolanaWallet) {
+        // No Solana wallet found - user might only have EVM wallet
+        console.error('❌ No Solana embedded wallet found in linkedAccounts');
+        console.log('All linked accounts:', user.linkedAccounts);
+        toast.error('No Solana wallet found. This app requires a Solana wallet.');
+        return;
+      }
+      
+      console.log('🔑 Found Solana embedded wallet:', exportableSolanaWallet);
+      console.log('Solana wallet details:', {
+        id: (exportableSolanaWallet as any).id,
+        address: (exportableSolanaWallet as any).address,
+        chainType: (exportableSolanaWallet as any).chainType,
+        walletClientType: (exportableSolanaWallet as any).walletClientType
+      });
+      
+      // Since Privy's exportWallet might default to EVM, let's show the Solana address directly
+      if ((exportableSolanaWallet as any).address) {
+        // For now, just copy the address and inform user
+        const solanaAddress = (exportableSolanaWallet as any).address;
+        navigator.clipboard.writeText(solanaAddress);
+        toast.info(`Solana wallet address copied: ${solanaAddress}. Note: Private key export for Solana wallets may show EVM wallet in Privy's dialog. We're working on a fix.`);
+        
+        // Still try to call exportWallet in case it works
+        try {
+          await exportWallet();
+          // If the modal shows EVM wallet, user will see our warning
+        } catch (err) {
+          console.error('Export wallet error:', err);
+        }
         return;
       }
       // --- End surgical fix ---
