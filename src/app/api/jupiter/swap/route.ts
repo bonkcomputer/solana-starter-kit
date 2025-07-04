@@ -3,7 +3,7 @@ import type { SwapRouteResponse } from '@/types/jupiter-service'
 import { Connection } from '@solana/web3.js'
 import { NextResponse } from 'next/server'
 
-const connection = new Connection(process.env.RPC_URL || '')
+const connection = new Connection(process.env.RPC_URL || 'https://api.mainnet-beta.solana.com')
 const swapService = new SwapService(connection)
 
 export async function POST(

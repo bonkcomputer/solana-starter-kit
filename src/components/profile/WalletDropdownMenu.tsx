@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { usePrivy } from '@privy-io/react-auth';
 import { toast } from 'sonner';
-import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet';
+import { isValidSolanaAddress } from '@/utils/wallet';
 import { Clipboard, Power, LogOut } from 'lucide-react';
 import { abbreviateWalletAddress } from '@/components/common/tools';
 
@@ -10,7 +10,7 @@ export function WalletDropdownMenu() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Wallet detection logic
+  // Wallet detection logic - ONLY look for Solana wallets
   const potentialConnectedWallet = user?.linkedAccounts?.find(
     (account): account is any =>
       account.type === 'wallet' &&
@@ -21,17 +21,23 @@ export function WalletDropdownMenu() {
     ? potentialConnectedWallet
     : undefined;
 
-  const embeddedWallet = user?.wallet;
+  // Look for Solana embedded wallet in linkedAccounts instead of user.wallet
+  const solanaEmbeddedWallet = user?.linkedAccounts?.find(
+    (account): account is any =>
+      account.type === 'wallet' &&
+      (account as any).chainType === 'solana' &&
+      (account as any).walletClientType === 'privy' &&
+      (account as any).address &&
+      isValidSolanaAddress((account as any).address)
+  ) as any | undefined;
+
   let solanaWalletAddress: string | undefined;
   let isEmailUser = false;
 
   if (connectedSolanaWallet?.address && isValidSolanaAddress(connectedSolanaWallet.address)) {
     solanaWalletAddress = connectedSolanaWallet.address;
-  } else if (embeddedWallet?.address) {
-    const validation = validateWalletAddress(embeddedWallet.address);
-    if (validation.isValid && validation.isSolana) {
-      solanaWalletAddress = embeddedWallet.address;
-    }
+  } else if (solanaEmbeddedWallet?.address && isValidSolanaAddress(solanaEmbeddedWallet.address)) {
+    solanaWalletAddress = solanaEmbeddedWallet.address;
   }
 
   if (user?.email?.address && !connectedSolanaWallet) {
@@ -67,7 +73,7 @@ export function WalletDropdownMenu() {
       console.log('🔍 Export wallet debug info:', {
         hasExternalWallet,
         connectedSolanaWallet,
-        embeddedWallet,
+        detectedSolanaEmbedded: solanaEmbeddedWallet,
         solanaWalletAddress,
         user
       });
@@ -78,15 +84,15 @@ export function WalletDropdownMenu() {
       }
       
       // --- Surgical fix: Find the correct Solana embedded wallet in linkedAccounts ---
-      const solanaEmbeddedWallet = user.linkedAccounts?.find(
+      const exportableSolanaWallet = user.linkedAccounts?.find(
         (account: any) =>
           account.type === 'wallet' &&
           account.chainType === 'solana' &&
           account.walletClientType === 'privy'
       );
-      if (solanaEmbeddedWallet) {
-        console.log('🔑 Attempting to export Solana embedded wallet:', solanaEmbeddedWallet);
-        await exportWallet({ id: (solanaEmbeddedWallet as any).id, chainType: 'solana' } as any);
+      if (exportableSolanaWallet) {
+        console.log('🔑 Attempting to export Solana embedded wallet:', exportableSolanaWallet);
+        await exportWallet({ id: (exportableSolanaWallet as any).id, chainType: 'solana' } as any);
         toast.success('Private key export initiated - check the modal');
         return;
       }
