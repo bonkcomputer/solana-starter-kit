@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { createTapestryProfile, getTapestryProfile } from "@/lib/tapestry";
-import { awardPoints, processReferral } from "@/services/points";
+import { awardPoints, processReferral, initializeAchievements } from "@/services/points";
 import { PointActionType } from "@/models/points.models";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -113,6 +113,14 @@ export async function POST(req: NextRequest) {
 
     // 7. Award points for profile creation
     try {
+      // Check if achievements exist, if not initialize them
+      const achievementCount = await prisma.achievement.count();
+      if (achievementCount === 0) {
+        console.log('🔄 No achievements found, initializing...');
+        await initializeAchievements();
+        console.log('✅ Achievements initialized successfully');
+      }
+      
       const pointsResult = await awardPoints(
         privyDid, 
         PointActionType.PROFILE_CREATION,
