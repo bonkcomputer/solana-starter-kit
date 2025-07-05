@@ -5,6 +5,7 @@ import { CopyPaste } from '@/components/common/copy-paste'
 import { Bio } from '@/components/profile/bio'
 import { UsernameEditor } from '@/components/profile/username-editor'
 import { useGetProfileInfo } from '@/components/profile/hooks/use-get-profile-info'
+import { PointsDisplay } from '@/components/points/ui/points-display'
 import { User } from 'lucide-react'
 import Image from 'next/image'
 import { WalletDropdownMenu } from './WalletDropdownMenu'
@@ -63,6 +64,14 @@ export function MyProfile({ username }: Props) {
             username={username} 
             data={profile} 
             onUsernameUpdate={handleUsernameUpdate}
+          />
+          
+          {/* Points Display */}
+          <PointsDisplay 
+            userId={profile?.privyDid} 
+            variant="profile" 
+            showStreak={true}
+            showTodayPoints={true}
           />
           <Bio username={username} data={profile} refetch={refetch} />
         </div>

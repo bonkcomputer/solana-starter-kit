@@ -23,11 +23,27 @@ model User {
   solanaWalletAddress   String?
   embeddedWalletAddress String?
   lastUsernameChange    DateTime? // Track when username was last changed
+  
+  // Points system fields
+  totalPoints           Int       @default(0)
+  currentStreak         Int       @default(0)
+  longestStreak         Int       @default(0)
+  lastLoginDate         DateTime?
+  referralCode          String    @unique @default(cuid())
+  referredBy            String?   // Reference to referring user's privyDid
+  
+  // Relations
   following             Follow[]  @relation("Followers")
   followers             Follow[]  @relation("Following")
   authoredComments      Comment[] @relation("AuthoredComments")
   profileComments       Comment[] @relation("ProfileComments")
   likes                 Like[]
+  
+  // Points system relations
+  pointTransactions     PointTransaction[]
+  achievements          UserAchievement[]
+  referrals             User[]    @relation("Referrals")
+  referrer              User?     @relation("Referrals", fields: [referredBy], references: [privyDid])
 }
 
 model Follow {
@@ -60,4 +76,82 @@ model Like {
   comment   Comment  @relation(fields: [commentId], references: [id])
 
   @@unique([userId, commentId])
+}
+
+// Points System Models
+
+model PointTransaction {
+  id          String            @id @default(cuid())
+  userId      String
+  points      Int
+  actionType  PointActionType
+  description String
+  createdAt   DateTime          @default(now())
+  metadata    Json?             // Additional data about the action (e.g., trade details, referral info)
+  
+  user        User              @relation(fields: [userId], references: [privyDid])
+  
+  @@index([userId, createdAt])
+}
+
+model Achievement {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  description String
+  icon        String
+  pointsReward Int
+  category    AchievementCategory
+  requirement Json              // Flexible requirement structure
+  createdAt   DateTime          @default(now())
+  
+  userAchievements UserAchievement[]
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  
+  user          User        @relation(fields: [userId], references: [privyDid])
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  
+  @@unique([userId, achievementId])
+}
+
+model DailyPointsLog {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @db.Date
+  points    Int
+  actions   Json     // Track which actions were performed that day
+  
+  @@unique([userId, date])
+  @@index([date])
+}
+
+// Enums
+
+enum PointActionType {
+  PROFILE_CREATION
+  DAILY_LOGIN
+  STREAK_BONUS
+  COMMENT_CREATED
+  LIKE_GIVEN
+  FOLLOW_USER
+  TRADE_COMPLETED
+  REFERRAL_BONUS
+  PROFILE_UPDATE
+  PORTFOLIO_VIEW
+  ACHIEVEMENT_UNLOCKED
+  ADMIN_ADJUSTMENT
+}
+
+enum AchievementCategory {
+  SOCIAL
+  TRADING
+  ENGAGEMENT
+  REFERRAL
+  MILESTONE
+  SPECIAL
 }

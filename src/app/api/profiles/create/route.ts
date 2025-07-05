@@ -1,5 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { createTapestryProfile, getTapestryProfile } from "@/lib/tapestry";
+import { awardPoints, processReferral } from "@/services/points";
+import { PointActionType } from "@/models/points.models";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -10,7 +12,8 @@ export async function POST(req: NextRequest) {
     embeddedWalletAddress,
     solanaWalletAddress,
     privyDid,
-    execution = 'FAST_UNCONFIRMED' // Default to fastest execution
+    execution = 'FAST_UNCONFIRMED', // Default to fastest execution
+    referralCode // Optional referral code
   } = await req.json();
 
   if (!privyDid || !username || !solanaWalletAddress) {
@@ -92,6 +95,34 @@ export async function POST(req: NextRequest) {
         solanaWalletAddress,
       },
     });
+
+    // 6. Process referral if provided
+    if (referralCode) {
+      try {
+        const referralSuccess = await processReferral(referralCode, privyDid);
+        if (referralSuccess) {
+          console.log('✅ Processed referral successfully:', referralCode);
+        } else {
+          console.log('❌ Failed to process referral:', referralCode);
+        }
+      } catch (referralError) {
+        console.error('Error processing referral:', referralError);
+        // Don't fail the entire request if referral fails
+      }
+    }
+
+    // 7. Award points for profile creation
+    try {
+      const pointsResult = await awardPoints(
+        privyDid, 
+        PointActionType.PROFILE_CREATION,
+        { username, firstProfile: true, referralCode }
+      );
+      console.log('✅ Awarded profile creation points:', pointsResult.pointsAwarded);
+    } catch (pointsError) {
+      console.error('Failed to award profile creation points:', pointsError);
+      // Don't fail the entire request if points fail
+    }
 
     console.log('✅ Successfully created profile for:', username);
     return NextResponse.json({ 

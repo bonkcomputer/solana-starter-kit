@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { createTapestryLike, deleteTapestryLike } from '@/lib/tapestry'
+import { awardPoints } from '@/services/points'
+import { PointActionType } from '@/models/points.models'
 import { NextRequest, NextResponse } from 'next/server'
 
 // POST handler for "liking" a comment
@@ -28,6 +30,19 @@ export async function POST(request: NextRequest) {
         commentId, // The comment's CUID from our DB
       },
     })
+
+    // 3. Award points for giving a like
+    try {
+      const pointsResult = await awardPoints(
+        userId,
+        PointActionType.LIKE_GIVEN,
+        { likeId: newLike.id, commentId, tapestryCommentId }
+      );
+      console.log('✅ Awarded like points:', pointsResult.pointsAwarded);
+    } catch (pointsError) {
+      console.error('Failed to award like points:', pointsError);
+      // Don't fail the entire request if points fail
+    }
 
     return NextResponse.json(newLike)
   } catch (error) {

@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { followUser } from '@/lib/tapestry'
+import { awardPoints } from '@/services/points'
+import { PointActionType } from '@/models/points.models'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface FollowRequestBody {
@@ -42,6 +44,23 @@ export async function POST(req: NextRequest) {
         followingId: followeePrivyDid,
       },
     })
+
+    // 3. Award points for following a user
+    try {
+      const pointsResult = await awardPoints(
+        followerPrivyDid,
+        PointActionType.FOLLOW_USER,
+        { 
+          followeeUsername, 
+          followeePrivyDid,
+          followId: followRelationship.followerId + '-' + followRelationship.followingId
+        }
+      );
+      console.log('✅ Awarded follow points:', pointsResult.pointsAwarded);
+    } catch (pointsError) {
+      console.error('Failed to award follow points:', pointsError);
+      // Don't fail the entire request if points fail
+    }
 
     return NextResponse.json(followRelationship)
   } catch (error: any) {

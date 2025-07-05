@@ -25,6 +25,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useCurrentWallet } from '../auth/hooks/use-current-wallet'
 import { CreateProfileContainer } from '../create-profile/create-profile-container'
 import { DialectNotificationComponent } from '../notifications/dialect-notifications-component'
+import { PointsDisplay } from '../points/ui/points-display'
+import { useAutoAwardPoints } from '../points/hooks/use-points'
+import { PointActionType } from '@/models/points.models'
 // Temporarily disabled for debugging
 // import { preloadService } from '@/utils/preload'
 // import { performanceMonitor } from '@/utils/performance'
@@ -42,6 +45,7 @@ export function Header() {
   const dropdownRef = useRef(null)
   const router = useRouter()
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+  const { awardPointsWithToast } = useAutoAwardPoints()
   const [showStakeModal, setShowStakeModal] = useState(false)
   const [countdownNumbers, setCountdownNumbers] = useState({
     days: '??',
@@ -266,6 +270,12 @@ export function Header() {
       console.log('✅ Already have mainUsername:', mainUsername)
       setUserProfile(mainUsername)
       setShowCreateProfile(false)
+      
+      // Award daily login points if user has a profile
+      if (user?.id) {
+        awardPointsWithToast(user.id, PointActionType.DAILY_LOGIN, { loginDate: new Date().toISOString() })
+          .catch(error => console.log('Daily login points already awarded or failed:', error.message))
+      }
       return
     }
 
@@ -277,6 +287,12 @@ export function Header() {
           console.log('✅ Found username:', username)
           setUserProfile(username)
           setShowCreateProfile(false)
+          
+          // Award daily login points
+          if (user?.id) {
+            awardPointsWithToast(user.id, PointActionType.DAILY_LOGIN, { loginDate: new Date().toISOString() })
+              .catch(error => console.log('Daily login points already awarded or failed:', error.message))
+          }
         } else {
           console.log('❓ No profile found, showing create profile dialog')
           // No profile found, show create profile dialog
@@ -284,7 +300,7 @@ export function Header() {
         }
       })
     }
-  }, [ready, authenticated, walletAddress, mainUsername, checkProfile, showCreateProfile])
+  }, [ready, authenticated, walletAddress, mainUsername, checkProfile, showCreateProfile, user?.id, awardPointsWithToast])
 
   // Separate effect to ensure create profile dialog shows when needed
   useEffect(() => {
@@ -821,7 +837,14 @@ export function Header() {
             )}
 
             {ready && authenticated && userProfile && (
-              <DialectNotificationComponent />
+              <>
+                <PointsDisplay 
+                  userId={user?.id} 
+                  variant="header" 
+                  className="border-r border-border pr-3 mr-3" 
+                />
+                <DialectNotificationComponent />
+              </>
             )}
           </div>
         </div>

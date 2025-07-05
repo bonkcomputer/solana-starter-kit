@@ -365,6 +365,24 @@ export function useJupiterSwap({
         console.error('Error in confirming tx:', tx.value.err)
       } else {
         toast.dismiss(confirmToastId)
+        
+        // Award points for successful trade
+        try {
+          await fetch('/api/points/award', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              walletAddress,
+              actionType: 'TRADE',
+            }),
+          })
+        } catch (pointsError) {
+          console.warn('Failed to award points for trade:', pointsError)
+          // Don't fail the whole transaction if points awarding fails
+        }
+        
         toast.success(SUCCESS.TX_SUCCESS.title, SUCCESS.TX_SUCCESS.content)
         setIsFullyConfirmed(true)
       }

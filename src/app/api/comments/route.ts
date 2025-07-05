@@ -1,5 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { createTapestryComment, getTapestryCommentsAndLikes } from '@/lib/tapestry'
+import { awardPoints } from '@/services/points'
+import { PointActionType } from '@/models/points.models'
 import { NextRequest, NextResponse } from 'next/server'
 
 // GET handler for fetching comments for a specific profile
@@ -116,6 +118,19 @@ export async function POST(request: NextRequest) {
         tapestryCommentId: tapestryId, // Will be null if Tapestry failed
       },
     })
+
+    // 3. Award points for creating a comment
+    try {
+      const pointsResult = await awardPoints(
+        authorId,
+        PointActionType.COMMENT_CREATED,
+        { commentId: newComment.id, targetProfile: profileUsername }
+      );
+      console.log('✅ Awarded comment points:', pointsResult.pointsAwarded);
+    } catch (pointsError) {
+      console.error('Failed to award comment points:', pointsError);
+      // Don't fail the entire request if points fail
+    }
 
     return NextResponse.json(newComment)
   } catch (error) {
