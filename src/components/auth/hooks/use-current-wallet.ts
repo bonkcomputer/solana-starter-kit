@@ -4,8 +4,8 @@ import { useSolanaWallets, usePrivy } from '@privy-io/react-auth'
 import { useEffect, useState } from 'react'
 
 export function useCurrentWallet() {
-  const { wallets } = useSolanaWallets()
   const { ready, authenticated } = usePrivy()
+  const { wallets } = useSolanaWallets()
   const [walletAddress, setWalletAddress] = useState('')
   const [mainUsername, setMainUsername] = useState<string | null>(null)
   const [loadingMainUsername, setLoadingMainUsername] = useState(false)
