@@ -4,6 +4,7 @@ import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { Button } from '@/components/common/button'
 import { useUpdateProfileInfo } from '@/components/profile/hooks/use-update-profile'
 import { IUser } from '@/models/profile.models'
+import { usePrivy } from '@privy-io/react-auth'
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 
@@ -18,7 +19,8 @@ export function Bio({ username, data, refetch }: Props) {
   const [bio, setBio] = useState(data?.bio || '')
   const [isEditing, setIsEditing] = useState(false)
 
-  const { mainUsername } = useCurrentWallet()
+  const { mainUsername, walletAddress } = useCurrentWallet()
+  const { user } = usePrivy()
 
   const handleSaveBio = async () => {
     await updateProfile({ bio })
@@ -26,9 +28,14 @@ export function Bio({ username, data, refetch }: Props) {
     setIsEditing(false)
   }
 
+  // Check ownership by comparing mainUsername, or by checking if the profile data matches the current user
+  const isOwner = mainUsername === username || 
+                  (data?.privyDid && user?.id && data.privyDid === user.id) ||
+                  (data?.solanaWalletAddress && walletAddress && data.solanaWalletAddress === walletAddress)
+
   return (
     <div className="mt-4">
-      {mainUsername === username ? (
+      {isOwner ? (
         isEditing ? (
           <div className="flex flex-col items-center space-y-2">
             <input

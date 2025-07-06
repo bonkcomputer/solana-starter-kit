@@ -132,8 +132,7 @@ export function CreateProfile({
         
         <div className="bg-border h-[1px] w-full my-6" />
         
-        <div className="space-y-4">
-          {/* Simple import section - only show if we found existing profiles */}
+        {/* Simple import section - only show if we found existing profiles */}
           {identities && identities.identities && identities.identities.length > 0 && (
             <>
               <div className="text-center py-4">
@@ -222,7 +221,6 @@ export function CreateProfile({
           >
             Disconnect wallet
           </Button>
-        </div>
     </div>
   )
 }

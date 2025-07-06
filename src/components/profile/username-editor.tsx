@@ -4,6 +4,7 @@ import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { Button } from '@/components/common/button'
 import { useUpdateUsername } from '@/components/profile/hooks/use-update-username'
 import { IUser } from '@/models/profile.models'
+import { usePrivy } from '@privy-io/react-auth'
 import { Pencil, Check, X, Clock, AlertCircle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
@@ -14,8 +15,13 @@ interface Props {
 }
 
 export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Props) {
-  const { mainUsername } = useCurrentWallet()
-  const isOwner = mainUsername === username
+  const { mainUsername, walletAddress } = useCurrentWallet()
+  const { user } = usePrivy()
+  
+  // Check ownership by comparing mainUsername, or by checking if the profile data matches the current user
+  const isOwner = mainUsername === username || 
+                  (data?.privyDid && user?.id && data.privyDid === user.id) ||
+                  (data?.solanaWalletAddress && walletAddress && data.solanaWalletAddress === walletAddress)
 
   const { 
     updateUsername, 
