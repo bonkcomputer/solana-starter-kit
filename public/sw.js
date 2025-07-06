@@ -1,166 +1,167 @@
-// Service Worker for intelligent caching
-const CACHE_NAME = 'bct-trading-v1'
-const STATIC_CACHE = 'bct-static-v1'
-const API_CACHE = 'bct-api-v1'
+// Service Worker for Bonk Computer Community Center
+const CACHE_NAME = 'bonk-community-v1';
+const STATIC_CACHE = 'static-v1';
+const API_CACHE = 'api-v1';
 
-// Critical assets to cache immediately
-const CRITICAL_ASSETS = [
+// Files to cache immediately
+const STATIC_ASSETS = [
   '/',
   '/trade',
-  '/bctlogo.png',
+  '/points',
+  '/token',
+  '/manifest.json',
+  '/bonklogo.svg',
   '/computerlogo.svg',
-  '/_next/static/css/app/layout.css',
-]
+  '/next.svg',
+  '/vercel.svg'
+];
 
-// API endpoints to cache with different strategies
-const CACHEABLE_APIS = [
-  '/api/token',
-  '/api/trades',
-  '/api/portfolio',
-]
-
-// External resources to cache
-const EXTERNAL_RESOURCES = [
-  'https://ipfs.io/ipfs/bafkreigxnxbmmov3vziotzzbcni4oja3qxdnrch6wjx6yqvm5xad2m3kce',
-  'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png',
-]
-
+// Install event - cache static assets
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
   event.waitUntil(
-    Promise.all([
-      // Cache critical static assets
-      caches.open(STATIC_CACHE).then((cache) => {
-        return cache.addAll(CRITICAL_ASSETS)
-      }),
-      // Cache external resources
-      caches.open(STATIC_CACHE).then((cache) => {
-        return cache.addAll(EXTERNAL_RESOURCES.map(url => new Request(url, { mode: 'cors' })))
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        console.log('Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
       })
-    ]).then(() => {
-      self.skipWaiting()
-    })
-  )
-})
+      .then(() => self.skipWaiting())
+  );
+});
 
+// Activate event - cleanup old caches
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME && cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
-            return caches.delete(cacheName)
-          }
-        })
-      )
-    }).then(() => {
-      self.clients.claim()
-    })
-  )
-})
-
-self.addEventListener('fetch', (event) => {
-  const { request } = event
-  const url = new URL(request.url)
-
-  // Skip authentication and Privy-related requests
-  if (url.hostname.includes('privy.io') || 
-      url.hostname.includes('auth.privy.io') ||
-      url.pathname.includes('/api/auth') ||
-      url.pathname.includes('/api/profiles') ||
-      url.pathname.includes('/api/identities')) {
-    // Always use network for auth requests
-    event.respondWith(fetch(request))
-    return
-  }
-
-  // Handle API requests with cache-first for token data, network-first for trades
-  if (CACHEABLE_APIS.some(api => url.pathname.startsWith(api))) {
-    if (url.pathname.startsWith('/api/token')) {
-      // Token data - cache first (rarely changes)
-      event.respondWith(cacheFirstStrategy(request, API_CACHE, 5 * 60 * 1000)) // 5 min cache
-    } else if (url.pathname.startsWith('/api/trades')) {
-      // Trades data - network first (changes frequently)
-      event.respondWith(networkFirstStrategy(request, API_CACHE, 30 * 1000)) // 30 sec cache
-    } else {
-      // Other APIs - network first with fallback
-      event.respondWith(networkFirstStrategy(request, API_CACHE, 2 * 60 * 1000)) // 2 min cache
-    }
-    return
-  }
-
-  // Handle static assets
-  if (request.destination === 'image' || request.destination === 'font' || request.destination === 'style') {
-    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE))
-    return
-  }
-
-  // Handle navigation requests
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match('/')
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
       })
-    )
-    return
+      .then(() => self.clients.claim())
+  );
+});
+
+// Fetch event - serve from cache with network fallback
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+
+  // Skip chrome-extension and other non-http requests
+  if (!url.protocol.startsWith('http')) return;
+
+  // Handle different types of requests
+  if (url.pathname.startsWith('/api/')) {
+    // API requests - cache with network first strategy
+    event.respondWith(handleApiRequest(request));
+  } else if (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf)$/)) {
+    // Static assets - cache first strategy
+    event.respondWith(handleStaticAsset(request));
+  } else {
+    // HTML pages - network first with cache fallback
+    event.respondWith(handlePageRequest(request));
+  }
+});
+
+// Network first strategy for API requests
+async function handleApiRequest(request) {
+  const url = new URL(request.url);
+  
+  // Don't cache sensitive API endpoints
+  const sensitiveEndpoints = [
+    '/api/profiles/create',
+    '/api/jupiter/swap',
+    '/api/jupiter/swap-complete',
+    '/api/points/award',
+    '/api/og/progress'
+  ];
+  if (sensitiveEndpoints.some(endpoint => url.pathname.includes(endpoint))) {
+    return fetch(request);
   }
 
-  // Default: network first
-  event.respondWith(fetch(request))
-})
+  try {
+    const networkResponse = await fetch(request);
+    
+    // Cache successful responses for non-sensitive endpoints
+    if (networkResponse.ok) {
+      const cache = await caches.open(API_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    // Return cached version if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    throw error;
+  }
+}
 
-// Cache-first strategy with optional TTL
-async function cacheFirstStrategy(request, cacheName, ttl) {
-  const cache = await caches.open(cacheName)
-  const cached = await cache.match(request)
+// Cache first strategy for static assets
+async function handleStaticAsset(request) {
+  const cachedResponse = await caches.match(request);
   
-  if (cached) {
-    // Check TTL if provided
-    if (ttl) {
-      const cachedDate = new Date(cached.headers.get('date'))
-      const now = new Date()
-      if (now - cachedDate > ttl) {
-        // Cache expired, fetch new data in background
-        fetchAndCache(request, cache)
-        return cached // Return stale data immediately
+  if (cachedResponse) {
+    // Update cache in background
+    fetch(request).then(response => {
+      if (response.ok) {
+        caches.open(STATIC_CACHE).then(cache => {
+          cache.put(request, response);
+        });
       }
-    }
-    return cached
+    }).catch(() => {
+      // Ignore network errors for background updates
+    });
+    
+    return cachedResponse;
   }
 
-  // Not in cache, fetch and cache
-  return fetchAndCache(request, cache)
-}
-
-// Network-first strategy with cache fallback
-async function networkFirstStrategy(request, cacheName, ttl) {
-  const cache = await caches.open(cacheName)
-  
+  // If not in cache, fetch from network and cache
   try {
-    const response = await fetch(request)
-    if (response.ok) {
-      // Cache successful responses
-      cache.put(request, response.clone())
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
     }
-    return response
+    
+    return networkResponse;
   } catch (error) {
-    // Network failed, try cache
-    const cached = await cache.match(request)
-    if (cached) {
-      return cached
-    }
-    throw error
+    console.log('Failed to fetch static asset:', request.url);
+    throw error;
   }
 }
 
-// Helper function to fetch and cache
-async function fetchAndCache(request, cache) {
+// Network first strategy for HTML pages
+async function handlePageRequest(request) {
   try {
-    const response = await fetch(request)
-    if (response.ok) {
-      cache.put(request, response.clone())
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
     }
-    return response
+    
+    return networkResponse;
   } catch (error) {
-    throw error
+    // Return cached version if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline page if available
+    return caches.match('/');
   }
 } 

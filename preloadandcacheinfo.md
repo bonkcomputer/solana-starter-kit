@@ -216,6 +216,49 @@ module.exports = withBundleAnalyzer(nextConfig);
 
 ```
 
+## the next-env.d.ts can look like this:
+
+```
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/basic-features/typescript for more information.
+
+```
+
+the tsconfig.json can look like this:
+
+```
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
+```
 
 ## the service-worker-registration.tsx can look like this:
 
@@ -525,6 +568,205 @@ export function AccessibilityEnhancements() {
 
   return null; // This component doesn't render anything
 }
+```
+
+## service worker sw.js can look like this:
+
+```
+// Service Worker for Bonk Computer
+const CACHE_NAME = 'bonk-computer-v1';
+const STATIC_CACHE = 'static-v1';
+const API_CACHE = 'api-v1';
+
+// Files to cache immediately
+const STATIC_ASSETS = [
+  '/',
+  '/app',
+  '/login',
+  '/manifest.json',
+  '/bonklogo.svg',
+  '/images/BonkComputerLogoMain.png',
+  '/images/bct-logo.png',
+  '/bctgates.jpeg'
+  // Token logos removed from immediate cache - will be cached on-demand when requested
+];
+
+// Install event - cache static assets
+self.addEventListener('install', (event) => {
+  console.log('Service Worker installing...');
+  event.waitUntil(
+    caches.open(STATIC_CACHE)
+      .then((cache) => {
+        console.log('Caching static assets');
+        return cache.addAll(STATIC_ASSETS);
+      })
+      .then(() => self.skipWaiting())
+  );
+});
+
+// Activate event - cleanup old caches
+self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating...');
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames.map((cacheName) => {
+            if (cacheName !== STATIC_CACHE && cacheName !== API_CACHE) {
+              console.log('Deleting old cache:', cacheName);
+              return caches.delete(cacheName);
+            }
+          })
+        );
+      })
+      .then(() => self.clients.claim())
+  );
+});
+
+// Fetch event - serve from cache with network fallback
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+
+  // Skip chrome-extension and other non-http requests
+  if (!url.protocol.startsWith('http')) return;
+
+  // Handle different types of requests
+  if (url.pathname.startsWith('/api/')) {
+    // API requests - cache with network first strategy
+    event.respondWith(handleApiRequest(request));
+  } else if (url.pathname.match(/\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf)$/)) {
+    // Static assets - cache first strategy
+    event.respondWith(handleStaticAsset(request));
+  } else {
+    // HTML pages - network first with cache fallback
+    event.respondWith(handlePageRequest(request));
+  }
+});
+
+// Network first strategy for API requests
+async function handleApiRequest(request) {
+  const url = new URL(request.url);
+  
+  // Don't cache sensitive API endpoints
+  const sensitiveEndpoints = ['/api/user', '/api/wallet-balance', '/api/desktop'];
+  if (sensitiveEndpoints.some(endpoint => url.pathname.includes(endpoint))) {
+    return fetch(request);
+  }
+
+  try {
+    const networkResponse = await fetch(request);
+    
+    // Cache successful responses
+    if (networkResponse.ok) {
+      const cache = await caches.open(API_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    // Return cached version if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    throw error;
+  }
+}
+
+// Cache first strategy for static assets
+async function handleStaticAsset(request) {
+  const cachedResponse = await caches.match(request);
+  
+  if (cachedResponse) {
+    // Update cache in background
+    fetch(request).then(response => {
+      if (response.ok) {
+        caches.open(STATIC_CACHE).then(cache => {
+          cache.put(request, response);
+        });
+      }
+    }).catch(() => {
+      // Ignore network errors for background updates
+    });
+    
+    return cachedResponse;
+  }
+
+  // If not in cache, fetch from network and cache
+  try {
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    console.log('Failed to fetch static asset:', request.url);
+    throw error;
+  }
+}
+
+// Network first strategy for HTML pages
+async function handlePageRequest(request) {
+  try {
+    const networkResponse = await fetch(request);
+    
+    if (networkResponse.ok) {
+      const cache = await caches.open(STATIC_CACHE);
+      cache.put(request, networkResponse.clone());
+    }
+    
+    return networkResponse;
+  } catch (error) {
+    // Return cached version if network fails
+    const cachedResponse = await caches.match(request);
+    if (cachedResponse) {
+      return cachedResponse;
+    }
+    
+    // Return offline page if available
+    return caches.match('/');
+  }
+}
+
+```
+
+## postinstall scripts:
+
+```
+// This script ensures Prisma client is generated during build
+import { execSync } from 'node:child_process';
+
+try {
+  console.log('Running Prisma generate...');
+  execSync('npx prisma generate');
+  console.log('Prisma client generated successfully!');
+} catch (error) {
+  console.error('Error generating Prisma client:', error.message);
+  process.exit(1);
+}
+
+```
+
+```
+// This script ensures Prisma client is generated during build
+import { execSync } from 'node:child_process';
+
+try {
+  console.log('Running Prisma generate...');
+  execSync('npx prisma generate');
+  console.log('Prisma client generated successfully!');
+} catch (error) {
+  console.error('Error generating Prisma client:', error.message);
+  process.exit(1);
+}
+
 ```
 
 ## IMPLEMENT THESE TYPES OF OPTIMIZATIONS BUT FOR OUR APPLICATION. INTEGRATE CAREFULLY AND MATICULASLY TO ENSURE NO EXISTING CODE IS DELETED OR MODIFIED IN THE PROCESS.

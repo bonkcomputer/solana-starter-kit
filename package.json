@@ -8,6 +8,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "analyze": "ANALYZE=true next build",
+    "postinstall": "node scripts/postinstall.mjs",
     "db:backup": "node scripts/backup-database.js",
     "db:restore-users": "node scripts/restore-users.js",
     "db:pre-migration-backup": "node scripts/pre-migration-backup.js",
@@ -63,6 +65,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@next/bundle-analyzer": "^15.1.7",
     "@next/eslint-plugin-next": "^15.1.7",
     "@tailwindcss/postcss": "^4.0.9",
     "@types/lodash": "^4.17.16",
