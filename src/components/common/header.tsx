@@ -791,32 +791,44 @@ export function Header() {
                     
                     <button
                       onClick={async () => {
-                        // Clear all local state first
-                        setIsDropdownOpen(false)
-                        setUserProfile(null)
-                        setShowCreateProfile(false)
-                        
-                        // Clear any cached data in localStorage (except Computer state)
-                        // Clear all localStorage except computer state
-                        const keysToKeep = ['bct-computer-on']
-                        const allKeys = Object.keys(localStorage)
-                        allKeys.forEach(key => {
-                          if (!keysToKeep.includes(key)) {
-                            localStorage.removeItem(key)
+                        try {
+                          // Clear all local state first
+                          setIsDropdownOpen(false)
+                          setUserProfile(null)
+                          setShowCreateProfile(false)
+                          
+                          // Import and use comprehensive cleanup service
+                          const { performLogoutCleanup } = await import('@/utils/logout-cleanup')
+                          
+                          // Perform comprehensive cleanup
+                          const cleanupResult = await performLogoutCleanup()
+                          
+                          // Show user feedback based on cleanup result
+                          if (cleanupResult.success) {
+                            toast.success('Logged out successfully - all data cleared')
+                          } else if (cleanupResult.completedSteps.length > 0) {
+                            toast.warning(`Logged out with partial cleanup (${cleanupResult.completedSteps.length}/${cleanupResult.completedSteps.length + cleanupResult.failedSteps.length} steps completed)`)
+                          } else {
+                            toast.error('Logout cleanup failed, but proceeding with logout')
                           }
-                        })
-                        
-                        // Clear session storage
-                        sessionStorage.clear()
-                        
-                        // Clear preloaded cache
-                        preloadService.clearCache()
-                        
-                        // Call Privy logout
-                        await logout()
-                        
-                        // Navigate to home page
-                        router.push('/')
+                          
+                          // Call Privy logout (always proceed even if cleanup failed)
+                          await logout()
+                          
+                          // Navigate to home page
+                          router.push('/')
+                        } catch (error) {
+                          console.error('❌ Logout process failed:', error)
+                          toast.error('Logout failed - please try again')
+                          
+                          // Still try to logout even if there was an error
+                          try {
+                            await logout()
+                            router.push('/')
+                          } catch (logoutError) {
+                            console.error('❌ Privy logout also failed:', logoutError)
+                          }
+                        }
                       }}
                       className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                     >

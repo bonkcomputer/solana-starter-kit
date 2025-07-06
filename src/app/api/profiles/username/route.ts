@@ -1,12 +1,13 @@
 import { prisma } from '@/lib/prisma'
 import { updateTapestryUsername } from '@/lib/tapestry'
 import { validateUsername } from '@/utils/username-validation'
+import { findAndSyncUser } from '@/utils/user-lookup'
 import { NextRequest, NextResponse } from 'next/server'
 
 // PUT handler for updating username with weekly limit validation
 export async function PUT(req: NextRequest) {
   const body = await req.json()
-  const { newUsername, privyDid } = body
+  const { newUsername, privyDid, currentUsername, solanaWalletAddress } = body
 
   if (!newUsername || !privyDid) {
     return NextResponse.json(
@@ -25,24 +26,31 @@ export async function PUT(req: NextRequest) {
   }
 
   try {
-    // 1. Check if user exists
-    const existingUser = await prisma.user.findUnique({
-      where: { privyDid },
-    })
+    // 1. Find user using robust lookup (handles privyDid changes)
+    const userLookupResult = await findAndSyncUser({
+      privyDid,
+      username: currentUsername,
+      solanaWalletAddress,
+      embeddedWalletAddress: undefined
+    });
 
-    if (!existingUser) {
+    if (!userLookupResult.user) {
+      console.error('❌ User not found for privyDid:', privyDid);
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'User not found. Please try logging out and back in.' },
         { status: 404 }
       )
     }
+
+    const existingUser = userLookupResult.user;
+    console.log(`✅ Found user by ${userLookupResult.matchedBy}:`, existingUser.username);
 
     // 2. Check if new username is already taken
     const usernameExists = await prisma.user.findUnique({
       where: { username: newUsername },
     })
 
-    if (usernameExists && usernameExists.privyDid !== privyDid) {
+    if (usernameExists && usernameExists.privyDid !== existingUser.privyDid) {
       return NextResponse.json(
         { error: 'Username is already taken' },
         { status: 409 }
@@ -79,9 +87,9 @@ export async function PUT(req: NextRequest) {
       // to maintain app functionality. A sync process could fix this later.
     }
 
-    // 5. Update username in local Prisma database
+    // 5. Update username in local Prisma database using the found user's actual privyDid
     const updatedUser = await prisma.user.update({
-      where: { privyDid },
+      where: { privyDid: existingUser.privyDid },
       data: {
         username: newUsername,
         lastUsernameChange: new Date(),
@@ -122,16 +130,24 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { privyDid },
-    })
+    // Use robust user lookup for checking eligibility too
+    const userLookupResult = await findAndSyncUser({
+      privyDid,
+      username: undefined,
+      solanaWalletAddress: undefined,
+      embeddedWalletAddress: undefined
+    });
 
-    if (!user) {
+    if (!userLookupResult.user) {
+      console.error('❌ User not found for username check, privyDid:', privyDid);
       return NextResponse.json(
-        { error: 'User not found' },
+        { error: 'User not found. Please try logging out and back in.' },
         { status: 404 }
       )
     }
+
+    const user = userLookupResult.user;
+    console.log(`✅ Found user for eligibility check by ${userLookupResult.matchedBy}:`, user.username);
 
     const oneWeekAgo = new Date()
     oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)

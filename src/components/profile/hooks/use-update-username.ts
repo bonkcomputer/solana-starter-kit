@@ -1,6 +1,7 @@
 'use client'
 
 import { usePrivy } from '@privy-io/react-auth'
+import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { useCallback, useState } from 'react'
 import { validateUsername } from '@/utils/username-validation'
 
@@ -14,6 +15,7 @@ interface UsernameChangeInfo {
 
 export const useUpdateUsername = () => {
   const { user } = usePrivy()
+  const { walletAddress, mainUsername } = useCurrentWallet()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
@@ -76,7 +78,9 @@ export const useUpdateUsername = () => {
         },
         body: JSON.stringify({
           newUsername,
-          privyDid: user.id
+          privyDid: user.id,
+          currentUsername: mainUsername,
+          solanaWalletAddress: walletAddress
         }),
       })
 
@@ -102,7 +106,7 @@ export const useUpdateUsername = () => {
     } finally {
       setLoading(false)
     }
-  }, [user, checkUsernameEligibility])
+  }, [user, checkUsernameEligibility, mainUsername, walletAddress])
 
   return { 
     updateUsername, 

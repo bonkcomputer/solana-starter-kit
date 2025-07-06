@@ -157,7 +157,37 @@ export function WalletDropdownMenu() {
               <Power className="mr-2 h-4 w-4" />🔑 Export Private Key
             </button>
             <button
-              onClick={logout}
+              onClick={async () => {
+                try {
+                  // Import and use comprehensive cleanup service
+                  const { performLogoutCleanup } = await import('@/utils/logout-cleanup')
+                  
+                  // Perform comprehensive cleanup
+                  const cleanupResult = await performLogoutCleanup()
+                  
+                  // Show user feedback based on cleanup result
+                  if (cleanupResult.success) {
+                    toast.success('Logged out successfully - all data cleared')
+                  } else if (cleanupResult.completedSteps.length > 0) {
+                    toast.warning(`Logged out with partial cleanup (${cleanupResult.completedSteps.length}/${cleanupResult.completedSteps.length + cleanupResult.failedSteps.length} steps completed)`)
+                  } else {
+                    toast.error('Logout cleanup failed, but proceeding with logout')
+                  }
+                  
+                  // Call Privy logout (always proceed even if cleanup failed)
+                  await logout()
+                } catch (error) {
+                  console.error('❌ Logout process failed:', error)
+                  toast.error('Logout failed - please try again')
+                  
+                  // Still try to logout even if there was an error
+                  try {
+                    await logout()
+                  } catch (logoutError) {
+                    console.error('❌ Privy logout also failed:', logoutError)
+                  }
+                }
+              }}
               className="w-full flex items-center text-xs text-red-600 border rounded px-2 py-1"
             >
               <LogOut className="mr-2 h-4 w-4" />🚪 Log out

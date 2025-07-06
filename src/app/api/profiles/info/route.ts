@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { getTapestryProfile } from '@/lib/tapestry'
 import { socialfi } from '@/utils/socialfi'
+import { findAndSyncUser } from '@/utils/user-lookup'
 import { NextRequest, NextResponse } from 'next/server'
 
 // GET handler for fetching a profile by username or privyDid
@@ -122,14 +123,33 @@ export async function PUT(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const username = searchParams.get('username')
   const body = await req.json()
-  const { bio, image, privyDid, properties } = body
+  const { bio, image, privyDid, properties, solanaWalletAddress } = body
 
   if (!username || !privyDid) {
     return NextResponse.json({ error: 'Username and privyDid are required' }, { status: 400 })
   }
 
   try {
-    // 1. Update on Tapestry first
+    // 1. Find user using robust lookup (handles privyDid changes)
+    const userLookupResult = await findAndSyncUser({
+      privyDid,
+      username,
+      solanaWalletAddress,
+      embeddedWalletAddress: undefined
+    });
+
+    if (!userLookupResult.user) {
+      console.error('❌ User not found for profile update, privyDid:', privyDid, 'username:', username);
+      return NextResponse.json(
+        { error: 'User not found. Please try logging out and back in.' },
+        { status: 404 }
+      )
+    }
+
+    const existingUser = userLookupResult.user;
+    console.log(`✅ Found user for profile update by ${userLookupResult.matchedBy}:`, existingUser.username);
+
+    // 2. Update on Tapestry first
     await socialfi.profiles.profilesUpdate(
       {
         apiKey: process.env.TAPESTRY_API_KEY || '',
@@ -142,9 +162,9 @@ export async function PUT(req: NextRequest) {
       }
     )
 
-    // 2. Update our local Prisma database
+    // 3. Update our local Prisma database using the found user's actual privyDid
     const updatedUser = await prisma.user.update({
-      where: { privyDid },
+      where: { privyDid: existingUser.privyDid },
       data: {
         bio,
         image,

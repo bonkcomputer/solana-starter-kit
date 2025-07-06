@@ -2,10 +2,12 @@
 
 import { IUser } from '@/models/profile.models'
 import { usePrivy } from '@privy-io/react-auth'
+import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { useCallback, useState } from 'react'
 
 export const useUpdateProfileInfo = (username: string) => {
   const { user } = usePrivy()
+  const { walletAddress } = useCurrentWallet()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
@@ -23,7 +25,8 @@ export const useUpdateProfileInfo = (username: string) => {
     try {
       const payload = {
         ...profileData,
-        privyDid: user.id
+        privyDid: user.id,
+        solanaWalletAddress: walletAddress
       };
 
       const response = await fetch(`/api/profiles/info?username=${username}`, {
@@ -47,7 +50,7 @@ export const useUpdateProfileInfo = (username: string) => {
     } finally {
       setLoading(false)
     }
-  }, [username, user])
+  }, [username, user, walletAddress])
 
   return { updateProfile, loading, error, success }
 }
