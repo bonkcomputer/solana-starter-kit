@@ -5,8 +5,6 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PrivyDebug } from '@/components/debug/privy-debug'
 import { ResourcePreloader } from '@/components/optimization/resource-preloader'
 import { ServiceWorkerRegistration } from '@/components/optimization/service-worker-registration'
-import { AccessibilityEnhancements } from '@/components/optimization/accessibility-enhancements'
-import { PerformanceMonitorComponent } from '@/components/optimization/performance-monitor'
 import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 import { ReactNode } from 'react'
@@ -17,7 +15,9 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   display: 'swap',
   preload: true,
-  variable: '--font-jetbrains-mono'
+  variable: '--font-jetbrains-mono',
+  weight: ['400', '500', '700'],
+  fallback: ['monospace']
 })
 
 export const metadata: Metadata = {
@@ -54,52 +54,21 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Font preloading */}
-        <link rel="preload" href="/nablafont/Nabla-Regular-VariableFont_EDPT,EHLT.ttf" as="font" type="font/ttf" crossOrigin="" />
+        {/* Critical preconnects only */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="preload"
-          href="/_next/static/css/app/layout.css"
-          as="style"
-        />
-        
-        {/* Critical API endpoints preconnect */}
         <link rel="preconnect" href="https://quote-api.jup.ag" />
         <link rel="preconnect" href="https://api.mainnet-beta.solana.com" />
-        <link rel="preconnect" href="https://birdeye.so" />
-        <link rel="preconnect" href="https://lite-api.jup.ag" />
-        <link rel="preconnect" href="https://terminal.jup.ag" />
-        <link rel="preconnect" href="https://api.helius.xyz" />
         
-        {/* DNS prefetch for external resources */}
+        {/* DNS prefetch for less critical resources */}
+        <link rel="dns-prefetch" href="https://birdeye.so" />
         <link rel="dns-prefetch" href="https://ipfs.io" />
         <link rel="dns-prefetch" href="https://raw.githubusercontent.com" />
         
-        {/* Preload critical images */}
+        {/* Preload only the most critical image */}
         <link
           rel="preload"
           href="/bctlogo.png"
-          as="image"
-          type="image/png"
-        />
-        <link
-          rel="preload"
-          href="/computerlogo.svg"
-          as="image"
-          type="image/svg+xml"
-        />
-        
-        {/* Preload critical token logos */}
-        <link
-          rel="preload"
-          href="https://ipfs.io/ipfs/bafkreigxnxbmmov3vziotzzbcni4oja3qxdnrch6wjx6yqvm5xad2m3kce"
-          as="image"
-          type="image/jpeg"
-        />
-        <link
-          rel="preload"
-          href="https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png"
           as="image"
           type="image/png"
         />
@@ -107,22 +76,6 @@ export default function RootLayout({
         {/* Resource hints for better performance */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
-        
-        {/* Service Worker Registration now handled by React component */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              console.log('🚀 Service Worker registration handled by React component');
-              // Performance monitoring
-              if (typeof window !== 'undefined' && 'performance' in window) {
-                window.addEventListener('load', () => {
-                  const perfData = performance.getEntriesByType('navigation')[0];
-                  console.log('⚡ Page load time:', perfData.loadEventEnd - perfData.loadEventStart + 'ms');
-                });
-              }
-            `,
-          }}
-        />
       </head>
       <body className={`${jetbrainsMono.className} min-h-screen bg-black text-white`}>
         <ThemeProvider
@@ -136,11 +89,9 @@ export default function RootLayout({
             <RoutePrefetch />
             <Toaster />
             <PrivyDebug />
-            {/* Performance and optimization components */}
+            {/* Simplified optimization components */}
             <ResourcePreloader />
             <ServiceWorkerRegistration />
-            <AccessibilityEnhancements />
-            <PerformanceMonitorComponent />
             <div className="max-w-6xl mx-auto pt-12 pb-22">{children}</div>
           </PrivyClientProvider>
         </ThemeProvider>
