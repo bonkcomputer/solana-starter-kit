@@ -81,7 +81,7 @@ export const useCreateProfile = () => {
             setError(data.error || "Profile creation failed");
           }
         } else {
-          setError(data.error || 'Failed to create profile');
+          setError(data.error || 'Click Create Profile Again to Confirm');
         }
         return null;
       }
