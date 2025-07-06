@@ -305,14 +305,14 @@ export class LogoutCleanupService {
       let deletedCount = 0;
 
       for (const dbName of dbNamesToClear) {
-        try {
-          indexedDB.deleteDatabase(dbName);
-          deletedCount++;
-          console.log(`   Deleted IndexedDB: ${dbName}`);
-        } catch (error) {
-          // Database might not exist, which is fine
-          console.log(`   IndexedDB ${dbName} not found or already deleted`);
-        }
+                  try {
+            indexedDB.deleteDatabase(dbName);
+            deletedCount++;
+            console.log(`   Deleted IndexedDB: ${dbName}`);
+          } catch (_error) {
+            // Database might not exist, which is fine
+            console.log(`   IndexedDB ${dbName} not found or already deleted`);
+          }
       }
 
       console.log(`   IndexedDB cleanup: ${deletedCount} databases processed`);
@@ -401,7 +401,7 @@ export class LogoutCleanupService {
           if (userCaches.length > 0) {
             warnings.push(`User caches still present: ${userCaches.join(', ')}`);
           }
-        } catch (error) {
+        } catch (_error) {
           warnings.push('Could not verify cache cleanup');
         }
       }
