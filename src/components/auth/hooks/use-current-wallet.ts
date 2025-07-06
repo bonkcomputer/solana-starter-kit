@@ -43,21 +43,7 @@ export function useCurrentWallet() {
     }
   }, [authenticated, mainUsername])
 
-  // Force clear cache on logout
-  useEffect(() => {
-    if (!authenticated && ready) {
-      // Clear any cached profile data
-      if ('caches' in window) {
-        caches.keys().then(names => {
-          names.forEach(name => {
-            if (name.includes('api')) {
-              caches.delete(name)
-            }
-          })
-        })
-      }
-    }
-  }, [authenticated, ready])
+  // Cache clearing is now handled by the logout cleanup service
 
   // Manual profile check function (not automatic)
   const checkProfile = async () => {

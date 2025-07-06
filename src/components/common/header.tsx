@@ -32,7 +32,6 @@ import { PointActionType } from '@/models/points.models'
 // import { preloadService } from '@/utils/preload'
 // import { performanceMonitor } from '@/utils/performance'
 import bctLogo from '@/app/bctlogo.png'
-import { preloadService } from '@/utils/preload'
 import { OGBadge } from './og-badge'
 import { useOGStatus } from './hooks/use-og-status'
 
@@ -338,15 +337,6 @@ export function Header() {
       try {
         await login()
         console.log('Login initiated successfully')
-        // After login, re-initialize preloading for the new user
-        // Use setTimeout to ensure user and walletAddress are updated
-        setTimeout(() => {
-          if (walletAddress) {
-            preloadService.initializePreloading(walletAddress)
-          } else {
-            preloadService.initializePreloading()
-          }
-        }, 0)
       } catch (error) {
         console.error('Login error:', error)
       }

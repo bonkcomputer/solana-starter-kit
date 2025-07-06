@@ -66,7 +66,7 @@ export function PrivyClientProvider({
         },
         externalWallets: {
           solana: {
-            connectors: toSolanaWalletConnectors({ shouldAutoConnect: true }),
+            connectors: toSolanaWalletConnectors({ shouldAutoConnect: false }),
           },
         },
         embeddedWallets: {
