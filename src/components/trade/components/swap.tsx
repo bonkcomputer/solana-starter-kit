@@ -112,7 +112,7 @@ export function Swap({ onTokenChange, onOutputTokenChange }: SwapProps) {
         swapMode === ESwapMode.EXACT_OUT
           ? inputTokenDecimals
           : outputTokenDecimals,
-      wallet: !ready || !wallet ? null : wallet,
+      wallet: wallet || null,
       walletAddress: walletAddress,
       swapMode: swapMode,
     })
