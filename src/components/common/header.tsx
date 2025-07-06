@@ -33,6 +33,8 @@ import { PointActionType } from '@/models/points.models'
 // import { performanceMonitor } from '@/utils/performance'
 import bctLogo from '@/app/bctlogo.png'
 import { preloadService } from '@/utils/preload'
+import { OGBadge } from './og-badge'
+import { useOGStatus } from './hooks/use-og-status'
 
 export function Header() {
   const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
@@ -47,6 +49,7 @@ export function Header() {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
   const { awardPointsWithToast } = useAutoAwardPoints()
   const [showStakeModal, setShowStakeModal] = useState(false)
+  const { ogStatus } = useOGStatus({ username: userProfile || undefined, privyDid: user?.id })
   const [countdownNumbers, setCountdownNumbers] = useState({
     days: '??',
     hours: '??',
@@ -707,6 +710,15 @@ export function Header() {
                   <span className="sm:hidden">
                     {solanaWalletAddress ? `${solanaWalletAddress.slice(0, 3)}...${solanaWalletAddress.slice(-3)}` : (user?.email?.address ? user.email.address.slice(0, 8) + '...' : 'No Wallet')}
                   </span>
+                  {/* OG Badge */}
+                  {ogStatus?.isOG && userProfile && (
+                    <OGBadge 
+                      username={userProfile} 
+                      reason={ogStatus.reason} 
+                      size="sm" 
+                      className="ml-1" 
+                    />
+                  )}
                 </button>
 
                 {isDropdownOpen && (
@@ -717,10 +729,21 @@ export function Header() {
                           router.push(`/${userProfile}`)
                           setIsDropdownOpen(false)
                         }}
-                        className="flex w-full items-center rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+                        className="flex w-full items-center justify-between rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
                       >
-                        <User className="mr-2 h-4 w-4" />
-                        Profile: {userProfile}
+                        <div className="flex items-center">
+                          <User className="mr-2 h-4 w-4" />
+                          Profile: {userProfile}
+                        </div>
+                        {/* OG Badge in dropdown */}
+                        {ogStatus?.isOG && (
+                          <OGBadge 
+                            username={userProfile} 
+                            reason={ogStatus.reason} 
+                            size="sm" 
+                            clickable={false}
+                          />
+                        )}
                       </button>
                     )}
                     
