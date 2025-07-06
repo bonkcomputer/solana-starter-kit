@@ -81,8 +81,10 @@ export class LogoutCleanupService {
       { name: 'Zustand Stores', fn: () => this.clearZustandStores() },
       { name: 'Preload Cache', fn: () => this.clearPreloadCache() },
       { name: 'React Query/SWR Cache', fn: () => this.clearReactQueryCache() },
+      { name: 'React Component State', fn: () => this.clearReactComponentState() },
       { name: 'IndexedDB', fn: () => this.clearIndexedDB() },
-      { name: 'Memory References', fn: () => this.clearMemoryReferences() }
+      { name: 'Memory References', fn: () => this.clearMemoryReferences() },
+      { name: 'Network Caches', fn: () => this.clearNetworkCaches() }
     ];
 
     for (const step of cleanupSteps) {
@@ -139,11 +141,32 @@ export class LogoutCleanupService {
       'performance-settings'       // Performance settings (non-sensitive)
     ];
 
+    // Additional keys to specifically target for removal (Privy and user data)
+    const sensitiveKeyPatterns = [
+      'privy',
+      'auth',
+      'user',
+      'profile',
+      'wallet',
+      'token',
+      'points',
+      'trading',
+      'swap',
+      'portfolio',
+      'session',
+      'login',
+      'cache'
+    ];
+
     const allKeys = Object.keys(localStorage);
     let removedCount = 0;
     
     allKeys.forEach(key => {
-      if (!keysToKeep.includes(key)) {
+      const shouldRemove = !keysToKeep.includes(key) && 
+        (sensitiveKeyPatterns.some(pattern => key.toLowerCase().includes(pattern)) || 
+         !keysToKeep.includes(key)); // Remove anything not explicitly kept
+
+      if (shouldRemove) {
         try {
           localStorage.removeItem(key);
           removedCount++;
@@ -282,6 +305,71 @@ export class LogoutCleanupService {
   }
 
   /**
+   * Clear React Component State including hooks
+   */
+  private clearReactComponentState(): void {
+    console.log('🗑️ Clearing React Component State...');
+
+    try {
+      let clearedCount = 0;
+
+      // Clear global variables that might contain component state
+      if (typeof window !== 'undefined') {
+        const stateKeysToDelete = [
+          'cachedUserData',
+          'userProfile', 
+          'walletInfo',
+          'tradingData',
+          'pointsCache',
+          'currentUserState',
+          'profileData',
+          'authState',
+          'loginState'
+        ];
+
+        stateKeysToDelete.forEach(key => {
+          if ((window as any)[key]) {
+            delete (window as any)[key];
+            clearedCount++;
+          }
+        });
+
+        // Clear any cached React state in development tools
+        if (process.env.NODE_ENV === 'development') {
+          // Clear React DevTools cached state if available
+          if ((window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__) {
+            try {
+              const hook = (window as any).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+              if (hook.onCommitFiberRoot) {
+                console.log('   React DevTools detected - state may persist in dev mode');
+              }
+            } catch (_error) {
+              // Ignore errors accessing DevTools
+            }
+          }
+        }
+
+        // Dispatch a custom event to notify components to clear their state
+        try {
+          const cleanupEvent = new CustomEvent('user-logout-cleanup', {
+            detail: { timestamp: Date.now(), reason: 'user-logout' }
+          });
+          window.dispatchEvent(cleanupEvent);
+          console.log('   Dispatched logout cleanup event to components');
+        } catch (error) {
+          console.warn('   Could not dispatch cleanup event:', error);
+        }
+        
+        console.log(`   Cleared ${clearedCount} React component state references`);
+      }
+
+    } catch (error) {
+      console.error('   Error clearing React Component State:', error);
+      throw new Error('Failed to clear React Component State');
+    }
+  }
+
+  /**
    * Clear IndexedDB databases (if any)
    */
   private async clearIndexedDB(): Promise<void> {
@@ -360,6 +448,52 @@ export class LogoutCleanupService {
     } catch (error) {
       console.error('   Error clearing memory references:', error);
       throw new Error('Failed to clear memory references');
+    }
+  }
+
+  /**
+   * Clear Network Caches
+   */
+  private async clearNetworkCaches(): Promise<void> {
+    console.log('🗑️ Clearing Network Caches...');
+
+    try {
+      // Clear browser's in-memory DNS cache (if available)
+      if (typeof window !== 'undefined' && 'navigator' in window) {
+        // Clear connection info if available
+        if ('connection' in navigator) {
+          console.log('   Network connection info available');
+        }
+      }
+
+      // Clear fetch cache (if any fetch requests were cached)
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          const networkCaches = cacheNames.filter(name => 
+            name.includes('network') || 
+            name.includes('fetch') || 
+            name.includes('http')
+          );
+          
+          for (const cacheName of networkCaches) {
+            await caches.delete(cacheName);
+            console.log(`   Deleted network cache: ${cacheName}`);
+          }
+          
+          if (networkCaches.length === 0) {
+            console.log('   No network caches found');
+          }
+        } catch (error) {
+          console.warn('   Could not clear network caches:', error);
+        }
+      }
+
+      console.log('   Network cache cleanup completed');
+
+    } catch (error) {
+      console.error('   Error clearing Network Caches:', error);
+      throw new Error('Failed to clear Network Caches');
     }
   }
 

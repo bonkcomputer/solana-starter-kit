@@ -10,6 +10,22 @@ export function useCurrentWallet() {
   const [mainUsername, setMainUsername] = useState<string | null>(null)
   const [loadingMainUsername, setLoadingMainUsername] = useState(false)
 
+  // Listen for logout cleanup event to reset state
+  useEffect(() => {
+    const handleLogoutCleanup = () => {
+      console.log('🧹 useCurrentWallet: Received logout cleanup event, clearing state')
+      setWalletAddress('')
+      setMainUsername(null)
+      setLoadingMainUsername(false)
+    }
+
+    window.addEventListener('user-logout-cleanup', handleLogoutCleanup)
+    
+    return () => {
+      window.removeEventListener('user-logout-cleanup', handleLogoutCleanup)
+    }
+  }, [])
+
   // Handle wallet detection and clear state on logout
   useEffect(() => {
     if (!ready) {
@@ -43,7 +59,21 @@ export function useCurrentWallet() {
     }
   }, [authenticated, mainUsername])
 
-  // Cache clearing is now handled by the logout cleanup service
+  // Clear caches when authentication state changes
+  useEffect(() => {
+    if (!authenticated) {
+      // Clear caches on logout
+      if ('caches' in window) {
+        caches.keys().then(cacheNames => {
+          cacheNames.forEach(cacheName => {
+            if (cacheName.includes('api') || cacheName.includes('user')) {
+              caches.delete(cacheName)
+            }
+          })
+        })
+      }
+    }
+  }, [authenticated])
 
   // Manual profile check function (not automatic)
   const checkProfile = async () => {

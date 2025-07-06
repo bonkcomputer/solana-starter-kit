@@ -14,7 +14,7 @@ export default function Page() {
           <Suspense
             fallback={
               <div className="h-[500px] flex items-center justify-center">
-                Loading chart and swap...
+                Loading $BCT Community Center...
               </div>
             }
           >

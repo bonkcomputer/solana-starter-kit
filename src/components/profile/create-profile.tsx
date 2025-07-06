@@ -50,9 +50,10 @@ export function CreateProfile({
       try {
         const result = await createProfile({ username, walletAddress })
         if (result) {
-          setIsProfileCreated(true)
-          setProfileUsername(username)
-          setCreateProfileDialog(false)
+          console.log('✅ CreateProfile: Profile created successfully, calling callbacks')
+          setProfileUsername(username) // Call username callback first
+          setIsProfileCreated(true) // Then call success callback (this should close dialog)
+          // Don't call setCreateProfileDialog(false) here - let container handle it
         }
       } catch (err) {
         console.error('Failed to create profile:', err)
@@ -80,9 +81,10 @@ export function CreateProfile({
       })
 
       if (result) {
-        setIsProfileCreated(true)
-        setProfileUsername(elem.profile.username)
-        setCreateProfileDialog(false)
+        console.log('✅ CreateProfile: Profile imported successfully, calling callbacks')
+        setProfileUsername(elem.profile.username) // Call username callback first
+        setIsProfileCreated(true) // Then call success callback (this should close dialog)
+        // Don't call setCreateProfileDialog(false) here - let container handle it
       }
     } catch (err) {
       console.error('Failed to import profile:', err)

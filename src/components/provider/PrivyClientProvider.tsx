@@ -57,17 +57,19 @@ export function PrivyClientProvider({
     <PrivyProvider
       appId={privyAppId}
       config={{
-        loginMethods: ['email', 'wallet'],
+        loginMethods: ['wallet', 'email'],
         appearance: {
-          walletChainType: 'solana-only',
           theme: 'dark',
-          accentColor: '#10b981', // Green accent color
-          logo: '/bctlogo.svg',
+          accentColor: '#676FFF',
+          logo: '/bctlogo.png',
         },
         externalWallets: {
           solana: {
             connectors: toSolanaWalletConnectors({ shouldAutoConnect: false }),
           },
+        },
+        mfa: {
+          noPromptOnMfaRequired: false,
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
@@ -80,9 +82,6 @@ export function PrivyClientProvider({
           },
         ],
         walletConnectCloudProjectId: walletConnectProjectId,
-        mfa: {
-          noPromptOnMfaRequired: false,
-        },
       }}
     >
       {children}

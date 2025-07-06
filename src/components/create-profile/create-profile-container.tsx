@@ -19,19 +19,6 @@ export function CreateProfileContainer({
   const { ready, authenticated } = usePrivy()
   const [isOpen, setIsOpen] = useState(true) // Start with dialog open
 
-  // Handle profile creation success
-  const handleProfileCreated = (isCreated: boolean) => {
-    if (isCreated) {
-      setIsOpen(false)
-    }
-  }
-
-  // Handle username setting
-  const handleProfileUsername = (username: string) => {
-    setProfileUsername(username)
-    setIsProfileCreated(username)
-  }
-
   // Auto-open dialog when component mounts
   useEffect(() => {
     setIsOpen(true)
@@ -40,6 +27,23 @@ export function CreateProfileContainer({
   // Only show if user is authenticated and has a wallet but no profile
   if (!ready || !authenticated || !walletAddress) {
     return null
+  }
+
+  // Handle username setting - this gets called with username string from CreateProfile
+  const handleProfileUsername = (username: string) => {
+    console.log('📝 CreateProfileContainer: Setting username and marking profile as created:', username)
+    
+    // Set both the username and mark profile as created
+    setProfileUsername(username)
+    setIsProfileCreated(username) // Parent expects username string, not boolean
+  }
+
+  // Handle profile creation success - this gets called with boolean from CreateProfile
+  const handleProfileCreated = (isCreated: boolean) => {
+    if (isCreated) {
+      console.log('✅ CreateProfileContainer: Profile creation completed, closing dialog')
+      setIsOpen(false) // Close dialog when profile creation succeeds
+    }
   }
 
   return (

@@ -4,6 +4,8 @@ import { Card } from '@/components/common/card'
 import { CopyPaste } from '@/components/common/copy-paste'
 import { FollowButton } from '@/components/profile/follow-button'
 import { useGetProfileInfo } from '@/components/profile/hooks/use-get-profile-info'
+import { PointsDisplay } from '@/components/points/ui/points-display'
+import { OGProgressDisplay } from '@/components/og/og-progress-display'
 import { User } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -61,68 +63,96 @@ export function Profile({ username }: Props) {
   const displayProfile = enhancedProfile || profile
 
   return (
-    <Card>
-      <div className="flex justify-between items-center">
-        <div className="flex flex-col justify-center space-y-2 w-full h-full">
-          <div className="flex items-end space-x-4">
-            {displayProfile?.image ? (
-              <div>
-                <Image
-                  src={displayProfile.image}
-                  width={40}
-                  height={40}
-                  alt="avatar"
-                  className="object-cover rounded-full"
-                  unoptimized
-                />
-              </div>
-            ) : (
-              <div className="h-10 w-10 bg-muted-light rounded-full flex items-center justify-center">
-                <User />
+    <div className="space-y-6">
+      <Card>
+        <div className="flex justify-between items-center">
+          <div className="flex flex-col justify-center space-y-2 w-full h-full">
+            <div className="flex items-end space-x-4">
+              {displayProfile?.image ? (
+                <div>
+                  <Image
+                    src={displayProfile.image}
+                    width={40}
+                    height={40}
+                    alt="avatar"
+                    className="object-cover rounded-full"
+                    unoptimized
+                  />
+                </div>
+              ) : (
+                <div className="h-10 w-10 bg-muted-light rounded-full flex items-center justify-center">
+                  <User />
+                </div>
+              )}
+              <Link href={`/${username}`} className="w-full font-bold">
+                <h2 className="text-xl">{username}</h2>
+              </Link>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <p className="text-sm text-gray">{displayProfile?.solanaWalletAddress}</p>
+              {displayProfile?.solanaWalletAddress && <CopyPaste content={displayProfile.solanaWalletAddress} />}
+              <WalletDropdownMenu />
+            </div>
+
+            {/* Points Display - Show for all profiles */}
+            {profile?.privyDid && (
+              <PointsDisplay 
+                userId={profile.privyDid} 
+                variant="profile" 
+                showRank={true}
+                showStreak={true}
+                showTodayPoints={false} // Don't show today's points for other users
+              />
+            )}
+
+            {/* Enhanced Social Counts */}
+            {enhancedProfile?.socialCounts && (
+              <div className="flex items-center space-x-4 text-sm text-gray">
+                <span>
+                  <strong>{enhancedProfile.socialCounts.followers}</strong> followers
+                </span>
+                <span>
+                  <strong>{enhancedProfile.socialCounts.following}</strong> following
+                </span>
+                {enhancedProfile.dataSource?.tapestry && (
+                  <span className="text-xs text-green-500">• Tapestry</span>
+                )}
               </div>
             )}
-            <Link href={`/${username}`} className="w-full font-bold">
-              <h2 className="text-xl">{username}</h2>
-            </Link>
-          </div>
 
-          <div className="flex items-center space-x-4">
-            <p className="text-sm text-gray">{displayProfile?.solanaWalletAddress}</p>
-            {displayProfile?.solanaWalletAddress && <CopyPaste content={displayProfile.solanaWalletAddress} />}
-            <WalletDropdownMenu />
-          </div>
+            {/* Bio */}
+            {profile?.bio && (
+              <div className="mt-4">
+                <p className="text-sm text-gray-600">Bio</p>
+                <p className="text-lg">{profile.bio}</p>
+              </div>
+            )}
 
-          {/* Enhanced Social Counts */}
-          {enhancedProfile?.socialCounts && (
-            <div className="flex items-center space-x-4 text-sm text-gray">
-              <span>
-                <strong>{enhancedProfile.socialCounts.followers}</strong> followers
-              </span>
-              <span>
-                <strong>{enhancedProfile.socialCounts.following}</strong> following
-              </span>
-              {enhancedProfile.dataSource?.tapestry && (
-                <span className="text-xs text-green-500">• Tapestry</span>
-              )}
+            {/* Data source indicator for debugging */}
+            {enhancedProfile?.dataSource && (
+              <div className="text-xs text-muted-foreground">
+                Data: {enhancedProfile.dataSource.local && 'Local'} 
+                {enhancedProfile.dataSource.local && enhancedProfile.dataSource.tapestry && ' + '}
+                {enhancedProfile.dataSource.tapestry && 'Tapestry'}
+                {loadingEnhanced && ' (Loading...)'}
+              </div>
+            )}
+
+            {/* Follow Button */}
+            <div className="flex items-center space-x-4 mt-4">
+              <FollowButton username={username} />
             </div>
-          )}
-
-          <div className="mt-4">
-            <p className="text-gray">{displayProfile?.bio}</p>
           </div>
-
-          {/* Data source indicator for debugging */}
-          {enhancedProfile?.dataSource && (
-            <div className="text-xs text-muted-foreground">
-              Data: {enhancedProfile.dataSource.local && 'Local'} 
-              {enhancedProfile.dataSource.local && enhancedProfile.dataSource.tapestry && ' + '}
-              {enhancedProfile.dataSource.tapestry && 'Tapestry'}
-              {loadingEnhanced && ' (Loading...)'}
-            </div>
-          )}
         </div>
-        <FollowButton username={username} />
-      </div>
-    </Card>
+      </Card>
+
+      {/* OG Progress Display - Show for all users */}
+      <OGProgressDisplay 
+        username={username}
+        showTitle={true}
+        compact={false}
+      />
+    </div>
   )
 }

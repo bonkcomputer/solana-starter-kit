@@ -6,6 +6,7 @@ import { Button } from '@/components/common/button'
 import { PointsDisplay } from '@/components/points/ui/points-display'
 import { Leaderboard } from '@/components/points/ui/leaderboard'
 import { ReferralCard } from '@/components/points/ui/referral-card'
+import { OGProgressDisplay } from '@/components/og/og-progress-display'
 import { usePointsHistory } from '@/components/points/hooks/use-points'
 import { useUserAchievements, useAllAchievements } from '@/components/points/hooks/use-achievements'
 import { LoadCircle } from '@/components/common/load-circle'
@@ -117,6 +118,13 @@ export default function PointsPage() {
           <PointsDisplay 
             userId={user.id} 
             variant="detailed" 
+          />
+
+          {/* OG Progress - Compact version */}
+          <OGProgressDisplay 
+            username={mainUsername}
+            showTitle={true}
+            compact={false}
           />
 
           {/* Quick Stats Grid */}

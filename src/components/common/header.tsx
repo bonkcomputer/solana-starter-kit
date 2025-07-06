@@ -28,9 +28,8 @@ import { DialectNotificationComponent } from '../notifications/dialect-notificat
 import { PointsDisplay } from '../points/ui/points-display'
 import { useAutoAwardPoints } from '../points/hooks/use-points'
 import { PointActionType } from '@/models/points.models'
-// Temporarily disabled for debugging
-// import { preloadService } from '@/utils/preload'
-// import { performanceMonitor } from '@/utils/performance'
+import { preloadService } from '@/utils/preload'
+
 import bctLogo from '@/app/bctlogo.png'
 import { OGBadge } from './og-badge'
 import { useOGStatus } from './hooks/use-og-status'
@@ -84,10 +83,9 @@ export function Header() {
 
   useEffect(() => {
     setAudio(new Audio('/bonksfx.aac'))
-    // Temporarily disable preloading and performance monitoring for debugging
-    console.log('🔧 Preloading and performance monitoring temporarily disabled for debugging')
-    // preloadService.initializePreloading()
-    // performanceMonitor.initialize()
+    
+    // Initialize general preloading for the app (not user-specific)
+    preloadService.initializePreloading()
   }, [])
 
   // Load Computer button state from localStorage
@@ -98,11 +96,15 @@ export function Header() {
     }
   }, [])
 
-  // Preload user-specific data when wallet is connected - temporarily disabled
+  // User-specific initialization when wallet is connected
   useEffect(() => {
     if (walletAddress && authenticated) {
-      console.log('🔧 User-specific preloading temporarily disabled for debugging')
-      // preloadService.initializePreloading(walletAddress)
+      console.log('✅ User authenticated with wallet:', walletAddress)
+      
+      // Add user-specific preloading with delay to avoid auth conflicts
+      setTimeout(() => {
+        preloadService.preloadPortfolioData(walletAddress)
+      }, 5000) // Wait 2 seconds after auth is stable
     }
   }, [walletAddress, authenticated])
 
@@ -204,8 +206,8 @@ export function Header() {
       
       // Users with external Solana wallets get private key from their wallet
       if (hasExternalWallet) {
-        console.log('📄 External wallet user: Please get private key from your wallet')
-        toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)')
+        console.log('📄 External wallet user: Please get private key from your connected external wallet')
+        toast.info('❗Please get your private key, or seed phrase, from your connected external wallet')
         return
       }
       
@@ -225,8 +227,8 @@ export function Header() {
       
       // Embedded wallet: Use Privy exportWallet() with no arguments as a fallback
       console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
-      await exportWallet()
-      toast.success('Private key export initiated - check the modal')
+      await exportWallet(embeddedSolanaWallet.address)
+      toast.success('Private key is being exported by Privy...')
     } catch (error) {
       console.error('Wallet export error:', error)
       toast.error('Failed to export wallet')

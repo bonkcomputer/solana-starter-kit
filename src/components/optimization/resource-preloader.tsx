@@ -15,6 +15,7 @@ export function ResourcePreloader() {
       'https://api.mainnet-beta.solana.com',
       'https://mainnet.helius-rpc.com',
       'https://fonts.googleapis.com',
+      'https://2fkyfggwlscwizn6.public.blob.vercel-storage.com',
       'https://fonts.gstatic.com'
     ];
 
@@ -86,6 +87,7 @@ export function ResourcePreloader() {
       '/bonklogo.svg',
       '/computerlogo.svg',
       '/bctlogo.png',
+      'https://2fkyfggwlscwizn6.public.blob.vercel-storage.com/bonkcomputer/BonkComputerLogoMain-FsfKSf0HTyD3BmHlOu3ylJmAaGSeEs.png',
       '/next.svg'
     ];
 
