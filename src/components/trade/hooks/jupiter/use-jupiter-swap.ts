@@ -1,7 +1,7 @@
 // import { isSolanaWallet } from '@dynamic-labs/solana'
 import { useToastContent } from '@/components/starterkit/hooks/use-toast-content'
 import { JUPITER_CONFIG } from '@/config/jupiter'
-import { ConnectedSolanaWallet } from '@privy-io/react-auth'
+import { ConnectedSolanaWallet, usePrivy } from '@privy-io/react-auth'
 import { Connection, VersionedTransaction } from '@solana/web3.js'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -66,6 +66,7 @@ export function useJupiterSwap({
   swapMode = 'ExactIn',
 }: UseJupiterSwapParams) {
   const { ERRORS, LOADINGS, SUCCESS } = useToastContent()
+  const { user } = usePrivy()
   const [quoteResponse, setQuoteResponse] = useState<QuoteResponse | null>(null)
   const [expectedOutput, setExpectedOutput] = useState<string>('')
   const [txSignature, setTxSignature] = useState<string>('')
@@ -381,6 +382,48 @@ export function useJupiterSwap({
         } catch (pointsError) {
           console.warn('Failed to award points for trade:', pointsError)
           // Don't fail the whole transaction if points awarding fails
+        }
+
+        // Track trading volume for OG eligibility
+        try {
+          // Calculate trade volume in USD from quote response
+          const tradeVolumeUSD = quoteResponse?.swapUsdValue ? 
+            parseFloat(quoteResponse.swapUsdValue) : 
+            0
+
+          if (tradeVolumeUSD > 0) {
+            const volumeResponse = await fetch('/api/jupiter/swap-complete', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                privyDid: user?.id,
+                walletAddress,
+                tradeVolumeUSD,
+                transactionSignature: txSig,
+                inputToken: inputMint,
+                outputToken: outputMint,
+                inputAmount: (Number(inputAmount) || 0).toString(),
+                outputAmount: expectedOutput
+              }),
+            })
+
+            const volumeResult = await volumeResponse.json()
+            
+            if (volumeResult.ogGranted) {
+              // Show special OG earned toast
+              toast.success('🎉 OG Status Earned!', {
+                description: `You've earned OG status for ${volumeResult.ogReason}! Total volume: $${volumeResult.newTotalVolume.toLocaleString()}`,
+                duration: 8000,
+              })
+            } else if (volumeResult.volumeUpdated) {
+              console.log(`📊 Trading volume updated: $${volumeResult.newTotalVolume.toLocaleString()}`)
+            }
+          }
+        } catch (volumeError) {
+          console.warn('Failed to track trading volume:', volumeError)
+          // Don't fail the whole transaction if volume tracking fails
         }
         
         toast.success(SUCCESS.TX_SUCCESS.title, SUCCESS.TX_SUCCESS.content)

@@ -39,11 +39,13 @@ export function useOGStatus({ username, privyDid }: UseOGStatusProps): UseOGStat
 
         const userData = await response.json();
         
-        // Check if user is OG
+        // Check if user is OG (using database fields if available)
         const ogCheck = isOGUser(
           userData.username,
           userData.createdAt,
-          userData.privyDid
+          userData.privyDid,
+          userData.isOG,
+          userData.ogReason
         );
 
         setOgStatus(ogCheck);
@@ -51,7 +53,7 @@ export function useOGStatus({ username, privyDid }: UseOGStatusProps): UseOGStat
         console.error('Error checking OG status:', err);
         setError(err instanceof Error ? err.message : 'Unknown error');
         
-        // Fallback: check based on available data
+        // Fallback: check based on available data (no database fields)
         const fallbackCheck = isOGUser(username, new Date(), privyDid);
         setOgStatus(fallbackCheck);
       } finally {

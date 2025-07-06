@@ -20,8 +20,8 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
   
   // Check ownership by comparing mainUsername, or by checking if the profile data matches the current user
   const isOwner = mainUsername === username || 
-                  (data?.privyDid && user?.id && data.privyDid === user.id) ||
-                  (data?.solanaWalletAddress && walletAddress && data.solanaWalletAddress === walletAddress)
+                  (_data?.privyDid && user?.id && _data.privyDid === user.id) ||
+                  (_data?.solanaWalletAddress && walletAddress && _data.solanaWalletAddress === walletAddress)
 
   const { 
     updateUsername, 

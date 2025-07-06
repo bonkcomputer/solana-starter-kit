@@ -13,13 +13,24 @@ export interface OGUserCheck {
  * @param username - The user's username
  * @param createdAt - The user's creation date
  * @param privyDid - The user's Privy DID
+ * @param dbIsOG - Database OG status (if available)
+ * @param dbOgReason - Database OG reason (if available)
  * @returns OGUserCheck object with isOG boolean and optional reason
  */
 export function isOGUser(
   username: string,
   createdAt: Date | string,
-  privyDid?: string
+  privyDid?: string,
+  dbIsOG?: boolean,
+  dbOgReason?: string
 ): OGUserCheck {
+  // If we have database OG status, use it (prioritize database over computed)
+  if (dbIsOG !== undefined) {
+    return {
+      isOG: dbIsOG,
+      reason: dbOgReason || 'Original community member'
+    };
+  }
   const createdDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
   
   // OG cutoff date - users created before July 6, 2025 are considered OG

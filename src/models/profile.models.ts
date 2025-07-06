@@ -110,4 +110,7 @@ export interface IUser {
     image: string | null;
     solanaWalletAddress: string | null;
     embeddedWalletAddress: string | null;
+    totalTradingVolume?: number;
+    isOG?: boolean;
+    ogReason?: string | null;
 }

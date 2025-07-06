@@ -23,6 +23,9 @@ model User {
   referralCode          String             @unique @default(cuid())
   referredBy            String?
   totalPoints           Int                @default(0)
+  totalTradingVolume    Float              @default(0)
+  isOG                  Boolean            @default(false)
+  ogReason              String?
   authoredComments      Comment[]          @relation("AuthoredComments")
   profileComments       Comment[]          @relation("ProfileComments")
   followers             Follow[]           @relation("Following")
