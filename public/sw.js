@@ -59,6 +59,12 @@ self.addEventListener('fetch', (event) => {
   // Skip chrome-extension and other non-http requests
   if (!url.protocol.startsWith('http')) return;
 
+  // Skip all authentication and wallet-related requests completely
+  const authDomains = ['privy.io', 'privy.', 'walletconnect', 'phantom.app', 'solflare.com'];
+  if (authDomains.some(domain => url.hostname.includes(domain))) {
+    return;
+  }
+
   // Handle different types of requests
   if (url.pathname.startsWith('/api/')) {
     // API requests - cache with network first strategy

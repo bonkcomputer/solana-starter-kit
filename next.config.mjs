@@ -103,11 +103,11 @@ const nextConfig = {
                 "data:",
                 "blob:"
               ].join(" "),
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.privy.io https://privy.bonk.computer https://*.privy.io https://*.jup.ag",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.privy.io https://privy.bonk.computer https://*.privy.io https://*.jup.ag https://www.gstatic.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: blob: https: https://*.privy.io",
               "font-src 'self' https://fonts.gstatic.com",
-              "frame-src 'self' https://auth.privy.io https://privy.bonk.computer https://birdeye.so https://*.jup.ag",
+              "frame-src 'self' https://auth.privy.io https://privy.bonk.computer https://*.privy.io https://birdeye.so https://*.jup.ag",
               "frame-ancestors 'self' https://bcttrading.vercel.app https://auth.privy.io https://privy.bonk.computer",
             ].join('; '),
           },
