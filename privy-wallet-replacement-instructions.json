@@ -1,0 +1,181 @@
+{
+  "overview": {
+    "totalEvmWallets": 32,
+    "totalSolanaWallets": 1,
+    "action": "Replace EVM wallets with Solana wallets"
+  },
+  "evmWalletsToReplace": [
+    {
+      "walletId": "x9omKoj35rmeeeSktmTnqx",
+      "address": "0x2A8...O39f",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "z5TmIn7kpT5Nn75vwmq",
+      "address": "0xBh...A3qP",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "mkca3R79mPecSneytgmrdn",
+      "address": "0xf27...AeeA",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "wOlgkungqGFc43xQebqzqe",
+      "address": "0xb42...d8G3",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "9ye4N35d9pj5exSvcqbqmse",
+      "address": "0xb5b...cbq5",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "c8qndjvnoBqwstdvnbqyezTb",
+      "address": "0xbE5...099f",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "prWsNnz9cjQhT5eqy3qJc",
+      "address": "0x59c...k2B8",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "eqjx9qyoP87cBqgocx3Tyqft",
+      "address": "0xnCf...k7eF",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "c84da9a25ZwreNelkSjco0",
+      "address": "0x207...4239",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "neqhqbhb1H4h5vqgmgmgJ",
+      "address": "0xFqR...7kq8",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "bqmWqJg3Sq5qbqhqgrmv",
+      "address": "0xL5q...8hqA",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "qbmqrmqnr23SuBqAr5cjZ",
+      "address": "0x75R...k33q",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "llmrJqcSSqrWqeqcqzqsH",
+      "address": "0xq23...df2E",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "x7qmPmcqBqer57Svmtqrq3",
+      "address": "0x70...c8q0",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "lPqhKPlmqcqmfqgqcrhwc",
+      "address": "0xqE...Bq7B",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "pqm7YqkqhmJPjpwqf23eq",
+      "address": "0xf74...C5H",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "p6qrmhh5y7xr9SqQr9qd2",
+      "address": "0xqF5...3cq",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "c5qkBqBcqm72YqwNqeJz",
+      "address": "0xhQ...qrTE",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "rqcWqXqmgJqeqxSqmqcv",
+      "address": "0xhQ7...C5eq",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "yqvSqrDqmqgqhYqrmqhQ",
+      "address": "0xhQ2...c6kq",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "U5qwrqhyqreqkBcqwqc3d6",
+      "address": "0xhQJ...23qB",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "h2hkqnQT2Svmq3NwkqZm",
+      "address": "0x7Xqm...FUeN",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "h2hkqnvqf5qnvqt5Pqkqc",
+      "address": "0x7B1...c99S",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "q9jqRqhH5rjpvqkSqfq3",
+      "address": "0xqkh...kFqF",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "rFkqc2vmRSqmrqdc2Nqqm",
+      "address": "0x7FB...25kq",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "rqnqXqRwqRdqkqmqhqhvq",
+      "address": "0xmqk...Dqst",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "xhqqzBkP7Brqgqd6gqff",
+      "address": "0xqF3...37qf",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "cyqShqgqc3HrPqdhqvqR",
+      "address": "0x7qB...4hqA",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "qz7vqXvmqqqrqSqJqd6q",
+      "address": "0xbq7...qqf1",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "15zQ99zb2qkrqwrhqrq",
+      "address": "0xqA4...lPqL",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "mkqxvSmvqq5ZlqPmwkqmq",
+      "address": "0xc5q...7q22",
+      "chain": "EVM"
+    },
+    {
+      "walletId": "pqm7YqkqhmJPjpwqf7S1x",
+      "address": "0xf73...C5H",
+      "chain": "EVM"
+    }
+  ],
+  "manualSteps": [
+    "Go to https://dashboard.privy.io/",
+    "Navigate to Wallets section",
+    "For each EVM wallet: Delete EVM → Generate Solana",
+    "Note new Solana addresses",
+    "Update database with new addresses"
+  ],
+  "apiCommands": {
+    "deleteWallet": "curl -X DELETE \"https://api.privy.io/v1/wallets/{WALLET_ID}\"",
+    "createSolanaWallet": "curl -X POST \"https://api.privy.io/v1/wallets\" -d '{\"chain_type\": \"solana\", \"owner\": {\"user_id\": \"USER_ID\"}}'"
+  },
+  "timestamp": "2025-07-06T05:28:31.101Z"
+}

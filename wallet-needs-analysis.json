@@ -1,0 +1,740 @@
+{
+  "csvAnalysis": {
+    "total": 42,
+    "hasEVMNeedsSolana": [],
+    "hasEmailOnlyNeedsWallet": [
+      {
+        "id": "cmc786qzc00gwjp0mkudq1thc",
+        "createdAt": "Sun Jun 22 2025 05:26:53 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "pickslabs@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmc7fvo1400qlk10nttr0vax0",
+        "createdAt": "Sun Jun 22 2025 09:02:13 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "cyberryda@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmc8oixe100vdjp0mlq2m98hs",
+        "createdAt": "Mon Jun 23 2025 05:52:01 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "clarityvision2030@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcb0329v001vjl0lck1wpsz2",
+        "createdAt": "Tue Jun 24 2025 20:51:08 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "ruggedwojak@proton.me",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcb29j19005ijp0n6rsp06v8",
+        "createdAt": "Tue Jun 24 2025 21:52:09 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "ordinalservice@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcjwu1kt00zfl90nczx7sluo",
+        "createdAt": "Tue Jul 01 2025 02:30:04 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "soulsete@naver.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmclw4z6f033hlk0n9uwdzu8l",
+        "createdAt": "Wed Jul 02 2025 11:46:07 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "farfouch2@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmclwesvw022dl70nkz3eu4yp",
+        "createdAt": "Wed Jul 02 2025 11:53:46 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "camden26@hotmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcm94tji01u9lj0max56h28m",
+        "createdAt": "Wed Jul 02 2025 17:49:55 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "allisobhan4@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcn9e9rk03aild0lk836kqez",
+        "createdAt": "Thu Jul 03 2025 10:45:02 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "bonkcomputer6@gmail.com",
+        "reason": "Email account only, no wallets"
+      },
+      {
+        "id": "cmcnhu3xn0361ky0n7w0rxrsm",
+        "createdAt": "Thu Jul 03 2025 14:41:18 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "boredgucciape@gmail.com",
+        "reason": "Email account only, no wallets"
+      }
+    ],
+    "hasSolanaWallet": [
+      {
+        "id": "cmc25iny801d5jx0m483x1c7g",
+        "createdAt": "Wed Jun 18 2025 16:13:19 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "AJxVLg4dhtRBtoXmQkwDNtTEPDRCsnWjQoz5kyoXKf6y",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc6f5alu01bula0m7ndf4s7x",
+        "createdAt": "Sat Jun 21 2025 15:53:56 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "FNrtStc4zJY4nTytGYaUzFcLkYRLD2sr4KjdNcXVSCV8",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc6l7y3y00ttla0m8dp2qphi",
+        "createdAt": "Sat Jun 21 2025 18:43:57 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "CUgVgd6DXqFakS6NdP7w5zhWKA3EgEK8woZpU4HUqM8Z",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc6mk7rg00dhl40nhwx6v9vq",
+        "createdAt": "Sat Jun 21 2025 19:21:29 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "EVxByXn7xzZJtWjWzVA75jVm6da2t2vSqVe7Y1WACJaq",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc7moqd7000jkz0m5aqayxrw",
+        "createdAt": "Sun Jun 22 2025 12:12:46 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "EsUpYn1iWYvbbcdU8RT14BAQG3443jsi8q1eqNvkt6az",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc8tlpm7001zl40mam0h3jsq",
+        "createdAt": "Mon Jun 23 2025 08:14:09 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "7EyuPFS7pnQvNi4GeELCrxc63qC9JxG84VqScbASZkH2",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc8ymhpu003njl0m4pzqx64n",
+        "createdAt": "Mon Jun 23 2025 10:34:43 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "7MLUye9Xf5uGuPPrzuKkajs36k1yY2nQnLBzJ3247cxt",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc8zrxph0070jv0lv30a9uef",
+        "createdAt": "Mon Jun 23 2025 11:06:57 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "1Jm9xWrFWBx2tqTh66HM7gFSmVWXbudLX7MPWbM4pmy",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc94q4py005alb0ndwuoajx5",
+        "createdAt": "Mon Jun 23 2025 13:25:31 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "2fSeenGREdk1NxayG8DwW7RtTc821ELe2T46WN41EPXs",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmc9yqokz003cl20ngi95av0b",
+        "createdAt": "Tue Jun 24 2025 03:25:45 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "CCLzErLkTocSscfEmseH76m1tSQan2d1GbsK2rvTQmzv",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmca7u0ca007ql50mlpaevkb1",
+        "createdAt": "Tue Jun 24 2025 07:40:17 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "FHr9u14PuF7bKvoyKkywvKZNfEreESogZhK7xJ14zPhH",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcahfgew00cujm0n85cr5eh1",
+        "createdAt": "Tue Jun 24 2025 12:08:54 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "CJsU6rbUfD9X9zBeRMQBP5SZ1SfHHRzNpKkx4DrztqZk",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcb2s7ie00bokz0ne7qx6sax",
+        "createdAt": "Tue Jun 24 2025 22:06:41 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "CFUzo6fBN85YDKr8kQaipKRgSdLxBstuAR5BSChEmqeV",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcb9c09900lrl50l1w6z51h7",
+        "createdAt": "Wed Jun 25 2025 01:10:02 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "3n2Np1yzjHC6rSZaZApScubRmkMhtZBFGzArbdYqLLLd",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmccch1z000osjr0mzp3byz7h",
+        "createdAt": "Wed Jun 25 2025 19:25:43 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "7Ge9WUxS2dXMhp2FoLpopaz8j77vdjCp2zQPagEbHkUm",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmck1wfk600iclb0m8m5wvw98",
+        "createdAt": "Tue Jul 01 2025 04:51:54 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "Gf4hfdNE9amWWWSqE2THhc3CLW4dsAZp2yvc7sG3o2bt",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmck1y9n100vrl40nxmm2gv1m",
+        "createdAt": "Tue Jul 01 2025 04:53:20 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "DiZempKrisZyJfVXoFoEt4e71V5MK93z2QTuFRup5MFQ",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmck1z36900sel40m1og0szx3",
+        "createdAt": "Tue Jul 01 2025 04:53:58 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "76Sg6h5WBTWFZUWcqjs6rmGz5XVNLHbk3y6KgQVf4CM6",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmckscusd0018le0l1mjwbcnd",
+        "createdAt": "Tue Jul 01 2025 17:12:30 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "d5sej8JSLh9XMm8BFGVPcfUEs4tHpbVqBtzPs2wzd1E",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmclh7md9004pi30mf8iib6c7",
+        "createdAt": "Wed Jul 02 2025 04:48:16 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "4BBJ1YP3CVyazn66RSRA5VA5BoCi8ZpKqV1wE3Ve4zRN",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmclwh3nb02dml40mka9ncukx",
+        "createdAt": "Wed Jul 02 2025 11:55:33 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "GJR91qDTTjDFkGHhpLPCXcfirfq38UVsB5vkgKkHEC1b",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcn9bm1602jpl50lug5a3koe",
+        "createdAt": "Thu Jul 03 2025 10:42:58 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "9kKq2smhQ4p3NiauGRVwnPBqp2iCTYe2WyoXRjEBjFc3",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcnc3tmc01pjk20nrauo0m1j",
+        "createdAt": "Thu Jul 03 2025 12:00:53 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "CGWQBz4CPPLSASBdWhtWAnqe3EePKZVB1kymmi9vzn1S",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcndplw10163k10nfzhjn2da",
+        "createdAt": "Thu Jul 03 2025 12:45:49 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "HN589hfZW1DF1xTsbVv5Bz2uxH5ZWWYqo3aDo53nbZga",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcnfnv3t0009l10m8md6k8mu",
+        "createdAt": "Thu Jul 03 2025 13:40:27 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "5VEAmyBfjQoGi7RZqA5z4fAnSuHkqbJhscJZdTvhMXEv",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcnswtn201c6lh0mgs7x563w",
+        "createdAt": "Thu Jul 03 2025 19:51:20 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "5a5T223iwm6qqaED1kV8L5GJXvnb59NkpvXurAxxjGmo",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcoh8x3g0084jx0mpsvojjf7",
+        "createdAt": "Fri Jul 04 2025 07:12:35 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "VrZJDABRme6MZzz1tnPQbqZB2SpkC6fLBUTrhdkFXTf",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcooqtxn004xih0lkrncbuhy",
+        "createdAt": "Fri Jul 04 2025 10:42:29 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "BsrXUU9phAbjtnAkAv8khLf9EHqaV3Kvx3rsBETEcU7A",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcotqafn02wijz0mo0ev8ezp",
+        "createdAt": "Fri Jul 04 2025 13:02:01 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "5GCtcZkHCJXgYmFTVXm2h6bVb24Qji1KZWzk3Evs4GY",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcprzxi0015pl40lnksvm2su",
+        "createdAt": "Sat Jul 05 2025 05:01:18 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "6EBrxTWQtFUvBa43vZmBAiwDK4K1xcdAr9eM66Wdmj6H",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      },
+      {
+        "id": "cmcqxjtef01wal80o6ebi8uu0",
+        "createdAt": "Sun Jul 06 2025 00:24:30 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "D5tqVpoDBiXMmeg7mqwG9qSrKkQJByPY8hbnJg2HSwfb",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": ""
+      }
+    ],
+    "errors": []
+  },
+  "dbAnalysis": {
+    "foundInDB": [],
+    "notFoundInDB": [],
+    "alreadyHasSolanaInDB": [],
+    "needsUpdate": [
+      {
+        "id": "cmc786qzc00gwjp0mkudq1thc",
+        "createdAt": "Sun Jun 22 2025 05:26:53 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "pickslabs@gmail.com",
+        "dbUser": {
+          "privyDid": "cmc786qzc00gwjp0mkudq1thc",
+          "username": "pickslabs",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmc7fvo1400qlk10nttr0vax0",
+        "createdAt": "Sun Jun 22 2025 09:02:13 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "cyberryda@gmail.com",
+        "dbUser": {
+          "privyDid": "cmc7fvo1400qlk10nttr0vax0",
+          "username": "cyberryda",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmc8oixe100vdjp0mlq2m98hs",
+        "createdAt": "Mon Jun 23 2025 05:52:01 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "clarityvision2030@gmail.com",
+        "dbUser": {
+          "privyDid": "cmc8oixe100vdjp0mlq2m98hs",
+          "username": "clarityvision2030",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcb0329v001vjl0lck1wpsz2",
+        "createdAt": "Tue Jun 24 2025 20:51:08 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "ruggedwojak@proton.me",
+        "dbUser": {
+          "privyDid": "cmcb0329v001vjl0lck1wpsz2",
+          "username": "ruggedwojak",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcb29j19005ijp0n6rsp06v8",
+        "createdAt": "Tue Jun 24 2025 21:52:09 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "ordinalservice@gmail.com",
+        "dbUser": {
+          "privyDid": "cmcb29j19005ijp0n6rsp06v8",
+          "username": "ordinalservice",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcjwu1kt00zfl90nczx7sluo",
+        "createdAt": "Tue Jul 01 2025 02:30:04 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "soulsete@naver.com",
+        "dbUser": {
+          "privyDid": "cmcjwu1kt00zfl90nczx7sluo",
+          "username": "soulsete",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmclw4z6f033hlk0n9uwdzu8l",
+        "createdAt": "Wed Jul 02 2025 11:46:07 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "farfouch2@gmail.com",
+        "dbUser": {
+          "privyDid": "cmclw4z6f033hlk0n9uwdzu8l",
+          "username": "farfouch2",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmclwesvw022dl70nkz3eu4yp",
+        "createdAt": "Wed Jul 02 2025 11:53:46 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "camden26@hotmail.com",
+        "dbUser": {
+          "privyDid": "cmclwesvw022dl70nkz3eu4yp",
+          "username": "camden26",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcm94tji01u9lj0max56h28m",
+        "createdAt": "Wed Jul 02 2025 17:49:55 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "allisobhan4@gmail.com",
+        "dbUser": {
+          "privyDid": "cmcm94tji01u9lj0max56h28m",
+          "username": "allisobhan4",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcn9e9rk03aild0lk836kqez",
+        "createdAt": "Thu Jul 03 2025 10:45:02 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "bonkcomputer6@gmail.com",
+        "dbUser": {
+          "privyDid": "cmcn9e9rk03aild0lk836kqez",
+          "username": "bonkcomputer6",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      },
+      {
+        "id": "cmcnhu3xn0361ky0n7w0rxrsm",
+        "createdAt": "Thu Jul 03 2025 14:41:18 GMT+0000 (Coordinated Universal Time)",
+        "externalEthereum": "",
+        "externalSolana": "",
+        "embeddedEthereum": "",
+        "embeddedSolana": "",
+        "email": "boredgucciape@gmail.com",
+        "dbUser": {
+          "privyDid": "cmcnhu3xn0361ky0n7w0rxrsm",
+          "username": "boredgucciape",
+          "solanaWalletAddress": null,
+          "embeddedWalletAddress": null
+        }
+      }
+    ]
+  },
+  "usersNeedingSolanaWallets": [
+    {
+      "id": "cmc786qzc00gwjp0mkudq1thc",
+      "createdAt": "Sun Jun 22 2025 05:26:53 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "pickslabs@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc786qzc00gwjp0mkudq1thc",
+        "username": "pickslabs",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmc7fvo1400qlk10nttr0vax0",
+      "createdAt": "Sun Jun 22 2025 09:02:13 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "cyberryda@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc7fvo1400qlk10nttr0vax0",
+        "username": "cyberryda",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmc8oixe100vdjp0mlq2m98hs",
+      "createdAt": "Mon Jun 23 2025 05:52:01 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "clarityvision2030@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc8oixe100vdjp0mlq2m98hs",
+        "username": "clarityvision2030",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcb0329v001vjl0lck1wpsz2",
+      "createdAt": "Tue Jun 24 2025 20:51:08 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "ruggedwojak@proton.me",
+      "dbUser": {
+        "privyDid": "cmcb0329v001vjl0lck1wpsz2",
+        "username": "ruggedwojak",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcb29j19005ijp0n6rsp06v8",
+      "createdAt": "Tue Jun 24 2025 21:52:09 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "ordinalservice@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcb29j19005ijp0n6rsp06v8",
+        "username": "ordinalservice",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcjwu1kt00zfl90nczx7sluo",
+      "createdAt": "Tue Jul 01 2025 02:30:04 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "soulsete@naver.com",
+      "dbUser": {
+        "privyDid": "cmcjwu1kt00zfl90nczx7sluo",
+        "username": "soulsete",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmclw4z6f033hlk0n9uwdzu8l",
+      "createdAt": "Wed Jul 02 2025 11:46:07 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "farfouch2@gmail.com",
+      "dbUser": {
+        "privyDid": "cmclw4z6f033hlk0n9uwdzu8l",
+        "username": "farfouch2",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmclwesvw022dl70nkz3eu4yp",
+      "createdAt": "Wed Jul 02 2025 11:53:46 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "camden26@hotmail.com",
+      "dbUser": {
+        "privyDid": "cmclwesvw022dl70nkz3eu4yp",
+        "username": "camden26",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcm94tji01u9lj0max56h28m",
+      "createdAt": "Wed Jul 02 2025 17:49:55 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "allisobhan4@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcm94tji01u9lj0max56h28m",
+        "username": "allisobhan4",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcn9e9rk03aild0lk836kqez",
+      "createdAt": "Thu Jul 03 2025 10:45:02 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "bonkcomputer6@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcn9e9rk03aild0lk836kqez",
+        "username": "bonkcomputer6",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    },
+    {
+      "id": "cmcnhu3xn0361ky0n7w0rxrsm",
+      "createdAt": "Thu Jul 03 2025 14:41:18 GMT+0000 (Coordinated Universal Time)",
+      "externalEthereum": "",
+      "externalSolana": "",
+      "embeddedEthereum": "",
+      "embeddedSolana": "",
+      "email": "boredgucciape@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcnhu3xn0361ky0n7w0rxrsm",
+        "username": "boredgucciape",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      }
+    }
+  ],
+  "timestamp": "2025-07-06T06:30:06.779Z"
+}

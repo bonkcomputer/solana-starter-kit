@@ -1,0 +1,94 @@
+{
+  "removeEvmOnly": [],
+  "removeEvmAndGenerateSolana": [],
+  "generateSolanaOnly": [
+    {
+      "privyId": "cmc7fvo1400qlk10nttr0vax0",
+      "username": "cyberryda",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmc8oixe100vdjp0mlq2m98hs",
+      "username": "clarityvision2030",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcb0329v001vjl0lck1wpsz2",
+      "username": "ruggedwojak",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcb29j19005ijp0n6rsp06v8",
+      "username": "ordinalservice",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmc786qzc00gwjp0mkudq1thc",
+      "username": "pickslabs",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcjwu1kt00zfl90nczx7sluo",
+      "username": "soulsete",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmclw4z6f033hlk0n9uwdzu8l",
+      "username": "farfouch2",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmclwesvw022dl70nkz3eu4yp",
+      "username": "camden26",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcm94tji01u9lj0max56h28m",
+      "username": "allisobhan4",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcn9e9rk03aild0lk836kqez",
+      "username": "bonkcomputer6",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    },
+    {
+      "privyId": "cmcnhu3xn0361ky0n7w0rxrsm",
+      "username": "boredgucciape",
+      "email": "unknown",
+      "currentSolana": null,
+      "currentEvm": null
+    }
+  ],
+  "noActionNeeded": [],
+  "notFound": [],
+  "timestamp": "2025-07-06T05:06:48.330Z",
+  "summary": {
+    "total": 11,
+    "removeEvmOnly": 0,
+    "removeEvmAndGenerateSolana": 0,
+    "generateSolanaOnly": 11,
+    "noActionNeeded": 0,
+    "notFound": 0
+  }
+}

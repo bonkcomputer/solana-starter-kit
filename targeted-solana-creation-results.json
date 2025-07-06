@@ -1,0 +1,79 @@
+{
+  "successful": [],
+  "failed": [
+    {
+      "privyId": "cmc7fvo1400qlk10nttr0vax0",
+      "username": "cyberryda",
+      "email": "cyberryda@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmc8oixe100vdjp0mlq2m98hs",
+      "username": "clarityvision2030",
+      "email": "clarityvision2030@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcb0329v001vjl0lck1wpsz2",
+      "username": "ruggedwojak",
+      "email": "ruggedwojak@proton.me",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcb29j19005ijp0n6rsp06v8",
+      "username": "ordinalservice",
+      "email": "ordinalservice@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmc786qzc00gwjp0mkudq1thc",
+      "username": "pickslabs",
+      "email": "pickslabs@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcjwu1kt00zfl90nczx7sluo",
+      "username": "soulsete",
+      "email": "soulsete@naver.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmclw4z6f033hlk0n9uwdzu8l",
+      "username": "farfouch2",
+      "email": "farfouch2@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmclwesvw022dl70nkz3eu4yp",
+      "username": "camden26",
+      "email": "camden26@hotmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcm94tji01u9lj0max56h28m",
+      "username": "allisobhan4",
+      "email": "allisobhan4@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcn9e9rk03aild0lk836kqez",
+      "username": "bonkcomputer6",
+      "email": "bonkcomputer6@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    },
+    {
+      "privyId": "cmcnhu3xn0361ky0n7w0rxrsm",
+      "username": "boredgucciape",
+      "email": "boredgucciape@gmail.com",
+      "error": "Privy API error: 401 - {\"error\":\"Invalid app ID or app secret.\"}"
+    }
+  ],
+  "skipped": [],
+  "timestamp": "2025-07-06T05:08:41.353Z",
+  "summary": {
+    "total": 11,
+    "successful": 0,
+    "failed": 11,
+    "skipped": 0
+  }
+}

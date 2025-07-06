@@ -1,0 +1,249 @@
+{
+  "usersWithEVMToRemove": [
+    {
+      "email": "cyberryda@gmail.com",
+      "privyId": "cmc7fvo1400qlk10nttr0vax0",
+      "hasEVM": true,
+      "hasSolana": true,
+      "action": "remove_evm_keep_solana",
+      "dbUser": {
+        "privyDid": "cmc7fvo1400qlk10nttr0vax0",
+        "username": "cyberryda",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "privyId": "cmc8oixe100vdjp0mlq2m98hs",
+      "hasEVM": true,
+      "evmAddress": "0x94D4E3dAcC3E7f96497...af2f2",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmc8oixe100vdjp0mlq2m98hs",
+        "username": "clarityvision2030",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "privyId": "cmcb0329v001vjl0lck1wpsz2",
+      "hasEVM": true,
+      "evmAddress": "0x6C4a4aA7795e99e2227...6AF5c",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmcb0329v001vjl0lck1wpsz2",
+        "username": "ruggedwojak",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "privyId": "cmcb29j19005ijp0n6rsp06v8",
+      "hasEVM": true,
+      "evmAddress": "0x2A8C83fE6d74228a83b...9c37f",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmcb29j19005ijp0n6rsp06v8",
+        "username": "ordinalservice",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    }
+  ],
+  "emailUsersNeedingSolana": [
+    {
+      "email": "pickslabs@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc786qzc00gwjp0mkudq1thc",
+        "username": "pickslabs",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "cyberryda@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc7fvo1400qlk10nttr0vax0",
+        "username": "cyberryda",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "clarityvision2030@gmail.com",
+      "dbUser": {
+        "privyDid": "cmc8oixe100vdjp0mlq2m98hs",
+        "username": "clarityvision2030",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "ruggedwojak@proton.me",
+      "dbUser": {
+        "privyDid": "cmcb0329v001vjl0lck1wpsz2",
+        "username": "ruggedwojak",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "ordinalservice@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcb29j19005ijp0n6rsp06v8",
+        "username": "ordinalservice",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "soulsete@naver.com",
+      "dbUser": {
+        "privyDid": "cmcjwu1kt00zfl90nczx7sluo",
+        "username": "soulsete",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "farfouch2@gmail.com",
+      "dbUser": {
+        "privyDid": "cmclw4z6f033hlk0n9uwdzu8l",
+        "username": "farfouch2",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "camden26@hotmail.com",
+      "dbUser": {
+        "privyDid": "cmclwesvw022dl70nkz3eu4yp",
+        "username": "camden26",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "allisobhan4@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcm94tji01u9lj0max56h28m",
+        "username": "allisobhan4",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "bonkcomputer6@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcn9e9rk03aild0lk836kqez",
+        "username": "bonkcomputer6",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    },
+    {
+      "email": "boredgucciape@gmail.com",
+      "dbUser": {
+        "privyDid": "cmcnhu3xn0361ky0n7w0rxrsm",
+        "username": "boredgucciape",
+        "solanaWalletAddress": null,
+        "embeddedWalletAddress": null,
+        "bio": "Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it."
+      },
+      "currentSolanaWallet": null,
+      "currentEmbeddedWallet": null
+    }
+  ],
+  "alreadyClean": [
+    {
+      "privyId": "cmc6f5alu01bula0m7ndf4s7x",
+      "hasEVM": true,
+      "evmAddress": "0x2A8C83fE6d74228a83b...9c37f",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmc6f5alu01bula0m7ndf4s7x",
+        "username": "user_FNrtStc4",
+        "solanaWalletAddress": "FNrtStc4zJY4nTytGYaUzFcLkYRLD2sr4KjdNcXVSCV8",
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": "FNrtStc4zJY4nTytGYaUzFcLkYRLD2sr4KjdNcXVSCV8",
+      "currentEmbeddedWallet": null
+    },
+    {
+      "privyId": "cmc6l7y3y00ttla0m8dp2qphi",
+      "hasEVM": true,
+      "evmAddress": "0xbc536fb6e7A8b728c52c...0f99",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmc6l7y3y00ttla0m8dp2qphi",
+        "username": "user_CUgVgd6D",
+        "solanaWalletAddress": "CUgVgd6DXqFakS6NdP7w5zhWKA3EgEK8woZpU4HUqM8Z",
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": "CUgVgd6DXqFakS6NdP7w5zhWKA3EgEK8woZpU4HUqM8Z",
+      "currentEmbeddedWallet": null
+    },
+    {
+      "privyId": "cmc6mk7rg00dhl40nhwx6v9vq",
+      "hasEVM": true,
+      "evmAddress": "0xA8ddFC42a8270c51...9c37",
+      "action": "remove_evm_ensure_solana",
+      "dbUser": {
+        "privyDid": "cmc6mk7rg00dhl40nhwx6v9vq",
+        "username": "user_EVxByXn7",
+        "solanaWalletAddress": "EVxByXn7xzZJtWjWzVA75jVm6da2t2vSqVe7Y1WACJaq",
+        "embeddedWalletAddress": null
+      },
+      "currentSolanaWallet": "EVxByXn7xzZJtWjWzVA75jVm6da2t2vSqVe7Y1WACJaq",
+      "currentEmbeddedWallet": null
+    }
+  ],
+  "notFound": [],
+  "errors": [],
+  "timestamp": "2025-07-06T04:40:54.007Z",
+  "summary": {
+    "usersNeedingEVMRemoval": 4,
+    "usersNeedingSolanaGeneration": 11,
+    "usersAlreadyClean": 3,
+    "usersNotFound": 0,
+    "totalErrors": 0
+  }
+}
