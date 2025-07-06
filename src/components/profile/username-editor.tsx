@@ -26,16 +26,58 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
   const { 
     updateUsername, 
     checkUsernameEligibility,
+    getCurrentUsername,
     usernameInfo,
     loading, 
     error, 
     success,
+    optimisticUsername,
     setError,
     setSuccess
   } = useUpdateUsername()
   
   const [newUsername, setNewUsername] = useState('')
   const [isEditing, setIsEditing] = useState(false)
+  const [displayUsername, setDisplayUsername] = useState(username)
+
+  // Listen for username update events
+  useEffect(() => {
+    const handleUsernameUpdated = (event: CustomEvent) => {
+      const { newUsername } = event.detail
+      setDisplayUsername(newUsername)
+      if (onUsernameUpdate) {
+        onUsernameUpdate(newUsername)
+      }
+    }
+
+    const handleUsernameUpdateFailed = (event: CustomEvent) => {
+      const { revertTo } = event.detail
+      setDisplayUsername(revertTo)
+    }
+
+    const handleUsernameUpdateConfirmed = (event: CustomEvent) => {
+      const { newUsername } = event.detail
+      setDisplayUsername(newUsername)
+    }
+
+    window.addEventListener('username-updated', handleUsernameUpdated as EventListener)
+    window.addEventListener('username-update-failed', handleUsernameUpdateFailed as EventListener)
+    window.addEventListener('username-update-confirmed', handleUsernameUpdateConfirmed as EventListener)
+
+    return () => {
+      window.removeEventListener('username-updated', handleUsernameUpdated as EventListener)
+      window.removeEventListener('username-update-failed', handleUsernameUpdateFailed as EventListener)
+      window.removeEventListener('username-update-confirmed', handleUsernameUpdateConfirmed as EventListener)
+    }
+  }, [onUsernameUpdate])
+
+  // Update display username when optimistic username changes
+  useEffect(() => {
+    const currentUsername = getCurrentUsername()
+    if (currentUsername) {
+      setDisplayUsername(currentUsername)
+    }
+  }, [getCurrentUsername])
 
   // Check eligibility when component mounts or when editing starts
   useEffect(() => {
@@ -45,7 +87,7 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
   }, [isEditing, usernameInfo, checkUsernameEligibility, isOwner])
 
   const handleStartEdit = () => {
-    setNewUsername(username)
+    setNewUsername(displayUsername)
     setIsEditing(true)
     setError(null)
     setSuccess(false)
@@ -59,7 +101,7 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
   }
 
   const handleSaveUsername = async () => {
-    if (newUsername === username) {
+    if (newUsername === displayUsername) {
       setIsEditing(false)
       return
     }
@@ -67,9 +109,6 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
     const success = await updateUsername(newUsername)
     if (success) {
       setIsEditing(false)
-      if (onUsernameUpdate) {
-        onUsernameUpdate(newUsername)
-      }
     }
   }
 
@@ -91,7 +130,7 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
     return (
       <div className="mt-4">
         <p className="text-sm text-gray-600">Username</p>
-        <p className="text-lg font-semibold">@{username}</p>
+        <p className="text-lg font-semibold">@{displayUsername}</p>
       </div>
     )
   }
@@ -179,7 +218,7 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
               type="submit"
               variant="secondary"
               onClick={handleSaveUsername}
-              disabled={loading || !newUsername || newUsername === username || (usernameInfo?.canChange === false)}
+              disabled={loading || !newUsername || newUsername === displayUsername || (usernameInfo?.canChange === false)}
             >
               {loading ? (
                 '...'
@@ -194,7 +233,12 @@ export function UsernameEditor({ username, data: _data, onUsernameUpdate }: Prop
         </div>
       ) : (
         <div className="flex items-center space-x-3">
-          <p className="text-lg font-semibold">@{username}</p>
+          <p className="text-lg font-semibold">
+            @{displayUsername}
+            {optimisticUsername && (
+              <span className="ml-2 text-sm text-blue-600 font-normal">(updating...)</span>
+            )}
+          </p>
           <Button onClick={handleStartEdit} variant="ghost">
             <Pencil size={16} />
           </Button>

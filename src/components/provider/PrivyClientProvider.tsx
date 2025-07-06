@@ -65,7 +65,9 @@ export function PrivyClientProvider({
         },
         externalWallets: {
           solana: {
-            connectors: toSolanaWalletConnectors({ shouldAutoConnect: false }),
+            connectors: toSolanaWalletConnectors({ 
+              shouldAutoConnect: false,
+            }),
           },
         },
         mfa: {
@@ -82,6 +84,15 @@ export function PrivyClientProvider({
           },
         ],
         walletConnectCloudProjectId: walletConnectProjectId,
+        legal: {
+          termsAndConditionsUrl: undefined,
+          privacyPolicyUrl: undefined,
+        },
+        fundingMethodConfig: {
+          moonpay: {
+            useSandbox: false,
+          },
+        },
       }}
     >
       {children}

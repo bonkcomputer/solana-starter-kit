@@ -60,6 +60,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://quote-api.jup.ag" />
         <link rel="preconnect" href="https://api.mainnet-beta.solana.com" />
         
+        {/* Privy authentication domains */}
+        <link rel="preconnect" href="https://auth.privy.io" />
+        <link rel="preconnect" href="https://verify.walletconnect.com" />
+        <link rel="preconnect" href="https://privy.cc.bonk.computer" />
+        
         {/* DNS prefetch for less critical resources */}
         <link rel="dns-prefetch" href="https://birdeye.so" />
         <link rel="dns-prefetch" href="https://ipfs.io" />
@@ -76,6 +81,12 @@ export default function RootLayout({
         {/* Resource hints for better performance */}
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
+        
+        {/* Relaxed CSP for Privy authentication - allows all HTTPS connections */}
+        <meta 
+          httpEquiv="Content-Security-Policy" 
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https: wss: data:; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https:; frame-src 'self' https:;" 
+        />
       </head>
       <body className={`${jetbrainsMono.className} min-h-screen bg-black text-white`}>
         <ThemeProvider

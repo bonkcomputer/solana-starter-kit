@@ -35,9 +35,12 @@ export function OGBadge({
 
   return (
     <>
-      {/* Nabla Font Import */}
+      {/* Nabla Font Import - Load only when needed */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Nabla:EDPT,EHLT@0..200,0..24&display=swap');
+        .font-nabla {
+          font-family: 'Nabla', system-ui, sans-serif;
+        }
       `}</style>
       
       <button

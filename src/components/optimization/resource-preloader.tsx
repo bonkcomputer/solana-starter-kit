@@ -9,7 +9,12 @@ export function ResourcePreloader() {
       'https://auth.privy.io',
       'https://price.jup.ag',
       'https://public-api.birdeye.so',
-      'https://mainnet.helius-rpc.com'
+      'https://mainnet.helius-rpc.com',
+      'https://privy.bonk.computer',
+      'https://quote-api.jup.ag',
+      'https://api.tapestry.dev',
+      'https://api.mainnet-beta.solana.com',
+      'https://mainnet.helius-rpc.com',
     ];
 
     criticalDomains.forEach(domain => {

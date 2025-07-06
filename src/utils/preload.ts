@@ -84,13 +84,12 @@ export class PreloadService {
     return promise
   }
 
-  // Preload critical images
+  // Preload critical images (only local images to avoid CSP violations)
   preloadImages() {
     const criticalImages = [
       '/bctlogo.png',
       '/computerlogo.svg',
-      'https://ipfs.io/ipfs/bafkreigxnxbmmov3vziotzzbcni4oja3qxdnrch6wjx6yqvm5xad2m3kce', // BCT logo
-      'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/So11111111111111111111111111111111111111112/logo.png', // SOL logo
+      // Removed external images to prevent CSP violations
     ]
 
     criticalImages.forEach(src => {

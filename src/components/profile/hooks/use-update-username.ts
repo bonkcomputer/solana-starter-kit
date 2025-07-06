@@ -4,6 +4,7 @@ import { usePrivy } from '@privy-io/react-auth'
 import { useCurrentWallet } from '@/components/auth/hooks/use-current-wallet'
 import { useCallback, useState } from 'react'
 import { validateUsername } from '@/utils/username-validation'
+import { toast } from 'sonner'
 
 interface UsernameChangeInfo {
   canChange: boolean
@@ -20,11 +21,11 @@ export const useUpdateUsername = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<boolean>(false)
   const [usernameInfo, setUsernameInfo] = useState<UsernameChangeInfo | null>(null)
+  const [optimisticUsername, setOptimisticUsername] = useState<string | null>(null)
 
   // Check if user can change username
   const checkUsernameEligibility = useCallback(async () => {
     if (!user?.id) {
-      // Don't set error for unauthenticated users, just return null silently
       return null
     }
 
@@ -52,7 +53,7 @@ export const useUpdateUsername = () => {
     }
   }, [user])
 
-  // Update username
+  // Update username with optimistic updates
   const updateUsername = useCallback(async (newUsername: string) => {
     console.log('🔍 Frontend - updateUsername called with:', {
       newUsername,
@@ -74,9 +75,19 @@ export const useUpdateUsername = () => {
       return false
     }
 
+    // 🚀 OPTIMISTIC UPDATE: Update UI immediately
+    setOptimisticUsername(newUsername)
     setLoading(true)
     setError(null)
     setSuccess(false)
+    
+    // Show immediate feedback to user
+    toast.success(`Username changed to "${newUsername}"`)
+
+    // Dispatch event to update username across the app immediately
+    window.dispatchEvent(new CustomEvent('username-updated', {
+      detail: { newUsername, oldUsername: mainUsername }
+    }))
 
     try {
       const requestBody = {
@@ -105,35 +116,75 @@ export const useUpdateUsername = () => {
       });
 
       if (!response.ok) {
+        // 🔄 ROLLBACK: If API fails, revert optimistic update
+        setOptimisticUsername(null)
+        
+        // Dispatch rollback event
+        window.dispatchEvent(new CustomEvent('username-update-failed', {
+          detail: { failedUsername: newUsername, revertTo: mainUsername }
+        }))
+
         // Handle specific error cases
         if (response.status === 429) {
-          setError(`${result.error}. You can change it again in ${result.daysRemaining} day(s).`)
+          const errorMsg = `${result.error}. You can change it again in ${result.daysRemaining} day(s).`
+          setError(errorMsg)
+          toast.error(errorMsg)
         } else {
-          setError(result.error || 'Failed to update username')
+          const errorMsg = result.error || 'Failed to update username'
+          setError(errorMsg)
+          toast.error(`Username change failed: ${errorMsg}`)
         }
         return false
       }
 
+      // ✅ SUCCESS: API succeeded, confirm optimistic update
       setSuccess(true)
+      setOptimisticUsername(null) // Clear optimistic state since it's now real
+      
+      // Dispatch success event
+      window.dispatchEvent(new CustomEvent('username-update-confirmed', {
+        detail: { newUsername }
+      }))
+
       // Refresh username eligibility info
       await checkUsernameEligibility()
+      
+      toast.success('Username updated successfully!')
       return true
+
     } catch (err: any) {
+      // 🔄 ROLLBACK: If request fails, revert optimistic update
+      setOptimisticUsername(null)
+      
+      // Dispatch rollback event
+      window.dispatchEvent(new CustomEvent('username-update-failed', {
+        detail: { failedUsername: newUsername, revertTo: mainUsername }
+      }))
+
       console.error('🔍 Frontend - Error in updateUsername:', err);
-      setError(err.message || 'Something went wrong')
+      const errorMsg = err.message || 'Something went wrong'
+      setError(errorMsg)
+      toast.error(`Username change failed: ${errorMsg}`)
       return false
     } finally {
       setLoading(false)
     }
   }, [user, checkUsernameEligibility, mainUsername, walletAddress])
 
+  // Get the current display username (optimistic or actual)
+  const getCurrentUsername = useCallback(() => {
+    return optimisticUsername || mainUsername
+  }, [optimisticUsername, mainUsername])
+
   return { 
     updateUsername, 
     checkUsernameEligibility,
+    getCurrentUsername,
     usernameInfo,
     loading, 
     error, 
     success,
+    optimisticUsername,
     setError,
     setSuccess
   }
