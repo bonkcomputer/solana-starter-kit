@@ -125,17 +125,40 @@ export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { bio, image, privyDid, properties, solanaWalletAddress } = body
 
+  console.log('🔍 Profile update request received:', {
+    username,
+    privyDid,
+    solanaWalletAddress,
+    bioLength: bio?.length || 0,
+    hasImage: !!image
+  });
+
   if (!username || !privyDid) {
     return NextResponse.json({ error: 'Username and privyDid are required' }, { status: 400 })
   }
 
   try {
     // 1. Find user using robust lookup (handles privyDid changes)
+    console.log('🔍 Attempting user lookup with criteria:', {
+      privyDid,
+      username,
+      solanaWalletAddress,
+      embeddedWalletAddress: undefined
+    });
+
     const userLookupResult = await findAndSyncUser({
       privyDid,
       username,
       solanaWalletAddress,
       embeddedWalletAddress: undefined
+    });
+
+    console.log('🔍 User lookup result:', {
+      found: !!userLookupResult.user,
+      matchedBy: userLookupResult.matchedBy,
+      foundUsername: userLookupResult.user?.username,
+      foundPrivyDid: userLookupResult.user?.privyDid,
+      foundWallet: userLookupResult.user?.solanaWalletAddress
     });
 
     if (!userLookupResult.user) {
@@ -170,6 +193,13 @@ export async function PUT(req: NextRequest) {
         image,
       },
     })
+
+    console.log('✅ Profile updated successfully:', {
+      username: existingUser.username,
+      privyDid: existingUser.privyDid,
+      bioUpdated: !!bio,
+      imageUpdated: !!image
+    });
 
     return NextResponse.json(updatedUser)
   } catch (error: any) {

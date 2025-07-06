@@ -9,6 +9,13 @@ export async function PUT(req: NextRequest) {
   const body = await req.json()
   const { newUsername, privyDid, currentUsername, solanaWalletAddress } = body
 
+  console.log('🔍 Username update request received:', {
+    newUsername,
+    privyDid,
+    currentUsername,
+    solanaWalletAddress
+  });
+
   if (!newUsername || !privyDid) {
     return NextResponse.json(
       { error: 'New username and privyDid are required' },
@@ -27,11 +34,26 @@ export async function PUT(req: NextRequest) {
 
   try {
     // 1. Find user using robust lookup (handles privyDid changes)
+    console.log('🔍 Attempting user lookup with criteria:', {
+      privyDid,
+      username: currentUsername,
+      solanaWalletAddress,
+      embeddedWalletAddress: undefined
+    });
+
     const userLookupResult = await findAndSyncUser({
       privyDid,
       username: currentUsername,
       solanaWalletAddress,
       embeddedWalletAddress: undefined
+    });
+
+    console.log('🔍 User lookup result:', {
+      found: !!userLookupResult.user,
+      matchedBy: userLookupResult.matchedBy,
+      foundUsername: userLookupResult.user?.username,
+      foundPrivyDid: userLookupResult.user?.privyDid,
+      foundWallet: userLookupResult.user?.solanaWalletAddress
     });
 
     if (!userLookupResult.user) {
@@ -122,6 +144,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const privyDid = searchParams.get('privyDid')
 
+  console.log('🔍 Username eligibility check for privyDid:', privyDid);
+
   if (!privyDid) {
     return NextResponse.json(
       { error: 'privyDid is required' },
@@ -136,6 +160,13 @@ export async function GET(req: NextRequest) {
       username: undefined,
       solanaWalletAddress: undefined,
       embeddedWalletAddress: undefined
+    });
+
+    console.log('🔍 Eligibility check user lookup result:', {
+      found: !!userLookupResult.user,
+      matchedBy: userLookupResult.matchedBy,
+      foundUsername: userLookupResult.user?.username,
+      foundPrivyDid: userLookupResult.user?.privyDid
     });
 
     if (!userLookupResult.user) {

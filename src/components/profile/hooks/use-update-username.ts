@@ -54,6 +54,14 @@ export const useUpdateUsername = () => {
 
   // Update username
   const updateUsername = useCallback(async (newUsername: string) => {
+    console.log('🔍 Frontend - updateUsername called with:', {
+      newUsername,
+      userPrivyId: user?.id,
+      mainUsername,
+      walletAddress,
+      userExists: !!user
+    });
+
     if (!user?.id) {
       setError('User not authenticated')
       return false
@@ -71,20 +79,30 @@ export const useUpdateUsername = () => {
     setSuccess(false)
 
     try {
+      const requestBody = {
+        newUsername,
+        privyDid: user.id,
+        currentUsername: mainUsername,
+        solanaWalletAddress: walletAddress
+      };
+
+      console.log('🔍 Frontend - Sending API request with body:', requestBody);
+
       const response = await fetch('/api/profiles/username', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          newUsername,
-          privyDid: user.id,
-          currentUsername: mainUsername,
-          solanaWalletAddress: walletAddress
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const result = await response.json()
+
+      console.log('🔍 Frontend - API response:', {
+        status: response.status,
+        ok: response.ok,
+        result
+      });
 
       if (!response.ok) {
         // Handle specific error cases
@@ -101,6 +119,7 @@ export const useUpdateUsername = () => {
       await checkUsernameEligibility()
       return true
     } catch (err: any) {
+      console.error('🔍 Frontend - Error in updateUsername:', err);
       setError(err.message || 'Something went wrong')
       return false
     } finally {
