@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { createTapestryProfile, getTapestryProfile } from "@/lib/tapestry";
 import { awardPoints, processReferral, initializeAchievements } from "@/services/points";
 import { PointActionType } from "@/models/points.models";
+import { validateUsername } from "@/utils/username-validation";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -19,6 +20,15 @@ export async function POST(req: NextRequest) {
   if (!privyDid || !username || !solanaWalletAddress) {
     return NextResponse.json(
       { error: "Privy DID, username, and wallet address are required" },
+      { status: 400 }
+    );
+  }
+
+  // Validate username format and rules
+  const usernameValidation = validateUsername(username);
+  if (!usernameValidation.isValid) {
+    return NextResponse.json(
+      { error: usernameValidation.error },
       { status: 400 }
     );
   }

@@ -90,7 +90,7 @@ async function restoreUsers() {
             totalPoints: 0,
             referralCode: `ref_${privyDid.slice(-8)}`, // Generate unique referral code
             // Add bio based on available data
-            bio: email ? `Restored user - ${email}` : 'Restored user',
+            bio: email ? `Welcome back! Your account was restored from ${email}. You can change your username anytime by clicking the edit button next to it.` : 'Welcome back! Your account was restored. You can change your username anytime by clicking the edit button next to it.',
           }
         });
         

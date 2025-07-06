@@ -9,6 +9,7 @@ import { SubmitButton } from '@/components/form/submit-button'
 import { useCreateProfile } from '@/components/profile/hooks/use-create-profile'
 import { useGetIdentities } from '@/components/profile/hooks/use-get-identities'
 import { IProfileList } from '@/models/profile.models'
+import { sanitizeUsername } from '@/utils/username-validation'
 import { cn } from '@/utils/utils'
 import { usePrivy } from '@privy-io/react-auth'
 import { User } from 'lucide-react'
@@ -61,8 +62,8 @@ export function CreateProfile({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    const validValue = value.toLowerCase().replace(/[^a-z0-9]/g, '')
-    setUsername(validValue)
+    const sanitized = sanitizeUsername(value)
+    setUsername(sanitized)
   }
 
   const handleClick = async (elem: IProfileList) => {

@@ -41,6 +41,9 @@ node scripts/safe-migration.js
 ```bash
 # Restore users from CSV export
 pnpm run db:restore-users
+
+# Update bio messages for restored users
+pnpm run db:update-restored-bios
 ```
 
 ## 🔄 User Data Restoration
@@ -64,6 +67,42 @@ The script will:
 - `External Solana accounts`: Solana wallet address
 - `Embedded Solana accounts`: Embedded wallet address
 - `Email account`: User email address
+
+## 👤 Username Management
+
+### New User Experience
+New users go through a proper profile creation flow where they can:
+- Choose their own username
+- Set a custom bio
+- Upload a profile image
+- Import existing profiles from other platforms
+
+### Restored User Experience
+Users restored from CSV exports get:
+- **Auto-generated usernames** (e.g., `user_AJxVLg4d` from wallet address)
+- **Helpful bio messages** explaining they can change their username
+- **Full editing capabilities** through the username editor
+
+### Username Editing
+All users can change their usernames by:
+1. Going to their profile page
+2. Clicking the edit button (pencil icon) next to their username
+3. Entering a new username (must be unique)
+4. Confirming the change
+
+**Username Rules:**
+- Must be unique across the platform
+- Only lowercase letters and numbers allowed
+- Cannot be empty
+- Changes are limited (cooldown period may apply)
+
+### Username Generation Logic
+For restored users, usernames are generated in this priority:
+1. **Email-based**: `username` from `email@domain.com`
+2. **Wallet-based**: `user_` + first 8 characters of wallet address
+3. **ID-based**: `user_` + last 8 characters of Privy ID
+
+All generated usernames are checked for uniqueness and incremented if needed (e.g., `username_1`, `username_2`).
 
 ## 📁 Backup File Structure
 

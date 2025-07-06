@@ -2,6 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth'
 import { useCallback, useState } from 'react'
+import { validateUsername } from '@/utils/username-validation'
 
 interface UsernameChangeInfo {
   canChange: boolean
@@ -57,14 +58,9 @@ export const useUpdateUsername = () => {
     }
 
     // Client-side validation
-    if (!newUsername || newUsername.length < 3 || newUsername.length > 20) {
-      setError('Username must be between 3 and 20 characters')
-      return false
-    }
-
-    const usernameRegex = /^[a-z0-9]+$/
-    if (!usernameRegex.test(newUsername)) {
-      setError('Username must contain only lowercase letters and numbers')
+    const validation = validateUsername(newUsername)
+    if (!validation.isValid) {
+      setError(validation.error || 'Invalid username')
       return false
     }
 

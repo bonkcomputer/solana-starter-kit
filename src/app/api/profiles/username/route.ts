@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { updateTapestryUsername } from '@/lib/tapestry'
+import { validateUsername } from '@/utils/username-validation'
 import { NextRequest, NextResponse } from 'next/server'
 
 // PUT handler for updating username with weekly limit validation
@@ -14,19 +15,11 @@ export async function PUT(req: NextRequest) {
     )
   }
 
-  // Validate username format (alphanumeric, lowercase only)
-  const usernameRegex = /^[a-z0-9]+$/
-  if (!usernameRegex.test(newUsername)) {
+  // Validate username format and rules
+  const usernameValidation = validateUsername(newUsername)
+  if (!usernameValidation.isValid) {
     return NextResponse.json(
-      { error: 'Username must contain only lowercase letters and numbers' },
-      { status: 400 }
-    )
-  }
-
-  // Validate username length
-  if (newUsername.length < 3 || newUsername.length > 20) {
-    return NextResponse.json(
-      { error: 'Username must be between 3 and 20 characters' },
+      { error: usernameValidation.error },
       { status: 400 }
     )
   }

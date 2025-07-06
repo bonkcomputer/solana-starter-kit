@@ -13,8 +13,10 @@
     "db:pre-migration-backup": "node scripts/pre-migration-backup.js",
     "db:safe-migrate": "node scripts/safe-migration.js",
     "db:status": "node scripts/db-status.js",
+    "db:update-restored-bios": "node scripts/update-restored-user-bios.js",
     "db:migrate": "npm run db:pre-migration-backup && prisma migrate dev",
     "db:migrate-deploy": "npm run db:pre-migration-backup && prisma migrate deploy",
+    "test:username-validation": "node scripts/test-username-validation.js",
     "points:retroactive": "npx tsx src/scripts/retroactive-points.ts"
   },
   "dependencies": {
