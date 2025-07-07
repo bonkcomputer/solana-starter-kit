@@ -85,7 +85,7 @@ export default function RootLayout({
         {/* Relaxed CSP for Privy authentication - allows all HTTPS connections */}
         <meta 
           httpEquiv="Content-Security-Policy" 
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; connect-src 'self' https: wss: data:; img-src 'self' https: data: blob:; style-src 'self' 'unsafe-inline' https:; font-src 'self' https:; frame-src 'self' https:;" 
+          content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';" 
         />
       </head>
       <body className={`${jetbrainsMono.className} min-h-screen bg-black text-white`}>
