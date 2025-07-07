@@ -302,43 +302,49 @@ async function checkAchievements(userId: string): Promise<IAchievement[]> {
 }
 
 /**
- * Gets user points information
+ * Gets all points data for a specific user
  */
 export async function getUserPoints(userId: string): Promise<IUserPoints | null> {
-  const user = await prisma.user.findUnique({
-    where: { privyDid: userId }
-  })
-  
-  if (!user) return null
-  
-  // Get today's points
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  
-  const todayPoints = await prisma.pointTransaction.aggregate({
-    where: {
-      userId,
-      createdAt: {
-        gte: today
-      }
-    },
-    _sum: {
-      points: true
+  try {
+    const user = await prisma.user.findUnique({
+      where: { privyDid: userId },
+    })
+
+    if (!user) {
+      return null
     }
-  })
-  
-  // Get user rank
-  const rank = await getUserRank(userId)
-  
-  return {
-    totalPoints: user.totalPoints,
-    currentStreak: user.currentStreak,
-    longestStreak: user.longestStreak,
-    lastLoginDate: user.lastLoginDate?.toISOString(),
-    referralCode: user.referralCode,
-    referredBy: user.referredBy || undefined,
-    rank,
-    todayPoints: todayPoints._sum.points || 0
+
+    // Calculate points earned today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const todayTransactions = await prisma.pointTransaction.findMany({
+      where: {
+        userId,
+        createdAt: {
+          gte: today
+        }
+      }
+    })
+    
+    const todayPoints = todayTransactions.reduce((sum, t) => sum + t.points, 0)
+
+    // Get user rank
+    const rank = await getUserRank(userId)
+
+    return {
+      totalPoints: user.totalPoints,
+      rank,
+      currentStreak: user.currentStreak,
+      longestStreak: user.longestStreak,
+      lastLoginDate: user.lastLoginDate?.toISOString(),
+      todayPoints,
+      referralCode: user.referralCode || '',
+      referredBy: user.referredBy || undefined,
+    }
+  } catch (error) {
+    console.error(`Error getting points for user ${userId}:`, error)
+    return null
   }
 }
 
@@ -552,4 +558,4 @@ export async function initializeAchievements(): Promise<void> {
       create: achievement
     })
   }
-} 
+}

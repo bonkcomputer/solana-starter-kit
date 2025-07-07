@@ -702,7 +702,17 @@ export function Header() {
                   <span className="sm:hidden">
                     {solanaWalletAddress ? `${solanaWalletAddress.slice(0, 3)}...${solanaWalletAddress.slice(-3)}` : (user?.email?.address ? user.email.address.slice(0, 8) + '...' : 'No Wallet')}
                   </span>
-                  {/* OG Badge */}
+                  {/* OG Badge - Debug and ensure visibility */}
+                  {(() => {
+                    console.log('🏷️ OG Badge Debug:', { 
+                      ogStatus, 
+                      userProfile, 
+                      isOG: ogStatus?.isOG,
+                      reason: ogStatus?.reason,
+                      shouldShow: ogStatus?.isOG && userProfile 
+                    });
+                    return null;
+                  })()}
                   {ogStatus?.isOG && userProfile && (
                     <OGBadge 
                       username={userProfile} 
@@ -870,6 +880,12 @@ export function Header() {
                   variant="header" 
                   className="border-r border-border pr-3 mr-3" 
                 />
+                <Link href="/points" passHref>
+                  <Button className="flex items-center space-x-2 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20">
+                    <Coins className="h-4 w-4" />
+                    <span>Points System</span>
+                  </Button>
+                </Link>
                 <DialectNotificationComponent />
               </>
             )}

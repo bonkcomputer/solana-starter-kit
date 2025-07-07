@@ -1,0 +1,17 @@
+{
+  "timestamp": "2025-07-07T02-54-46-719Z",
+  "backupDate": "2025-07-07T02:54:49.784Z",
+  "counts": {
+    "users": 51,
+    "comments": 0,
+    "pointTransactions": 124,
+    "achievements": 10,
+    "userAchievements": 13
+  },
+  "files": [
+    "users-backup-2025-07-07T02-54-46-719Z.json",
+    "comments-backup-2025-07-07T02-54-46-719Z.json",
+    "points-backup-2025-07-07T02-54-46-719Z.json",
+    "achievements-backup-2025-07-07T02-54-46-719Z.json"
+  ]
+}

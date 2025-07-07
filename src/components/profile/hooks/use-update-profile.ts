@@ -48,7 +48,15 @@ export const useUpdateProfileInfo = (username: string) => {
     }))
 
     try {
+      // First, fetch the full current profile to preserve all fields
+      const profileRes = await fetch(`/api/profiles?privyDid=${user.id}`);
+      if (!profileRes.ok) {
+        throw new Error('Could not fetch current profile before updating.');
+      }
+      const fullProfile = await profileRes.json();
+      
       const payload = {
+        ...fullProfile, // Preserve all existing fields
         ...profileData,
         privyDid: user.id,
         solanaWalletAddress: walletAddress

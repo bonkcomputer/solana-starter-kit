@@ -90,7 +90,15 @@ export const useUpdateUsername = () => {
     }))
 
     try {
+      // First, fetch the full current profile to preserve all fields
+      const profileRes = await fetch(`/api/profiles?privyDid=${user.id}`);
+      if (!profileRes.ok) {
+        throw new Error('Could not fetch current profile before updating.');
+      }
+      const fullProfile = await profileRes.json();
+
       const requestBody = {
+        ...fullProfile, // Preserve all existing fields
         newUsername,
         privyDid: user.id,
         currentUsername: mainUsername,
