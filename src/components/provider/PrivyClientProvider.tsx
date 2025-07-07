@@ -65,6 +65,10 @@ export function PrivyClientProvider({
         },
         externalWallets: {
           solana: {
+            // @ts-ignore
+            connection: {
+              endpoint: solanaRpcUrl,
+            },
             connectors: toSolanaWalletConnectors({ 
               shouldAutoConnect: false,
             }),
