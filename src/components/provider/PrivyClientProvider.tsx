@@ -70,29 +70,11 @@ export function PrivyClientProvider({
             }),
           },
         },
-        mfa: {
-          noPromptOnMfaRequired: false,
-        },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
           requireUserPasswordOnCreate: false,
         },
-        solanaClusters: [
-          {
-            name: 'mainnet-beta',
-            rpcUrl: solanaRpcUrl,
-          },
-        ],
         walletConnectCloudProjectId: walletConnectProjectId,
-        legal: {
-          termsAndConditionsUrl: undefined,
-          privacyPolicyUrl: undefined,
-        },
-        fundingMethodConfig: {
-          moonpay: {
-            useSandbox: false,
-          },
-        },
       }}
     >
       {children}

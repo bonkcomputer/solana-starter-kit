@@ -65,58 +65,6 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              [
-                "connect-src 'self' https://cc.bonk.computer",
-                // Privy authentication
-                "https://auth.privy.io",
-                "https://*.privy.io",
-                "https://privy.bonk.computer",
-                // Solana RPC endpoints
-                "https://*.solana.com",
-                "https://api.mainnet-beta.solana.com",
-                "https://solana.public-rpc.com",
-                "https://*.alchemy.com",
-                "https://solana-mainnet.g.alchemy.com",
-                "https://*.helius-rpc.com",
-                "https://mainnet.helius-rpc.com",
-                "https://solana-api.projectserum.com",
-                "https://*.ankr.com",
-                "https://rpc.ankr.com",
-                "https://*.quicknode.com",
-                "https://*.rpcpool.com",
-                "https://*.syndica.io",
-                // WebSocket endpoints for Solana
-                "wss://*.solana.com",
-                "wss://*.helius-rpc.com",
-                "wss://*.alchemy.com",
-                // Jupiter API
-                "https://quote-api.jup.ag",
-                "https://price.jup.ag",
-                "https://*.jup.ag",
-                // Birdeye API
-                "https://public-api.birdeye.so",
-                "https://*.birdeye.so",
-                // Tapestry API
-                "https://api.tapestry.dev",
-                "https://*.tapestry.dev",
-                // Other services
-                "https://fonts.googleapis.com",
-                "'self'",
-                "data:",
-                "blob:"
-              ].join(" "),
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://auth.privy.io https://privy.bonk.computer https://*.privy.io https://*.jup.ag https://www.gstatic.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https: https://*.privy.io",
-              "font-src 'self' https://fonts.gstatic.com",
-              "frame-src 'self' https://auth.privy.io https://privy.bonk.computer https://*.privy.io https://birdeye.so https://*.jup.ag",
-              "frame-ancestors 'self' https://bcttrading.vercel.app https://auth.privy.io https://privy.bonk.computer",
-            ].join('; '),
-          },
-          {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN',
           },
