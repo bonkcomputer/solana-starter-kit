@@ -65,7 +65,7 @@ export function PrivyClientProvider({
         },
         externalWallets: {
           solana: {
-            // @ts-expect-error
+            // @ts-expect-error: The connection property is not part of the standard type definition, but is required for Solana network configuration.
             connection: {
               endpoint: solanaRpcUrl,
             },
