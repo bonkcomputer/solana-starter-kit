@@ -242,21 +242,10 @@ export default function PointsPage() {
             <p className="text-muted-foreground mb-6">
               Join the BCT Community Center and start earning points today!
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                onClick={() => window.location.href = '/'}
-                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
-              >
-                <Star className="h-4 w-4 mr-2" />
-                Get Started
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => window.location.href = '/'}
-                className="border-yellow-500/50 text-yellow-600 hover:bg-yellow-500/10"
-              >
-                Learn More
-              </Button>
+            <div className="text-center">
+              <p className="text-lg font-semibold text-yellow-600">
+                Get Started by creating your profile and start earning points!
+              </p>
             </div>
           </Card>
         </div>
