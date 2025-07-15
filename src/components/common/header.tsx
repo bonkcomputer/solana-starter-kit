@@ -679,6 +679,18 @@ export function Header() {
                 </div>
               )}
             </div>
+
+            {/* Trench Button */}
+            <div className="relative">
+              <Button
+                onClick={() => window.open('https://trade.bonk.computer', '_blank')}
+                variant="default"
+                className="bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-300 flex items-center space-x-2 px-4 py-1.5 h-9 rounded font-mono text-xs uppercase tracking-wider"
+              >
+                <span>🪖</span>
+                <span>Trench</span>
+              </Button>
+            </div>
           </div>
 
           {/* Right section - User Profile/Login */}

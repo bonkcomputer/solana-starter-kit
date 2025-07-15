@@ -96,12 +96,44 @@ const nextConfig = {
         },
       };
       
-      // Optimize development builds
+      // Fix chunk loading issues in development
       config.optimization = {
         ...config.optimization,
         removeAvailableModules: false,
         removeEmptyChunks: false,
-        splitChunks: false,
+        // Re-enable splitChunks with better configuration
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+              chunks: 'all',
+              maxSize: 244000, // Limit chunk size to prevent loading issues
+            },
+            // Separate large libraries that cause chunk loading issues
+            reown: {
+              test: /[\\/]node_modules[\\/]@?reown/,
+              name: 'reown',
+              priority: 10,
+              chunks: 'all',
+              maxSize: 200000,
+            },
+            solana: {
+              test: /[\\/]node_modules[\\/]@solana/,
+              name: 'solana',
+              priority: 10,
+              chunks: 'all',
+              maxSize: 200000,
+            },
+          },
+        },
       };
     }
     
@@ -115,6 +147,13 @@ const nextConfig = {
     
     // Reduce module resolution time
     config.resolve.extensions = ['.tsx', '.ts', '.jsx', '.js', '.json'];
+    
+    // Add error handling for chunk loading
+    config.output = {
+      ...config.output,
+      chunkLoadingGlobal: 'webpackChunktrading_computer',
+      chunkLoadTimeout: 30000, // Increase timeout for slow connections
+    };
     
     return config;
   },
