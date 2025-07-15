@@ -68,14 +68,198 @@ export default function PointsPage() {
 
   if (!user || !mainUsername) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="p-8 text-center">
-          <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <h2 className="text-xl font-bold mb-2">Points System</h2>
-          <p className="text-muted-foreground mb-4">
-            Please log in and create a profile to view your points.
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <Star className="h-8 w-8 text-yellow-500" />
+            <h1 className="text-3xl font-bold">BCT Points System</h1>
+          </div>
+          <p className="text-muted-foreground text-lg">
+            Earn points by engaging with the BCT Community Center and unlock exclusive rewards!
           </p>
-        </Card>
+        </div>
+
+        {/* Points System Overview */}
+        <div className="space-y-8">
+          {/* What are Points? */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
+              <Gift className="h-6 w-6 text-purple-500" />
+              <span>What are BCT Points?</span>
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              BCT Points are rewards you earn for participating in the Bonk Computer Token community.
+              The more you engage, trade, and contribute, the more points you accumulate!
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <div className="text-2xl mb-2">🎯</div>
+                <h3 className="font-semibold mb-1">Engage</h3>
+                <p className="text-sm text-muted-foreground">Comment, like, and follow other community members</p>
+              </div>
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                <div className="text-2xl mb-2">📈</div>
+                <h3 className="font-semibold mb-1">Trade</h3>
+                <p className="text-sm text-muted-foreground">Complete trades and swaps on the platform</p>
+              </div>
+              <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                <div className="text-2xl mb-2">🎁</div>
+                <h3 className="font-semibold mb-1">Refer</h3>
+                <p className="text-sm text-muted-foreground">Invite friends and earn referral bonuses</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* How to Earn Points */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
+              <TrendingUp className="h-6 w-6 text-green-500" />
+              <span>How to Earn Points</span>
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">🎯</span>
+                  <div>
+                    <p className="font-medium">Create Profile</p>
+                    <p className="text-sm text-muted-foreground">Get started with bonus points</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+100</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">📅</span>
+                  <div>
+                    <p className="font-medium">Daily Login</p>
+                    <p className="text-sm text-muted-foreground">Log in every day</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+10</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">🔥</span>
+                  <div>
+                    <p className="font-medium">Login Streak</p>
+                    <p className="text-sm text-muted-foreground">Consecutive daily logins</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+25</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">💬</span>
+                  <div>
+                    <p className="font-medium">Create Comment</p>
+                    <p className="text-sm text-muted-foreground">Engage in discussions</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+5</span>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">❤️</span>
+                  <div>
+                    <p className="font-medium">Give Like</p>
+                    <p className="text-sm text-muted-foreground">Show appreciation</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+2</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">👥</span>
+                  <div>
+                    <p className="font-medium">Follow User</p>
+                    <p className="text-sm text-muted-foreground">Build your network</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+3</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">📈</span>
+                  <div>
+                    <p className="font-medium">Complete Trade</p>
+                    <p className="text-sm text-muted-foreground">Trade tokens successfully</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+50</span>
+                </div>
+                <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
+                  <span className="text-xl">🎁</span>
+                  <div>
+                    <p className="font-medium">Referral Bonus</p>
+                    <p className="text-sm text-muted-foreground">Invite friends to join</p>
+                  </div>
+                  <span className="font-mono font-bold text-green-600 ml-auto">+200</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Achievements System */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
+              <Award className="h-6 w-6 text-purple-500" />
+              <span>Achievement System</span>
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Unlock special achievements by reaching milestones and completing challenges.
+              Each achievement rewards you with bonus points!
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="p-4 border rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
+                <div className="text-2xl mb-2">🏆</div>
+                <h3 className="font-semibold mb-1">Social Achievements</h3>
+                <p className="text-sm text-muted-foreground">Unlock by engaging with the community</p>
+              </div>
+              <div className="p-4 border rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/20">
+                <div className="text-2xl mb-2">💰</div>
+                <h3 className="font-semibold mb-1">Trading Achievements</h3>
+                <p className="text-sm text-muted-foreground">Earn through successful trades</p>
+              </div>
+              <div className="p-4 border rounded-lg bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/20">
+                <div className="text-2xl mb-2">🎯</div>
+                <h3 className="font-semibold mb-1">Milestone Achievements</h3>
+                <p className="text-sm text-muted-foreground">Reach important community milestones</p>
+              </div>
+            </div>
+          </Card>
+
+          {/* Leaderboard Preview */}
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold mb-4 flex items-center space-x-2">
+              <Trophy className="h-6 w-6 text-yellow-500" />
+              <span>Community Leaderboard</span>
+            </h2>
+            <p className="text-muted-foreground mb-4">
+              Compete with other community members and see where you rank!
+              The leaderboard showcases the most active and engaged members.
+            </p>
+            <div className="bg-muted/50 p-4 rounded-lg text-center">
+              <Trophy className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
+              <p className="font-medium">Join the competition!</p>
+              <p className="text-sm text-muted-foreground">Create a profile to see your ranking</p>
+            </div>
+          </Card>
+
+          {/* Call to Action */}
+          <Card className="p-8 text-center bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+            <Star className="h-12 w-12 mx-auto mb-4 text-yellow-500" />
+            <h2 className="text-2xl font-bold mb-4">Ready to Start Earning?</h2>
+            <p className="text-muted-foreground mb-6">
+              Join the BCT Community Center and start earning points today!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button
+                onClick={() => window.location.href = '/'}
+                className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold"
+              >
+                <Star className="h-4 w-4 mr-2" />
+                Get Started
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => window.location.href = '/'}
+                className="border-yellow-500/50 text-yellow-600 hover:bg-yellow-500/10"
+              >
+                Learn More
+              </Button>
+            </div>
+          </Card>
+        </div>
       </div>
     )
   }

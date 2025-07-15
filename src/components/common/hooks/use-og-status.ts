@@ -31,7 +31,7 @@ export function useOGStatus({ username, privyDid }: UseOGStatusProps): UseOGStat
 
       try {
         // Fetch user data from API
-        const response = await fetch(`/api/profiles/${username}`);
+        const response = await fetch(`/api/profiles/info?username=${username}`);
         
         if (!response.ok) {
           throw new Error('Failed to fetch user data');

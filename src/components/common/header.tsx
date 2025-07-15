@@ -545,18 +545,19 @@ export function Header() {
             </div>
 
             {/* Rewards Button */}
-            <div 
+            <div
               ref={rewardsButtonRef}
               className="relative"
               onMouseEnter={() => setShowRewardsModal(true)}
               onMouseLeave={() => setShowRewardsModal(false)}
             >
-              <button
+              <Link
+                href="/points"
                 className="h-9 w-9 flex items-center justify-center rounded bg-black border border-yellow-600/50 text-yellow-600/70 hover:border-yellow-500 hover:text-yellow-500 hover:bg-yellow-500/10 transition-all duration-200"
-                aria-label="Rewards"
+                aria-label="Points System"
               >
                 <Gift className="h-3.5 w-3.5" />
-              </button>
+              </Link>
               
               {/* Animated Rewards Modal */}
               {showRewardsModal && (
@@ -887,17 +888,11 @@ export function Header() {
 
             {ready && authenticated && userProfile && (
               <>
-                <PointsDisplay 
-                  userId={user?.id} 
-                  variant="header" 
-                  className="border-r border-border pr-3 mr-3" 
+                <PointsDisplay
+                  userId={user?.id}
+                  variant="header"
+                  className="border-r border-border pr-3 mr-3"
                 />
-                <Link href="/points" passHref>
-                  <Button className="flex items-center space-x-2 bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20">
-                    <Coins className="h-4 w-4" />
-                    <span>Points System</span>
-                  </Button>
-                </Link>
                 <DialectNotificationComponent />
               </>
             )}
