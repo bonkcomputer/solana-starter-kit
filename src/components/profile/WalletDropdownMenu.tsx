@@ -73,19 +73,15 @@ export function WalletDropdownMenu() {
         ? potentialConnectedWallet
         : undefined;
 
+      // If user has an external connected wallet, show error message
       if (connectedSolanaWallet) {
-        console.log('🔑 Attempting to export embedded Solana wallet by address:', connectedSolanaWallet.address);
-        try {
-          await exportWallet({ address: connectedSolanaWallet.address });
-          toast.success('Private key export initiated - check the modal');
-        } catch (error) {
-          console.error('Wallet export error (external wallet):', error);
-          toast.error('Private key export is not supported for external wallets. Please use your wallet app to export your private key.');
-        }
+        console.log('🔑 External wallet detected:', connectedSolanaWallet.address);
+        toast.error('Private key export is not supported for external wallets. Please use your wallet app to export your private key.');
         return;
       }
 
-      // Embedded wallet: Use Privy exportWallet() with no arguments
+      // For embedded wallets (email users with Privy embedded Solana wallet)
+      // Use Privy exportWallet() with no arguments
       console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments');
       await exportWallet();
       toast.success('Private key export initiated - check the modal');
@@ -197,4 +193,4 @@ export function WalletDropdownMenu() {
       )}
     </div>
   );
-} 
+}
