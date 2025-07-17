@@ -220,14 +220,14 @@ export function Header() {
 
       if (embeddedSolanaWallet) {
         console.log('🔑 Attempting to export embedded Solana wallet by address:', embeddedSolanaWallet.address);
-        await exportWallet(embeddedSolanaWallet.address);
+        await exportWallet();
         toast.success('Private key export initiated - check the modal');
         return;
       }
       
       // Embedded wallet: Use Privy exportWallet() with no arguments as a fallback
       console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
-      await exportWallet(embeddedSolanaWallet.address)
+      await exportWallet()
       toast.success('Private key is being exported by Privy...')
     } catch (error) {
       console.error('Wallet export error:', error)
