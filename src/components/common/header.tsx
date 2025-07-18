@@ -3,6 +3,7 @@
 import { Button } from '@/components/common/button'
 import { abbreviateWalletAddress } from '@/components/common/tools'
 import { useLogin, usePrivy } from '@privy-io/react-auth'
+import { useSolanaWallets } from '@privy-io/react-auth/solana'
 import { toast } from 'sonner'
 import { isValidSolanaAddress, validateWalletAddress } from '@/utils/wallet'
 import {
@@ -38,7 +39,8 @@ export function Header() {
   const { walletAddress, mainUsername, checkProfile } = useCurrentWallet()
   const [showCreateProfile, setShowCreateProfile] = useState(false)
   const [userProfile, setUserProfile] = useState<string | null>(null)
-  const { ready, authenticated, logout, user, exportWallet } = usePrivy()
+  const { ready, authenticated, logout, user } = usePrivy()
+  const { exportWallet } = useSolanaWallets() // Get exportWallet from Solana hook
   const { login } = useLogin()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -220,15 +222,15 @@ export function Header() {
 
       if (embeddedSolanaWallet) {
         console.log('🔑 Attempting to export embedded Solana wallet by address:', embeddedSolanaWallet.address);
-        await exportWallet();
+        await exportWallet({ address: embeddedSolanaWallet.address }); // Pass Solana address
         toast.success('Private key export initiated - check the modal');
         return;
       }
       
-      // Embedded wallet: Use Privy exportWallet() with no arguments as a fallback
-      console.log('🔑 Attempting to export embedded wallet using exportWallet() with no arguments')
-      await exportWallet()
-      toast.success('Private key is being exported by Privy...')
+      // Fallback: Use Solana exportWallet with no arguments (defaults to first Solana wallet)
+      console.log('🔑 Attempting to export Solana wallet using exportWallet() with no arguments')
+      await exportWallet() // This will now export Solana wallet
+      toast.success('Solana private key is being exported by Privy...')
     } catch (error) {
       console.error('Wallet export error:', error)
       toast.error('Failed to export wallet')
