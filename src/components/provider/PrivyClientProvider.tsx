@@ -3,6 +3,21 @@
 import { PrivyProvider } from '@privy-io/react-auth'
 import { toSolanaWalletConnectors } from '@privy-io/react-auth/solana'
 
+// Mobile wallet detection utility
+const isMobileOrTWA = () => {
+  if (typeof window === 'undefined') return false
+  
+  // Check for TWA (Trusted Web Activity)
+  const isTWA = window.matchMedia('(display-mode: standalone)').matches ||
+                (window.navigator as any).standalone === true ||
+                window.document.referrer.includes('android-app://')
+  
+  // Check for mobile user agent
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  
+  return isTWA || isMobile
+}
+
 export function PrivyClientProvider({
   children,
 }: {
@@ -53,37 +68,53 @@ export function PrivyClientProvider({
     )
   }
 
+  // Dynamic configuration based on environment
+  const isMobile = isMobileOrTWA()
+  
+  // Mobile-optimized configuration
+  const mobileConfig = {
+    loginMethods: ['email', 'sms', 'twitter'] as ('email' | 'sms' | 'twitter')[],
+    appearance: {
+      theme: 'dark' as const,
+      accentColor: '#676FFF' as `#${string}`,
+      logo: '/bctlogo.png',
+    },
+    embeddedWallets: {
+      createOnLogin: 'users-without-wallets' as const,
+      requireUserPasswordOnCreate: false,
+    },
+    walletConnectCloudProjectId: walletConnectProjectId,
+  }
+
+  // Desktop configuration with external wallets
+  const desktopConfig = {
+    loginMethods: ['wallet', 'email', 'twitter'] as ('wallet' | 'email' | 'twitter')[],
+    appearance: {
+      theme: 'dark' as const,
+      accentColor: '#676FFF' as `#${string}`,
+      logo: '/bctlogo.png',
+    },
+    externalWallets: {
+      solana: {
+        connection: {
+          endpoint: solanaRpcUrl,
+        },
+        connectors: toSolanaWalletConnectors({ 
+          shouldAutoConnect: false,
+        }),
+      },
+    },
+    embeddedWallets: {
+      createOnLogin: 'users-without-wallets' as const,
+      requireUserPasswordOnCreate: false,
+    },
+    walletConnectCloudProjectId: walletConnectProjectId,
+  }
+
   return (
     <PrivyProvider
       appId={privyAppId}
-      config={{
-        loginMethods: ['wallet', 'email', 'twitter'],
-        appearance: {
-          theme: 'dark',
-          accentColor: '#676FFF',
-          logo: '/bctlogo.png',
-        },
-        externalWallets: {
-          solana: {
-            // @ts-expect-error: The connection property is not part of the standard type definition, but is required for Solana network configuration.
-            connection: {
-              endpoint: solanaRpcUrl,
-            },
-            connectors: toSolanaWalletConnectors({ 
-              shouldAutoConnect: false,
-            }),
-          },
-        },
-        // Enable mobile wallet detection
-        mobileWallets: {
-          enabled: true,
-        },
-        embeddedWallets: {
-          createOnLogin: 'users-without-wallets',
-          requireUserPasswordOnCreate: false,
-        },
-        walletConnectCloudProjectId: walletConnectProjectId,
-      }}
+      config={isMobile ? mobileConfig : desktopConfig}
     >
       {children}
     </PrivyProvider>

@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-page-custom-font */
+
 import { Header } from '@/components/common/header'
 import { RoutePrefetch } from '@/components/common/route-prefetch'
 import { PrivyClientProvider } from '@/components/provider/PrivyClientProvider'
@@ -6,6 +6,8 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { PrivyDebug } from '@/components/debug/privy-debug'
 import { ResourcePreloader } from '@/components/optimization/resource-preloader'
 import { ServiceWorkerRegistration } from '@/components/optimization/service-worker-registration'
+import { MobileWalletAdapter } from '@/components/mobile/MobileWalletAdapter'
+import { TwitterLoginFix } from '@/components/mobile/TwitterLoginFix'
 import type { Metadata } from 'next'
 import { JetBrains_Mono } from 'next/font/google'
 import { ReactNode } from 'react'
@@ -115,6 +117,9 @@ export default function RootLayout({
             <RoutePrefetch />
             <Toaster />
             <PrivyDebug />
+            {/* Mobile-specific components */}
+            <MobileWalletAdapter />
+            <TwitterLoginFix />
             {/* Simplified optimization components */}
             <ResourcePreloader />
             <ServiceWorkerRegistration />
