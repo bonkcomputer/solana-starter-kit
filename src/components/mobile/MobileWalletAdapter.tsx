@@ -41,13 +41,20 @@ export function MobileWalletAdapter() {
   const [showMobileWallets, setShowMobileWallets] = useState(false)
 
   useEffect(() => {
-    // Only show on mobile/TWA
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                     window.matchMedia('(display-mode: standalone)').matches
+    // Only run on client side
+    if (typeof window === 'undefined') return
 
-    if (isMobile) {
-      setShowMobileWallets(true)
-      setWallets(detectMobileWallets())
+    try {
+      // Only show on mobile/TWA
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+                       window.matchMedia('(display-mode: standalone)').matches
+
+      if (isMobile) {
+        setShowMobileWallets(true)
+        setWallets(detectMobileWallets())
+      }
+    } catch (error) {
+      console.warn('MobileWalletAdapter: Error detecting mobile environment:', error)
     }
   }, [])
 
