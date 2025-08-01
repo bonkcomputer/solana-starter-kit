@@ -3,41 +3,8 @@
 import { useEffect, useState } from 'react'
 import { usePrivy } from '@privy-io/react-auth'
 
-interface MobileWallet {
-  name: string
-  icon: string
-  installed: boolean
-  deepLink: string
-}
-
-// Mobile wallet detection for Android
-const detectMobileWallets = (): MobileWallet[] => {
-  if (typeof window === 'undefined') return []
-  
-  const wallets: MobileWallet[] = []
-  
-  // Phantom Wallet
-  wallets.push({
-    name: 'Phantom',
-    icon: '👻',
-    installed: !!(window as any).phantom?.solana,
-    deepLink: 'phantom://browse/mobile.bonk.computer'
-  })
-  
-  // Solflare Wallet
-  wallets.push({
-    name: 'Solflare',
-    icon: '🌟',
-    installed: !!(window as any).solflare,
-    deepLink: 'solflare://browse/mobile.bonk.computer'
-  })
-  
-  return wallets
-}
-
 export function MobileWalletAdapter() {
-  const { authenticated } = usePrivy()
-  const [wallets, setWallets] = useState<MobileWallet[]>([])
+  const { authenticated, login } = usePrivy()
   const [showMobileWallets, setShowMobileWallets] = useState(false)
 
   useEffect(() => {
@@ -51,24 +18,33 @@ export function MobileWalletAdapter() {
 
       if (isMobile) {
         setShowMobileWallets(true)
-        setWallets(detectMobileWallets())
       }
     } catch (error) {
       console.warn('MobileWalletAdapter: Error detecting mobile environment:', error)
     }
   }, [])
 
-  const handleMobileWalletConnect = (wallet: MobileWallet) => {
-    if (wallet.installed) {
-      // Try to connect via deep link
-      window.location.href = wallet.deepLink
-    } else {
-      // Redirect to wallet installation
-      const installUrl = wallet.name === 'Phantom' 
-        ? 'https://play.google.com/store/apps/details?id=app.phantom'
-        : 'https://play.google.com/store/apps/details?id=com.solflare.mobile'
+  const handleMobileWalletConnect = () => {
+    try {
+      // Use Privy's wallet login method which should handle mobile wallet detection
+      login({
+        loginMethods: ['wallet']
+      })
+    } catch (error) {
+      console.error('Mobile wallet connect error:', error)
       
-      window.open(installUrl, '_blank')
+      // Fallback: Try to trigger mobile wallet connection via deep links
+      const walletDeepLinks = [
+        'phantom://browse/mobile.bonk.computer',
+        'solflare://browse/mobile.bonk.computer',
+        'backpack://browse/mobile.bonk.computer',
+        'solana-wallet://browse/mobile.bonk.computer'
+      ]
+      
+      // Try the first available wallet deep link
+      if (walletDeepLinks.length > 0) {
+        window.location.href = walletDeepLinks[0]
+      }
     }
   }
 
@@ -78,35 +54,29 @@ export function MobileWalletAdapter() {
 
   return (
     <div className="mobile-wallet-adapter bg-gray-900 p-4 rounded-lg">
-      <h3 className="text-white text-lg font-semibold mb-3">Connect Mobile Wallet</h3>
-      <div className="space-y-2">
-        {wallets.map((wallet) => (
-          <button
-            key={wallet.name}
-            onClick={() => handleMobileWalletConnect(wallet)}
-            className="w-full flex items-center justify-between p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <div className="flex items-center space-x-3">
-              <span className="text-2xl">{wallet.icon}</span>
-              <span className="text-white font-medium">{wallet.name}</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              {wallet.installed ? (
-                <span className="text-green-400 text-sm">Installed</span>
-              ) : (
-                <span className="text-gray-400 text-sm">Install</span>
-              )}
-              <span className="text-gray-400">→</span>
-            </div>
-          </button>
-        ))}
-      </div>
-      
-      <div className="mt-4 pt-4 border-t border-gray-700">
-        <p className="text-gray-400 text-sm text-center">
-          Mobile wallets connect via deep linking
-        </p>
-      </div>
+      <h3 className="text-white text-lg font-semibold mb-3">External Wallet</h3>
+      <button
+        onClick={handleMobileWalletConnect}
+        className="w-full flex items-center justify-center p-4 bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors text-white font-medium"
+      >
+        <svg 
+          className="w-6 h-6 mr-2" 
+          fill="none" 
+          stroke="currentColor" 
+          viewBox="0 0 24 24"
+        >
+          <path 
+            strokeLinecap="round" 
+            strokeLinejoin="round" 
+            strokeWidth={2} 
+            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" 
+          />
+        </svg>
+        Connect Mobile Wallet
+      </button>
+      <p className="text-gray-400 text-xs mt-2 text-center">
+        Works with Phantom, Solflare, Backpack, and other Solana wallets
+      </p>
     </div>
   )
 }

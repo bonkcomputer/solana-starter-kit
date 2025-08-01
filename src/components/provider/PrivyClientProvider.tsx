@@ -73,11 +73,21 @@ export function PrivyClientProvider({
   
   // Mobile-optimized configuration
   const mobileConfig = {
-    loginMethods: ['email', 'sms', 'twitter'] as ('email' | 'sms' | 'twitter')[],
+    loginMethods: ['wallet', 'email', 'twitter'] as ('wallet' | 'email' | 'twitter')[],
     appearance: {
       theme: 'dark' as const,
       accentColor: '#676FFF' as `#${string}`,
       logo: '/bctlogo.png',
+    },
+    externalWallets: {
+      solana: {
+        connection: {
+          endpoint: solanaRpcUrl,
+        },
+        connectors: toSolanaWalletConnectors({ 
+          shouldAutoConnect: false,
+        }),
+      },
     },
     embeddedWallets: {
       createOnLogin: 'users-without-wallets' as const,
