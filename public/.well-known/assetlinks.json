@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.bonkcomputer.mobile",
+        "sha256_cert_fingerprints": ["85:59:0A:56:81:66:F3:DF:89:F9:F1:03:82:A1:A9:EA:01:23:C2:E3:5F:DA:0A:B1:25:3A:7D:20:19:83:ED:BF"]
+      }
+    }]

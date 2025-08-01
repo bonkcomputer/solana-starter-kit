@@ -40,3 +40,40 @@ next-env.d.ts
 .vscode
 /src/generated/prisma
 
+# Solana Mobile TWA Build Files
+bonkcomputer-twa/
+!bonkcomputer-twa/twa-manifest.json
+!bonkcomputer-twa/assetlinks.json
+
+# Android Keystore - NEVER COMMIT THIS
+*.keystore
+*.jks
+android.keystore
+
+# APK and AAB files - build artifacts
+*.apk
+*.aab
+*.idsig
+
+# Android build artifacts
+.gradle/
+build/
+gradle/
+gradlew
+gradlew.bat
+settings.gradle
+build.gradle
+gradle.properties
+manifest-checksum.txt
+store_icon.png
+
+# Documentation files - keep these
+!TWA_CONVERSION.md
+!APK_TESTING_GUIDE.md
+!SOLANA_MOBILE_*.md
+!MOBILE_APP_DELIVERABLES.md
+!PHASE_1_IMPLEMENTATION_GUIDE.md
+
+SOLANA_MOBILE_FULL_CONVERSION_PLAN(UNUSED).md
+SOLANA_MOBILE_PUBLISHING_CHECKLIST(UNUSED).md
+PHASE_1_IMPLEMENTATION_GUIDE.md

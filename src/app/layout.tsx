@@ -29,6 +29,11 @@ export const metadata: Metadata = {
     shortcut: '/bctlogo.ico',
     apple: '/bctlogo.png',
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'BonkComputer',
+  },
   openGraph: {
     title: "BonkComputer: Community Center",
     description: "The First Meme Powered Community dApp with shared Virtual Machines and Social features by Tapestry. Built on Solana, Bonk Computer Utilizes $BCT, and in some cases $SOL and $BONK, to measure,quantify, and provide secure compute that transcends boundaries and creates new unthought of before possibilities for creating, collaborating, and sharing experiences. Bonk Computer, and $BCT, blew up as the hottest meme coin on Solana since the launch on the letsBONK.fun launchpad.  BCT attracted developers and tech enthusiasts who organized and formed the most active community in meme coins. With so many things coming up for BCT and Bonk Computer, value of the project will catch up to this pure explosion of adoption of the private secure VM and ai technologies provided and currently being utilized by so many people! Join our awesome organic and rapidly growing community now, and be a part of the future of the internet!",
@@ -87,9 +92,14 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#000000" />
         
+        {/* PWA Manifest */}
+        <link rel="manifest" href="/manifest.json" />
+        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+        <link rel="apple-touch-icon" href="/bctlogo.png" />
+        
         {/* Relaxed CSP for Privy authentication - allows all HTTPS connections */}
         <meta 
-          httpEquiv="Content-Security-Policy" 
+          httpEquiv="Content-Security-Policy"
           content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';" 
         />
       </head>
