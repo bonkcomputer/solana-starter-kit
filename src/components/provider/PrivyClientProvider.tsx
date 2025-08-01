@@ -57,7 +57,7 @@ export function PrivyClientProvider({
     <PrivyProvider
       appId={privyAppId}
       config={{
-        loginMethods: ['wallet', 'email'],
+        loginMethods: ['wallet', 'email', 'twitter'],
         appearance: {
           theme: 'dark',
           accentColor: '#676FFF',
@@ -73,6 +73,10 @@ export function PrivyClientProvider({
               shouldAutoConnect: false,
             }),
           },
+        },
+        // Enable mobile wallet detection
+        mobileWallets: {
+          enabled: true,
         },
         embeddedWallets: {
           createOnLogin: 'users-without-wallets',
