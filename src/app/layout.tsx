@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-page-custom-font */
 import { Header } from '@/components/common/header'
 import { RoutePrefetch } from '@/components/common/route-prefetch'
 import { PrivyClientProvider } from '@/components/provider/PrivyClientProvider'
@@ -94,7 +95,6 @@ export default function RootLayout({
         
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
-        {/* eslint-disable-next-line @next/next/no-page-custom-font */}
         <link rel="apple-touch-icon" href="/bctlogo.png" />
         
         {/* Relaxed CSP for Privy authentication - allows all HTTPS connections */}

@@ -58,10 +58,6 @@ export function PrivyClientProvider({
       appId={privyAppId}
       config={{
         loginMethods: ['wallet', 'email'],
-        // Enable mobile wallet support
-        mobileWalletConnect: {
-          enabled: true,
-        },
         appearance: {
           theme: 'dark',
           accentColor: '#676FFF',
@@ -75,13 +71,6 @@ export function PrivyClientProvider({
             },
             connectors: toSolanaWalletConnectors({ 
               shouldAutoConnect: false,
-              // Enable mobile wallet support
-              metadata: {
-                name: 'BonkComputer',
-                description: 'The First Meme Powered Community dApp',
-                url: 'https://cc.bonk.computer',
-                icons: ['https://cc.bonk.computer/bctlogo.png'],
-              },
             }),
           },
         },
