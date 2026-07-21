@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/common/button'
-import { abbreviateWalletAddress } from '@/components/common/tools'
+
 import { useLogin, usePrivy } from '@privy-io/react-auth'
 import { toast } from 'sonner'
 import { isValidSolanaAddress } from '@/utils/wallet'
@@ -106,153 +106,83 @@ export function Header() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const copyEmail = () => {
-    if (user?.email?.address) {
-      navigator.clipboard.writeText(user.email.address)
-      toast.success('Email copied to clipboard')
+  const copyEmail = async () => {
+    if (email) {
+      try {
+        await navigator.clipboard.writeText(email)
+        toast.success('Email address copied to clipboard')
+      } catch {
+        toast.error('Failed to copy email address')
+      }
+    } else {
+      toast.error('No email address found')
     }
   }
 
-  const copyWalletAddress = () => {
+  const copyWalletAddress = async () => {
     if (solanaWalletAddress) {
-      navigator.clipboard.writeText(solanaWalletAddress)
-      toast.success('Wallet address copied to clipboard')
+      try {
+        await navigator.clipboard.writeText(solanaWalletAddress)
+        toast.success('Solana wallet address copied to clipboard')
+      } catch {
+        toast.error('Failed to copy wallet address')
+      }
+    } else {
+      toast.error('No Solana wallet address found')
     }
   }
 
-  // Get Solana wallet address with proper validation - prioritize connected Solana wallet, then embedded wallet
-  const potentialConnectedWallet = user?.linkedAccounts?.find(
-    (account): account is any =>
-      account.type === 'wallet' &&
-      (account as any).chainType === 'solana'
-  ) as any | undefined
-
-  const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
-    ? potentialConnectedWallet
-    : undefined
+  // Simple wallet detection using user.wallet (works with Privy solana-only config)
+  const email = user?.email?.address
+  const userWalletAddress = user?.wallet?.address
+  const walletType = user?.wallet?.walletClientType
+  const isEmailUser = !!email && !userWalletAddress
   
-  // Look for Solana embedded wallet in linkedAccounts instead of user.wallet
-  const solanaEmbeddedWallet = user?.linkedAccounts?.find(
-    (account): account is any =>
-      account.type === 'wallet' &&
-      (account as any).chainType === 'solana' &&
-      (account as any).walletClientType === 'privy' &&
-      (account as any).address &&
-      isValidSolanaAddress((account as any).address)
-  ) as any | undefined;
-
-  let solanaWalletAddress: string | undefined
-  let isEmailUser = false
-  
-  if (connectedSolanaWallet?.address && isValidSolanaAddress(connectedSolanaWallet.address)) {
-    // Use connected Solana wallet address
-    solanaWalletAddress = connectedSolanaWallet.address
-    console.log('🟣 Using connected Solana wallet:', solanaWalletAddress)
-  } else if (solanaEmbeddedWallet?.address && isValidSolanaAddress(solanaEmbeddedWallet.address)) {
-    // Use Solana embedded wallet address
-    solanaWalletAddress = solanaEmbeddedWallet.address
-    console.log('🧠 Using embedded Solana wallet:', solanaWalletAddress)
-  }
-
-  // Check if user is email-based (no external wallet)
-  if (user?.email?.address && !connectedSolanaWallet) {
-    isEmailUser = true
-  }
+  // Validate that the wallet address is actually a Solana address
+  const solanaWalletAddress = userWalletAddress && isValidSolanaAddress(userWalletAddress) ? userWalletAddress : undefined
 
   // Display info for the wallet button
   const displayInfo = solanaWalletAddress 
-    ? abbreviateWalletAddress({ address: solanaWalletAddress })
-    : user?.email?.address 
-    ? user.email.address.slice(0, 8) + '...'
-    : 'No Wallet'
+    ? `${solanaWalletAddress.slice(0, 4)}...${solanaWalletAddress.slice(-4)}`
+    : (email || 'No Wallet')
+
+  const exportWalletData = async () => {
+    try {
+      const exportData = {
+        walletAddress: solanaWalletAddress || 'N/A',
+        email: email || 'N/A',
+        walletType: walletType || 'N/A',
+        network: 'Solana Mainnet',
+        exportedAt: new Date().toISOString(),
+      }
+      
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(dataBlob)
+      
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `bonk-computer-wallet-${Date.now()}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      toast.success('Wallet data exported successfully')
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export wallet data')
+    }
+  }
 
   const handleExportWallet = async () => {
-    if (!user) return
     try {
-      // Check if user connected with external wallet (with validation)
-      const potentialConnectedWallet = user.linkedAccounts?.find(
-        (account): account is any =>
-          account.type === 'wallet' &&
-          (account as any).chainType === 'solana'
-      ) as any | undefined
-      
-      const connectedSolanaWallet = potentialConnectedWallet?.address && isValidSolanaAddress(potentialConnectedWallet.address)
-        ? potentialConnectedWallet
-        : undefined
-      
-      // Check if it's truly an external wallet (not Privy embedded)
-      const hasExternalWallet = !!(connectedSolanaWallet && 
-        connectedSolanaWallet.walletClientType !== 'privy')
-      
-      // Debug logging
-      console.log('🔍 Export wallet debug info:', {
-        hasExternalWallet,
-        connectedSolanaWallet: connectedSolanaWallet ? {
-          walletClientType: connectedSolanaWallet.walletClientType,
-          address: connectedSolanaWallet.address
-        } : null,
-        detectedSolanaEmbedded: solanaEmbeddedWallet,
-        solanaWalletAddress, // Add this to debug
-        user // Log entire user object for debugging
-      })
-      
-      // Users with external Solana wallets get private key from their wallet
-      if (hasExternalWallet) {
-        console.log('📄 External wallet user: Please get private key from your wallet')
-        toast.info('Please get private key from your connected wallet (Phantom, Solflare, etc.)')
-        return
-      }
-      
-      // --- Surgical fix: Find the correct Solana embedded wallet in linkedAccounts ---
-      const exportableSolanaWallet = user.linkedAccounts?.find(
-        (account: any) =>
-          account.type === 'wallet' &&
-          account.chainType === 'solana' &&
-          account.walletClientType === 'privy'
-      )
-      
-      if (!exportableSolanaWallet) {
-        // No Solana wallet found - user might only have EVM wallet
-        console.error('❌ No Solana embedded wallet found in linkedAccounts')
-        console.log('All linked accounts:', user.linkedAccounts)
-        toast.error('No Solana wallet found. This app requires a Solana wallet.')
-        return
-      }
-      
-      console.log('🔑 Found Solana embedded wallet:', exportableSolanaWallet)
-      console.log('Solana wallet details:', {
-        id: (exportableSolanaWallet as any).id,
-        address: (exportableSolanaWallet as any).address,
-        chainType: (exportableSolanaWallet as any).chainType,
-        walletClientType: (exportableSolanaWallet as any).walletClientType
-      })
-      
-      // Since Privy's exportWallet might default to EVM, let's show the Solana address directly
-      if ((exportableSolanaWallet as any).address) {
-        // For now, just copy the address and inform user
-        const solanaAddress = (exportableSolanaWallet as any).address
-        navigator.clipboard.writeText(solanaAddress)
-        toast.info(`Solana wallet address copied: ${solanaAddress}. Note: Private key export for Solana wallets may show EVM wallet in Privy's dialog. We're working on a fix.`)
-        
-        // Still try to call exportWallet in case it works
-        try {
-          await exportWallet()
-          // If the modal shows EVM wallet, user will see our warning
-        } catch (err) {
-          console.error('Export wallet error:', err)
-        }
-        return
-      }
-      // --- End surgical fix ---
-      
-      // Users with embedded wallets: Use the solanaWalletAddress we already validated
-      if (solanaWalletAddress && !hasExternalWallet) {
-        console.log('🔑 Attempting to export wallet with address:', solanaWalletAddress)
-        await exportWallet({ address: solanaWalletAddress, chainType: 'solana' } as any)
-        toast.success('Private key export initiated - check the modal')
+      if (walletType === 'privy') {
+        await exportWallet()
+        toast.success('Privy wallet export initiated')
       } else {
-        console.error('❌ No valid Solana wallet address found for export')
-        toast.error('No valid wallet address found')
+        // For external Solana wallets, provide export data instead
+        await exportWalletData()
       }
     } catch (error) {
       console.error('Wallet export error:', error)
